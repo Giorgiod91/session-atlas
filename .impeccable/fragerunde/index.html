@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Session Atlas Fragerunde</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=Barlow+Condensed:wght@700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root { --ground:#fff4e6; --card:#fff; --surface:#f7ebdd; --border:#e7dacb; --ink:#2b241f; --ink-2:#6f625a; --action:#cc4213; --action-soft:#ffe6dc;
+  --shadow:0 2px 4px rgba(90,55,25,.04),0 10px 28px rgba(90,55,25,.08); --spring:cubic-bezier(.34,1.56,.64,1); --out:cubic-bezier(.16,1,.3,1); }
+* { box-sizing:border-box; }
+html,body { margin:0; }
+body { background:var(--ground); color:var(--ink); font:500 15px/1.45 "Figtree",system-ui,sans-serif; -webkit-font-smoothing:antialiased; min-height:100vh;
+  background-image:radial-gradient(#ecdcc6 1.5px,transparent 1.6px); background-size:28px 28px; }
+::selection { background:var(--action-soft); }
+button { font:inherit; color:inherit; cursor:pointer; }
+:focus-visible { outline:2.5px solid var(--action); outline-offset:3px; border-radius:10px; }
+.wrap { max-width:1180px; margin:0 auto; padding:28px 24px 140px; }
+header { display:flex; align-items:center; gap:14px; margin-bottom:26px; flex-wrap:wrap; }
+.logo { width:40px; height:40px; border-radius:13px; background:var(--action); display:grid; place-items:center; color:#fff; }
+header b { font-size:18px; letter-spacing:-.02em; }
+.prog { display:flex; gap:6px; margin-left:auto; }
+.prog i { width:34px; height:6px; border-radius:3px; background:var(--border); transition:background .4s var(--out), width .4s var(--out); }
+.prog i.done { background:#d9b9a3; } .prog i.cur { background:var(--action); width:54px; }
+.step { display:none; } .step.on { display:block; animation:in .55s var(--out) both; }
+@keyframes in { from { opacity:0; transform:translateY(14px); } }
+h1 { font-size:clamp(34px,5vw,58px); line-height:1.02; letter-spacing:-.035em; margin:0 0 10px; font-weight:800; text-wrap:balance; max-width:900px; }
+.lead { color:var(--ink-2); font-size:17px; max-width:680px; margin:0 0 26px; }
+.lead b { color:var(--ink); }
+.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:18px; }
+.grid.big { grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); }
+.opt { position:relative; text-align:left; border:0; background:var(--card); border-radius:24px; padding:12px; box-shadow:var(--shadow); transition:transform .25s var(--spring), box-shadow .25s; }
+.opt:hover { transform:translateY(-3px); box-shadow:0 4px 8px rgba(90,55,25,.06),0 20px 44px rgba(90,55,25,.14); }
+.opt.sel { outline:3px solid var(--action); outline-offset:0; box-shadow:0 20px 44px rgba(90,55,25,.14); }
+.opt .pv { height:180px; border-radius:16px; overflow:hidden; position:relative; background:var(--surface); }
+.opt h3 { margin:14px 6px 2px; font-size:18px; letter-spacing:-.015em; }
+.opt p { margin:0 6px 6px; color:var(--ink-2); font-size:14px; }
+.opt .tagline { display:inline-block; margin:8px 6px 4px; font-size:12px; font-weight:700; color:var(--action); background:var(--action-soft); padding:2px 9px; border-radius:99px; }
+.check { position:absolute; top:20px; right:20px; width:30px; height:30px; border-radius:50%; background:var(--action); color:#fff; display:grid; place-items:center; transform:scale(0); transition:transform .35s var(--spring); z-index:3; border:3px solid #fff; }
+.opt.sel .check { transform:scale(1); }
+.mini { display:flex; gap:12px; align-items:flex-start; }
+.mini .ico { width:46px; height:46px; border-radius:14px; background:var(--surface); display:grid; place-items:center; flex:none; font-size:20px; }
+.opt.small { padding:16px; } .opt.small h3 { margin:0 0 2px; font-size:16.5px; } .opt.small p { margin:0; }
+.opt.small .check { top:12px; right:12px; width:24px; height:24px; }
+.bar { position:fixed; left:0; right:0; bottom:0; padding:16px 24px; background:linear-gradient(transparent, var(--ground) 40%); display:flex; justify-content:center; gap:12px; z-index:9; }
+.btn { border:0; border-radius:16px; padding:15px 26px; font-weight:800; font-size:16px; transition:transform .2s var(--spring), background .2s; }
+.btn:active { transform:scale(.95); }
+.btn.p { background:var(--action); color:#fff; min-width:220px; }
+.btn.p:disabled { background:#d9c4b5; cursor:not-allowed; }
+.btn.s { background:var(--card); box-shadow:var(--shadow); }
+.seg { display:inline-flex; background:var(--card); border-radius:14px; padding:4px; box-shadow:var(--shadow); margin:0 0 22px; }
+.seg button { border:0; background:none; padding:9px 16px; border-radius:11px; font-weight:700; color:var(--ink-2); }
+.seg button.on { background:var(--action); color:#fff; }
+textarea { width:100%; min-height:130px; border:0; border-radius:20px; padding:18px; font:inherit; font-size:16px; background:var(--card); box-shadow:var(--shadow); color:var(--ink); resize:vertical; }
+.sum { background:var(--card); border-radius:24px; padding:22px 24px; box-shadow:var(--shadow); margin-top:20px; }
+.sum div { padding:8px 0; border-bottom:1px solid var(--border); display:flex; gap:16px; }
+.sum div:last-child { border:0; } .sum b { min-width:170px; color:var(--ink-2); font-weight:600; }
+.done { text-align:center; padding:80px 0; }
+.done .big { font-size:80px; animation:pop .7s var(--spring); display:inline-block; }
+@keyframes pop { from { transform:scale(.2) rotate(-20deg); opacity:0; } }
+
+/* ============ Vorschauen: Gefuehl ============ */
+.pv-warm { background:#fff4e6; padding:18px; }
+.pv-warm .c { background:#fff; border-radius:18px; padding:14px; box-shadow:0 8px 20px rgba(90,55,25,.1); animation:float 4s ease-in-out infinite; }
+.pv-warm .h { font-weight:800; font-size:20px; letter-spacing:-.02em; }
+.pv-warm .l { height:7px; border-radius:4px; background:#f7ebdd; margin:8px 0; width:80%; }
+.pv-warm .b { background:#cc4213; color:#fff; border-radius:11px; padding:8px; text-align:center; font-weight:800; font-size:13px; margin-top:10px; }
+@keyframes float { 50% { transform:translateY(-5px); } }
+.pv-floh { background:#eee7ef; font-family:"Barlow Condensed",sans-serif; }
+.pv-floh .mq { position:absolute; left:0; top:12px; white-space:nowrap; background:#160c1a; color:#d6fa36; font-weight:800; font-size:17px; padding:4px 0; animation:mq 7s linear infinite; letter-spacing:.04em; }
+@keyframes mq { to { transform:translateX(-50%); } }
+.pv-floh .stk { position:absolute; left:22px; top:58px; background:#ff6ddf; color:#160c1a; font-weight:800; font-size:38px; padding:2px 14px; border-radius:12px; transform:rotate(-6deg); animation:wig 1.8s ease-in-out infinite; text-transform:uppercase; }
+.pv-floh .stk2 { position:absolute; right:20px; bottom:20px; background:#d6fa36; color:#160c1a; font-weight:800; font-size:22px; padding:6px 14px; border-radius:99px; transform:rotate(5deg); animation:wig 2.2s ease-in-out infinite reverse; }
+.pv-floh .dot { position:absolute; right:40px; top:66px; width:44px; height:44px; border-radius:50%; background:#00d4e8; animation:bounce 1.4s var(--spring) infinite; }
+@keyframes wig { 50% { transform:rotate(3deg) scale(1.04); } }
+@keyframes bounce { 50% { transform:translateY(-14px) scale(1.08); } }
+.pv-studio { background:#101114; padding:18px; color:#eceef3; }
+.pv-studio .c { border:1px solid #2a2d34; border-radius:14px; padding:14px; background:#16181d; }
+.pv-studio .h { font-weight:700; font-size:18px; letter-spacing:-.02em; }
+.pv-studio .l { height:6px; border-radius:3px; background:#2a2d34; margin:9px 0; }
+.pv-studio .l.a { width:40%; background:#eceef3; animation:grow 2.6s var(--out) infinite; }
+@keyframes grow { 0% { width:5%; } 60%,100% { width:70%; } }
+.pv-studio .kbd { position:absolute; right:18px; bottom:18px; font:12px "JetBrains Mono"; border:1px solid #2a2d34; border-radius:7px; padding:3px 8px; color:#9aa0ad; }
+.pv-vim { background:#1d2021; font:12.5px/1.6 "JetBrains Mono",monospace; color:#ebdbb2; padding:12px 14px; }
+.pv-vim .ln { color:#7c6f64; display:inline-block; width:22px; }
+.pv-vim .t { color:#458588; opacity:.6; }
+.pv-vim .cur { background:#ebdbb2; color:#1d2021; animation:blink 1s steps(1) infinite; }
+@keyframes blink { 50% { background:transparent; color:#ebdbb2; } }
+.pv-vim .st { position:absolute; left:0; right:0; bottom:0; display:flex; background:#3c3836; font-size:11.5px; }
+.pv-vim .st span { padding:2px 8px; } .pv-vim .st .m { background:#b8bb26; color:#1d2021; font-weight:700; }
+
+/* ============ Vorschauen: Bewegung ============ */
+.pv-cam .g { position:absolute; inset:0; display:grid; grid-template-columns:repeat(4,1fr); gap:8px; padding:14px; animation:cam 4s var(--out) infinite; transform-origin:62% 55%; }
+.pv-cam .g i { background:#fff; border-radius:7px; box-shadow:0 2px 6px rgba(0,0,0,.06); }
+.pv-cam .g i.t { background:#cc4213; }
+@keyframes cam { 0%,15% { transform:scale(1); } 55%,85% { transform:scale(3.6); } 100% { transform:scale(1); } }
+.pv-pop { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; padding:16px; }
+.pv-pop i { height:64px; background:#fff; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,.06); animation:popin 3s var(--spring) infinite; }
+.pv-pop i:nth-child(2){animation-delay:.08s}.pv-pop i:nth-child(3){animation-delay:.16s}.pv-pop i:nth-child(4){animation-delay:.24s}.pv-pop i:nth-child(5){animation-delay:.32s}.pv-pop i:nth-child(6){animation-delay:.4s}
+@keyframes popin { 0% { transform:scale(.4) translateY(20px); opacity:0; } 25%,80% { transform:none; opacity:1; } 100% { opacity:0; } }
+.pv-scrub { padding:18px; }
+.pv-scrub .row { display:flex; gap:8px; }
+.pv-scrub .row i { flex:1; height:70px; border-radius:10px; background:#fff; animation:hl 3s steps(1) infinite; }
+.pv-scrub .row i:nth-child(1){animation-delay:0s}.pv-scrub .row i:nth-child(2){animation-delay:.6s}.pv-scrub .row i:nth-child(3){animation-delay:1.2s}.pv-scrub .row i:nth-child(4){animation-delay:1.8s}.pv-scrub .row i:nth-child(5){animation-delay:2.4s}
+@keyframes hl { 0%,20% { background:#cc4213; transform:translateY(-4px); } 21%,100% { background:#fff; } }
+.pv-scrub .track { margin-top:26px; height:6px; border-radius:3px; background:#e7dacb; position:relative; }
+.pv-scrub .track b { position:absolute; top:-9px; width:24px; height:24px; border-radius:50%; background:#fff; box-shadow:0 2px 8px rgba(0,0,0,.2); animation:knob 3s linear infinite; }
+@keyframes knob { from { left:0; } to { left:calc(100% - 24px); } }
+.pv-thread svg { position:absolute; inset:0; }
+.pv-thread path { stroke:#b9a28c; stroke-width:4; fill:none; stroke-linecap:round; stroke-dasharray:420; animation:draw 3.2s var(--out) infinite; }
+@keyframes draw { from { stroke-dashoffset:420; } 60%,100% { stroke-dashoffset:0; } }
+.pv-thread .n { position:absolute; width:56px; height:40px; background:#fff; border-radius:10px; box-shadow:0 3px 8px rgba(0,0,0,.08); }
+.pv-conf .bt { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); background:#cc4213; color:#fff; font-weight:800; padding:12px 22px; border-radius:14px; animation:press 2.4s var(--spring) infinite; }
+@keyframes press { 0%,30% { transform:translate(-50%,-50%) scale(1); } 35% { transform:translate(-50%,-50%) scale(.9); } 45%,100% { transform:translate(-50%,-50%) scale(1); } }
+.pv-conf i { position:absolute; left:50%; top:50%; width:9px; height:14px; border-radius:2px; opacity:0; animation:conf 2.4s var(--out) infinite; }
+@keyframes conf { 0%,35% { opacity:0; transform:translate(-50%,-50%); } 40% { opacity:1; } 100% { opacity:0; transform:translate(calc(-50% + var(--x)), calc(-50% + var(--y))) rotate(var(--r)); } }
+.pv-tilt { perspective:600px; display:grid; place-items:center; }
+.pv-tilt .c { width:62%; height:62%; background:#fff; border-radius:16px; box-shadow:0 14px 30px rgba(90,55,25,.18); animation:tilt 4s ease-in-out infinite; position:relative; overflow:hidden; }
+.pv-tilt .c::after { content:""; position:absolute; inset:0; background:linear-gradient(115deg,transparent 35%,rgba(255,255,255,.7) 50%,transparent 65%); animation:shine 4s ease-in-out infinite; }
+@keyframes tilt { 0%,100% { transform:rotateX(8deg) rotateY(-14deg); } 50% { transform:rotateX(-6deg) rotateY(14deg); } }
+@keyframes shine { 0%,100% { transform:translateX(-60%); } 50% { transform:translateX(60%); } }
+.pv-morph .c { position:absolute; background:#fff; box-shadow:0 6px 16px rgba(0,0,0,.08); animation:morph 3.6s var(--out) infinite; }
+@keyframes morph { 0%,20% { left:20px; top:60px; width:90px; height:60px; border-radius:12px; } 50%,80% { left:44%; top:12px; width:52%; height:156px; border-radius:18px; } 100% { left:20px; top:60px; width:90px; height:60px; border-radius:12px; } }
+
+/* ============ Vorschauen: Layouts (Wireframes, animiert) ============ */
+.wf { position:absolute; inset:0; padding:14px; }
+.wf i { position:absolute; background:#fff; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,.05); }
+.wf i.a { background:#cc4213; }
+.wf-canvas { animation:pan 6s ease-in-out infinite; }
+@keyframes pan { 50% { transform:translate(-14px,-8px) scale(1.05); } }
+.wf-river .line { position:absolute; left:20px; right:20px; top:50%; height:3px; background:#d9b9a3; }
+.wf-river i { animation:slide 5s linear infinite; }
+@keyframes slide { from { transform:translateX(30px); } to { transform:translateX(-30px); } }
+.wf-graph svg { position:absolute; inset:0; }
+.wf-graph line { stroke:#d9b9a3; stroke-width:2; }
+.wf-graph circle { fill:#fff; stroke:#d9b9a3; stroke-width:2; animation:breath 3s ease-in-out infinite; transform-origin:center; transform-box:fill-box; }
+.wf-graph circle.a { fill:#cc4213; stroke:none; }
+@keyframes breath { 50% { transform:scale(1.18); } }
+.sub { stroke:#6f625a; stroke-width:5; fill:none; stroke-linecap:round; }
+.sub2 { stroke:#cc4213; stroke-width:5; fill:none; stroke-linecap:round; stroke-dasharray:300; animation:draw 3.5s var(--out) infinite; }
+.film { position:absolute; left:0; right:0; top:44px; height:90px; background:#2b241f; display:flex; gap:8px; padding:12px 8px; animation:slide 4s linear infinite; }
+.film i { position:static; flex:none; width:70px; background:#fff4e6; border-radius:4px; }
+.film::before,.film::after { content:""; position:absolute; left:0; right:0; height:6px; background:repeating-linear-gradient(90deg,#fff4e6 0 6px,transparent 6px 14px); }
+.film::before { top:3px; } .film::after { bottom:3px; }
+.chat i.me { right:16px; background:#ffe6dc; } .chat i.ai { left:16px; }
+.mm { position:absolute; right:10px; top:14px; bottom:14px; width:16px; border-radius:6px; background:#e7dacb; }
+.mm b { position:absolute; left:0; right:0; height:30px; border-radius:6px; background:#cc4213; opacity:.7; animation:mmv 4s ease-in-out infinite; }
+@keyframes mmv { 0%,100% { top:0; } 50% { top:calc(100% - 30px); } }
+@media (prefers-reduced-motion: reduce) { *,*::before,*::after { animation-duration:.01ms !important; animation-iteration-count:1 !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header><span class="logo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="6" cy="7" r="2.2"/><circle cx="18" cy="7" r="2.2"/><circle cx="12" cy="17.5" r="2.2"/><path d="M8.2 7h7.6M7.2 8.9l3.6 6.7M16.8 8.9l-3.6 6.7"/></svg></span><b>Session Atlas · Fragerunde</b><div class="prog" id="prog"></div></header>
+  <main id="steps"></main>
+</div>
+<div class="bar"><button class="btn s" id="back">Zurück</button><button class="btn p" id="next">Weiter</button></div>
+
+<script>
+const CONF = Array.from({length:14},(_,i)=>{const a=i/14*6.28,d=60+Math.random()*40;return `<i style="--x:${Math.cos(a)*d}px;--y:${Math.sin(a)*d}px;--r:${Math.random()*540}deg;background:${["#cc4213","#ff6ddf","#d6fa36","#00d4e8","#f7ebdd"][i%5]}"></i>`}).join("");
+const STEPS = [
+  { id:"gefuehl", type:"one", big:true, title:"Wie soll sich Session Atlas anfühlen?", lead:"Wähl die Grundstimmung. Deine <b>Flohmarkt-App</b> ist als Option dabei: pinke, limettengrüne und türkise Sticker, schmale Plakatschrift, Laufband, alles wackelt ein bisschen.",
+    opts:[
+      { id:"warm", h:"Warm & freundlich", p:"So wie jetzt: weiche Karten, Creme, ein Orange nur zum Klicken.", pv:`<div class="pv pv-warm"><div class="c"><div class="h">Hier hast du aufgehört.</div><div class="l"></div><div class="l" style="width:60%"></div><div class="b">▶ Weitermachen</div></div></div>` },
+      { id:"flohmarkt", h:"Laut & verspielt wie dein Flohmarkt", p:"Pink, Limette, Türkis, Plakatschrift, Sticker, Laufband, Wackeln.", tag:"maximaler Wow-Effekt", pv:`<div class="pv pv-floh"><div class="mq">WEITERMACHEN ★ 32 SESSIONS ★ HEUTE 7 SCHRITTE ★ WEITERMACHEN ★ 32 SESSIONS ★ HEUTE 7 SCHRITTE ★ </div><div class="stk">Hier war ich!</div><div class="dot"></div><div class="stk2">▶ Weiter</div></div>` },
+      { id:"studio", h:"Ruhig & präzise", p:"Dunkles Studio, klare weiße Schrift, wenig Farbe, viel Tastatur. Wie Linear oder Raycast.", pv:`<div class="pv pv-studio"><div class="c"><div class="h">Impeccable install</div><div class="l a"></div><div class="l" style="width:55%"></div><div class="l" style="width:35%"></div></div><span class="kbd">⌘K</span></div>` },
+      { id:"vim", h:"Terminal / Neovim", p:"Gruvbox, Monospace, Statuszeile, alles per Tastatur.", pv:`<div class="pv pv-vim"><div><span class="ln">1</span>▸ mein-projekt</div><div><span class="ln">2</span>  Impeccable install</div><div><span class="ln">3</span>  41/41 Hier hast du<span class="cur"> </span></div><div class="t">~</div><div class="t">~</div><div class="st"><span class="m">NORMAL</span><span>session-atlas</span><span style="margin-left:auto">Bot</span></div></div>` },
+    ]},
+  { id:"bewegung", type:"many", big:true, title:"Welche Bewegungen sollen den Wow-Effekt machen?", lead:"Alles hier läuft später mit <b>Framer Motion</b>. Wähl so viele, wie du willst, und darunter, wie stark es sein soll.",
+    extra:`<div class="seg" id="staerke"><button data-v="dezent">Dezent</button><button data-v="mittel" class="on">Mittel</button><button data-v="voll">Volle Show</button></div>`,
+    opts:[
+      { id:"kamera", h:"Kamerafahrt", p:"Beim Öffnen fliegt die Ansicht in die Session hinein, statt umzuschalten.", pv:`<div class="pv pv-cam"><div class="g">${"<i></i>".repeat(10)}<i class="t"></i>${"<i></i>".repeat(5)}</div></div>` },
+      { id:"pop", h:"Karten ploppen rein", p:"Karten erscheinen nacheinander mit Federschwung.", pv:`<div class="pv pv-pop">${"<i></i>".repeat(6)}</div>` },
+      { id:"zeitreise", h:"Zeitreise-Regler", p:"Mit einem Regler durch alle Schritte ziehen, wie in einem Video.", pv:`<div class="pv pv-scrub"><div class="row">${"<i></i>".repeat(5)}</div><div class="track"><b></b></div></div>` },
+      { id:"faden", h:"Faden zeichnet sich", p:"Die Verbindungslinien zwischen Schritten werden live gezeichnet.", pv:`<div class="pv pv-thread"><svg viewBox="0 0 320 180"><path d="M50 50 C 140 50, 120 130, 200 130 S 290 60, 280 60"/></svg><span class="n" style="left:22px;top:30px"></span><span class="n" style="left:172px;top:110px"></span><span class="n" style="left:252px;top:40px"></span></div>` },
+      { id:"morph", h:"Karte wird zum Detail", p:"Die angeklickte Karte wächst fließend zum Detailblatt.", pv:`<div class="pv pv-morph"><span class="c"></span></div>` },
+      { id:"tilt", h:"3D-Neigung & Glanz", p:"Karten neigen sich zur Maus und glänzen leicht.", pv:`<div class="pv pv-tilt"><div class="c"></div></div>` },
+      { id:"feier", h:"Kleine Feier", p:"Beim Weitermachen ein Konfetti-Moment.", pv:`<div class="pv pv-conf"><span class="bt">▶ Weiter</span>${CONF}</div>` },
+    ]},
+  { id:"uebersicht", type:"one", big:true, title:"Wie soll die Übersicht aufgebaut sein?", lead:"Die erste Ansicht beim Öffnen.",
+    opts:[
+      { id:"canvas", h:"Karten auf der Fläche", p:"Wie jetzt: Projekte als Karten, frei zoomen und verschieben.", pv:`<div class="pv"><div class="wf wf-canvas"><i class="a" style="left:14px;top:14px;width:110px;height:80px"></i><i style="left:134px;top:14px;width:80px;height:60px"></i><i style="left:224px;top:14px;width:80px;height:100px"></i><i style="left:14px;top:104px;width:110px;height:60px"></i><i style="left:134px;top:84px;width:80px;height:80px"></i></div></div>` },
+      { id:"fluss", h:"Zeitfluss", p:"Ein Strom von links nach rechts: alles, was du wann gemacht hast.", pv:`<div class="pv"><div class="wf wf-river"><div class="line"></div><i style="left:30px;top:40px;width:60px;height:36px"></i><i class="a" style="left:110px;top:100px;width:60px;height:36px"></i><i style="left:190px;top:40px;width:60px;height:36px"></i><i style="left:260px;top:100px;width:60px;height:36px"></i></div></div>` },
+      { id:"bento", h:"Bento-Dashboard", p:"Feste Kacheln: Weitermachen, Heute, Projekte, Tags, Statistik.", pv:`<div class="pv"><div class="wf"><i class="a" style="left:14px;top:14px;width:140px;height:96px"></i><i style="left:164px;top:14px;width:70px;height:46px"></i><i style="left:244px;top:14px;width:62px;height:46px"></i><i style="left:164px;top:68px;width:142px;height:96px"></i><i style="left:14px;top:118px;width:140px;height:46px"></i></div></div>` },
+      { id:"graph", h:"Sternenkarte", p:"Projekte und Sessions als verbundene Punkte, die sich bewegen.", pv:`<div class="pv"><div class="wf wf-graph"><svg viewBox="0 0 320 180"><line x1="160" y1="90" x2="80" y2="50"/><line x1="160" y1="90" x2="250" y2="45"/><line x1="160" y1="90" x2="230" y2="140"/><line x1="80" y1="50" x2="60" y2="130"/><circle class="a" cx="160" cy="90" r="16"/><circle cx="80" cy="50" r="11"/><circle cx="250" cy="45" r="9"/><circle cx="230" cy="140" r="12"/><circle cx="60" cy="130" r="8"/></svg></div></div>` },
+    ]},
+  { id:"session", type:"one", big:true, title:"Wie willst du eine einzelne Session sehen?", lead:"Die Ansicht, wenn du in eine Session hineingehst.",
+    opts:[
+      { id:"schlange", h:"Karten-Schlange", p:"Wie jetzt: Schritte als Karten in Reihen, mit Faden verbunden.", pv:`<div class="pv"><div class="wf"><i style="left:14px;top:20px;width:80px;height:50px"></i><i style="left:114px;top:20px;width:80px;height:50px"></i><i style="left:214px;top:20px;width:80px;height:50px"></i><i style="left:14px;top:100px;width:80px;height:50px"></i><i class="a" style="left:114px;top:100px;width:80px;height:50px"></i></div></div>` },
+      { id:"chat", h:"Chatverlauf + Minikarte", p:"Wie ein Chat zum Durchscrollen, rechts eine Minikarte zum Springen.", pv:`<div class="pv"><div class="wf chat"><i class="ai" style="top:16px;width:150px;height:28px"></i><i class="me" style="top:52px;width:120px;height:24px;right:40px"></i><i class="ai" style="top:84px;width:170px;height:36px"></i><i class="me" style="top:130px;width:100px;height:24px;right:40px"></i><div class="mm"><b></b></div></div></div>` },
+      { id:"ubahn", h:"U-Bahn-Linie", p:"Jeder Schritt eine Station, Abzweige als eigene Linien.", pv:`<div class="pv"><svg viewBox="0 0 320 180" style="position:absolute;inset:0"><path class="sub" d="M20 90 H300"/><path class="sub2" d="M120 90 C150 90 150 40 190 40 H300"/>${[40,80,120,160,200,240,280].map(x=>`<circle cx="${x}" cy="90" r="8" fill="#fff" stroke="#6f625a" stroke-width="4"/>`).join("")}<circle cx="230" cy="40" r="8" fill="#fff" stroke="#cc4213" stroke-width="4"/><circle cx="280" cy="40" r="8" fill="#fff" stroke="#cc4213" stroke-width="4"/></svg></div>` },
+      { id:"film", h:"Filmstreifen", p:"Schritte als Einzelbilder, mit Vorschau groß darüber.", pv:`<div class="pv"><div class="film">${"<i></i>".repeat(10)}</div></div>` },
+    ]},
+  { id:"extras", type:"many", title:"Was soll noch rein?", lead:"Hier stecken auch deine Ideen drin, zum Beispiel das <b>eingebaute Terminal</b>. Wähl alles, was dich reizt.",
+    opts:[
+      { id:"terminal", i:"⌨️", h:"Eingebautes Terminal", p:"Claude direkt in der App weiterlaufen lassen, im Vim-Look, ohne Kopieren." },
+      { id:"diff", i:"±", h:"Änderungen pro Schritt", p:"Sehen, was sich in welcher Datei geändert hat, rot und grün." },
+      { id:"zuruecksetzen", i:"⟲", h:"Dateien zurücksetzen", p:"Code auf den Stand eines Schritts zurückholen, wie Rückgängig." },
+      { id:"zusammenfassung", i:"✦", h:"KI-Zusammenfassung", p:"Pro Session ein Satz: worum ging es, was ist offen." },
+      { id:"palette", i:"⌘", h:"Befehlspalette ⌘K", p:"Alles per Tastatur finden und starten." },
+      { id:"pins", i:"★", h:"Favoriten & Pins", p:"Wichtige Sessions oben festpinnen." },
+      { id:"heute", i:"☀", h:"Tagesrückblick", p:"Heute gemacht: Schritte, Projekte, geänderte Dateien." },
+      { id:"maskottchen", i:"🐾", h:"Maskottchen", p:"Ein kleiner Begleiter wie dein ClaudeWalker im Flohmarkt." },
+      { id:"statistik", i:"▦", h:"Aktivitäts-Heatmap", p:"Wann und wie viel du mit Claude arbeitest." },
+      { id:"live", i:"●", h:"Live-Ansicht", p:"Laufende Sessions erscheinen sofort, während du arbeitest." },
+    ]},
+  { id:"technik", type:"one", title:"Womit bauen wir die echte App?", lead:"Für Framer Motion braucht es React. Das Terminal braucht einen kleinen lokalen Server.",
+    opts:[
+      { id:"vite", i:"⚡", h:"React + Vite + Framer Motion, lokaler Bun-Server", p:"Startet mit einem Befehl, liest deine Sessions live, kann ein Terminal einbauen. Meine Empfehlung.", tag:"Empfehlung" },
+      { id:"next", i:"▲", h:"Next.js wie beim Flohmarkt", p:"Gleicher Stack wie deine Flohmarkt-App, etwas schwerer für ein lokales Tool." },
+      { id:"tauri", i:"🖥", h:"Echte Mac-App (Tauri)", p:"Eigenes Fenster im Dock, später als App verteilbar. Mehr Aufwand." },
+    ]},
+  { id:"notizen", type:"text", title:"Noch etwas, das wichtig ist?", lead:"Was gefällt dir an deiner Flohmarkt-App am meisten? Was darf auf keinen Fall passieren? Alles kann hier rein." },
+];
+
+const ans = { staerke:"mittel" }; let cur = 0;
+const $ = (s) => document.querySelector(s);
+function render() {
+  $("#prog").innerHTML = STEPS.concat([{}]).map((_, i) => `<i class="${i < cur ? "done" : i === cur ? "cur" : ""}"></i>`).join("");
+  $("#steps").innerHTML = STEPS.map((st, i) => `<section class="step ${i === cur ? "on" : ""}">
+    <h1>${st.title}</h1><p class="lead">${st.lead}</p>${st.extra || ""}
+    ${st.type === "text" ? `<textarea id="notes" placeholder="Zum Beispiel: Die Sticker und das Laufband im Flohmarkt finde ich super ...">${ans.notizen || ""}</textarea>` :
+      `<div class="grid ${st.big ? "big" : ""}">${st.opts.map(o => `<button class="opt ${o.pv ? "" : "small"} ${sel(st, o.id) ? "sel" : ""}" data-s="${st.id}" data-o="${o.id}">
+        <span class="check"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
+        ${o.pv ? o.pv + `${o.tag ? `<span class="tagline">${o.tag}</span>` : ""}<h3>${o.h}</h3><p>${o.p}</p>` : `<div class="mini"><span class="ico">${o.i}</span><div><h3>${o.h}</h3><p>${o.p}</p>${o.tag ? `<span class="tagline" style="margin:6px 0 0">${o.tag}</span>` : ""}</div></div>`}
+      </button>`).join("")}</div>`}
+  </section>`).join("") + (cur === STEPS.length ? summary() : "");
+  $("#back").style.visibility = cur ? "visible" : "hidden";
+  const st = STEPS[cur];
+  $("#next").textContent = cur === STEPS.length ? "Absenden" : cur === STEPS.length - 1 ? "Zur Übersicht" : "Weiter";
+  $("#next").disabled = st && st.type === "one" && !ans[st.id];
+  $("#staerke")?.querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.v === ans.staerke));
+  $("#notes")?.addEventListener("input", e => ans.notizen = e.target.value);
+}
+const sel = (st, id) => st.type === "many" ? (ans[st.id] || []).includes(id) : ans[st.id] === id;
+const label = (sid, id) => STEPS.find(s => s.id === sid).opts.find(o => o.id === id)?.h || id;
+function summary() {
+  const rows = STEPS.filter(s => s.type !== "text").map(s => `<div><b>${s.title.replace("?", "")}</b><span>${[].concat(ans[s.id] || []).map(id => label(s.id, id)).join(", ") || "nichts gewählt"}${s.id === "bewegung" ? ` · Stärke: ${ans.staerke}` : ""}</span></div>`).join("");
+  return `<section class="step on"><h1>Passt das so?</h1><p class="lead">Wenn du absendest, bekomme ich deine Antworten direkt und plane daraus die echte App.</p><div class="sum">${rows}<div><b>Notizen</b><span>${(ans.notizen || "keine").replace(/</g, "&lt;")}</span></div></div></section>`;
+}
+document.addEventListener("click", async (e) => {
+  const o = e.target.closest(".opt"); const sg = e.target.closest("#staerke button");
+  if (sg) { ans.staerke = sg.dataset.v; return render(); }
+  if (o) {
+    const st = STEPS.find(s => s.id === o.dataset.s);
+    if (st.type === "many") { const a = ans[st.id] ||= []; const i = a.indexOf(o.dataset.o); i < 0 ? a.push(o.dataset.o) : a.splice(i, 1); }
+    else ans[st.id] = o.dataset.o;
+    o.classList.toggle("sel", sel(st, o.dataset.o));
+    if (st.type === "one") document.querySelectorAll(`.opt[data-s="${st.id}"]`).forEach(x => x.classList.toggle("sel", x === o));
+    $("#next").disabled = false; return;
+  }
+  if (e.target.id === "back" && cur > 0) { cur--; render(); scrollTo({ top: 0, behavior: "smooth" }); }
+  if (e.target.id === "next") {
+    if (cur < STEPS.length) { cur++; render(); scrollTo({ top: 0, behavior: "smooth" }); return; }
+    $("#next").disabled = true; $("#next").textContent = "Wird gesendet ...";
+    try {
+      const r = await fetch("/answer", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(ans) });
+      if (!r.ok) throw 0;
+      $("#steps").innerHTML = `<div class="done"><span class="big">🎉</span><h1>Danke, ist angekommen.</h1><p class="lead" style="margin:0 auto">Du kannst dieses Fenster schließen. Ich melde mich im Terminal mit dem Plan.</p></div>`;
+      document.querySelector(".bar").remove(); $("#prog").innerHTML = "";
+    } catch { $("#next").disabled = false; $("#next").textContent = "Nochmal senden"; alertBox(); }
+  }
+});
+function alertBox() { const p = document.createElement("p"); p.className = "lead"; p.textContent = "Senden hat nicht geklappt. Läuft der kleine Server noch?"; $("#steps").appendChild(p); }
+render();
+</script>
+</body>
+</html>

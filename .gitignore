@@ -1,0 +1,14 @@
+# Session-Inhalte bleiben lokal (enthalten Kundendaten)
+prototype/data.js
+*.db
+*.sqlite
+.atlas/
+node_modules/
+.DS_Store
+.impeccable/review/
+.impeccable/ref/
+.impeccable/round1.json
+.impeccable/brief-body.md
+# Persoenliche Antworten und Entscheidungsprotokolle bleiben lokal
+.impeccable/fragerunde/answers.json
+.impeccable/questions/

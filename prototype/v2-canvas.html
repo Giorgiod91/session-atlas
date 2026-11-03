@@ -1,0 +1,450 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Session Atlas</title>
+<style>
+:root {
+  --bg: #f4f3ef; --dot: #d6d3ca; --panel: #ffffff; --ink: #1f1e1b; --muted: #77736b; --line: #e5e2da;
+  --accent: #4263eb; --accent-soft: #edf1ff; --ok: #2f9e44; --ok-soft: #ebfbee; --branch: #e8590c;
+  --edge: #b9b5ab; --shadow: 0 1px 2px rgba(30,25,15,.06), 0 6px 20px rgba(30,25,15,.07);
+  --shadow-hi: 0 2px 4px rgba(30,25,15,.08), 0 14px 36px rgba(30,25,15,.14);
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg:#121211; --dot:#2a2926; --panel:#1c1c1a; --ink:#edece8; --muted:#9b978e; --line:#2f2e2b;
+    --accent:#7d95ff; --accent-soft:#1f2645; --ok:#51cf66; --ok-soft:#16281a; --branch:#ff922b; --edge:#4a4843;
+    --shadow: 0 1px 2px rgba(0,0,0,.4); --shadow-hi: 0 10px 30px rgba(0,0,0,.5); }
+}
+* { box-sizing: border-box; }
+html, body { margin:0; height:100%; overflow:hidden; }
+body { background:var(--bg); color:var(--ink); font:14px/1.45 -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif; }
+button { font:inherit; color:inherit; cursor:pointer; }
+
+/* Arbeitsflaeche mit Punkteraster */
+#stage { position:fixed; inset:0; cursor:grab; background-color:var(--bg);
+  background-image: radial-gradient(var(--dot) 1.3px, transparent 1.4px); background-size:24px 24px; }
+#stage.drag { cursor:grabbing; }
+#world { position:absolute; left:0; top:0; transform-origin:0 0; }
+#world.anim { transition: transform .45s cubic-bezier(.2,.8,.2,1); }
+#edges { position:absolute; left:0; top:0; overflow:visible; pointer-events:none; }
+
+/* Projekt-Rahmen */
+.frame { position:absolute; border-radius:22px; border:2px dashed var(--edge); background:color-mix(in srgb, var(--panel) 45%, transparent); cursor:zoom-in; }
+.frame-h { white-space:nowrap; position:absolute; left:22px; top:-15px; background:var(--bg); padding:2px 10px; border-radius:99px; font-weight:650; font-size:15px; display:flex; gap:8px; align-items:center; }
+.frame-h .dot { width:10px; height:10px; border-radius:50%; }
+.frame-h small { color:var(--muted); font-weight:400; }
+
+/* Karten */
+.card { position:absolute; background:var(--panel); border:1px solid var(--line); border-radius:16px; box-shadow:var(--shadow);
+  padding:14px 16px; cursor:pointer; transition: box-shadow .15s, border-color .15s, opacity .2s, transform .15s; overflow:hidden; }
+.card:hover { box-shadow:var(--shadow-hi); transform:translateY(-1px); }
+.card.sel { border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft), var(--shadow-hi); }
+.card.dim { opacity:.18; }
+.card.hit { border-color:var(--accent); }
+
+.scard h3 { margin:0 0 4px; font-size:16px; line-height:1.3; letter-spacing:-.01em; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.sub { color:var(--muted); font-size:12.5px; display:flex; gap:10px; flex-wrap:wrap; }
+.scard .last { margin-top:10px; font-size:13px; color:var(--muted); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.scard .last b { color:var(--ink); font-weight:500; }
+.scard .foot { position:absolute; left:16px; right:16px; bottom:12px; display:flex; align-items:center; gap:8px; }
+.progress { display:flex; gap:2px; flex:1; align-items:center; }
+.progress i { height:6px; flex:1; max-width:10px; border-radius:3px; background:var(--line); }
+.progress i.e { background:var(--ok); }
+.chip { font-size:11.5px; padding:1px 8px; border-radius:99px; background:var(--bg); color:var(--muted); border:1px solid var(--line); white-space:nowrap; }
+.chip:hover { color:var(--accent); border-color:var(--accent); }
+.tags { display:flex; gap:5px; flex-wrap:wrap; margin-top:10px; }
+
+.go { border:0; background:var(--accent); color:#fff; border-radius:9px; padding:6px 11px; font-weight:600; font-size:12.5px; white-space:nowrap; }
+.go:hover { filter:brightness(1.08); }
+.go.ghost { background:var(--bg); color:var(--ink); border:1px solid var(--line); }
+
+/* Prompt-Karten */
+.pcard .num { display:flex; align-items:center; gap:8px; font-size:11.5px; color:var(--muted); margin-bottom:6px; }
+.pcard .num b { display:inline-grid; place-items:center; min-width:22px; height:22px; padding:0 6px; border-radius:7px; background:var(--bg); color:var(--ink); font-size:11.5px; border:1px solid var(--line); }
+.pcard .txt { font-size:13.5px; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+.pcard .badge { margin-left:auto; font-size:11px; padding:1px 7px; border-radius:99px; background:var(--ok-soft); color:var(--ok); font-weight:600; }
+.pcard.latest { border-color:var(--accent); }
+.pcard.latest .num b { background:var(--accent); color:#fff; border-color:var(--accent); }
+.pcard.br .num b { background:var(--branch); color:#fff; border-color:var(--branch); }
+.pcard.offpath { opacity:.75; border-style:dashed; }
+.hcard { background:var(--accent-soft); border-color:transparent; }
+.hcard h2 { margin:0 0 6px; font-size:20px; letter-spacing:-.015em; line-height:1.25; }
+.hcard .row { display:flex; gap:8px; margin-top:14px; }
+
+/* Weit weggezoomt: nur das Wichtigste */
+.far .scard .last, .far .scard .tags, .far .scard .sub, .far .scard .go { display:none; }
+.far .scard h3 { font-size:min(calc(13px * var(--inv)), 42px); line-height:1.15; -webkit-line-clamp:3; }
+.far .frame-h small { display:none; }
+.far .frame-h { max-width:calc(100% + 40px); overflow:hidden; text-overflow:ellipsis; }
+.far .scard .progress i { height:10px; max-width:14px; }
+.far .pcard .txt { font-size:20px; }
+.far .frame-h { font-size:min(calc(14px * var(--inv)), 52px); top:calc(-1.3em); padding:2px 16px; }
+.far .frame-h .dot { width:18px; height:18px; }
+
+/* Schwebende UI */
+.bar { position:fixed; top:14px; left:14px; right:14px; display:flex; gap:10px; align-items:center; pointer-events:none; z-index:5; }
+.bar > * { pointer-events:auto; }
+.pill { background:var(--panel); border:1px solid var(--line); border-radius:12px; box-shadow:var(--shadow); display:flex; align-items:center; gap:6px; padding:6px 8px; }
+.crumbs button { border:0; background:none; padding:4px 8px; border-radius:7px; color:var(--muted); }
+.crumbs button:hover { background:var(--bg); color:var(--ink); }
+.crumbs button.cur { color:var(--ink); font-weight:600; }
+.crumbs .sep { color:var(--line); }
+.brand { font-weight:700; padding:0 6px 0 4px; letter-spacing:-.02em; }
+.search { flex:0 1 360px; margin-left:auto; }
+.search input { border:0; outline:0; background:none; color:var(--ink); font:inherit; width:100%; padding:4px 4px; }
+.search .cnt { color:var(--muted); font-size:12px; white-space:nowrap; }
+.zoombar { position:fixed; right:14px; bottom:14px; z-index:5; }
+.zoombar button { border:0; background:none; width:30px; height:30px; border-radius:8px; font-size:16px; }
+.zoombar button:hover { background:var(--bg); }
+.zoombar span { min-width:44px; text-align:center; font-size:12px; color:var(--muted); font-variant-numeric:tabular-nums; }
+.help { position:fixed; left:14px; bottom:14px; z-index:5; font-size:12px; color:var(--muted); padding:7px 12px; }
+
+/* Detail-Panel rechts */
+.panel { position:fixed; top:70px; right:14px; bottom:64px; width:min(420px, calc(100vw - 28px)); background:var(--panel); border:1px solid var(--line);
+  border-radius:16px; box-shadow:var(--shadow-hi); z-index:6; display:flex; flex-direction:column; transform:translateX(calc(100% + 30px)); transition:transform .3s cubic-bezier(.2,.8,.2,1); }
+.panel.open { transform:none; }
+.panel-h { padding:16px 18px 12px; border-bottom:1px solid var(--line); display:flex; gap:10px; align-items:flex-start; }
+.panel-h .x { margin-left:auto; border:0; background:var(--bg); border-radius:8px; width:28px; height:28px; flex:none; }
+.panel-b { padding:16px 18px; overflow:auto; flex:1; }
+.panel-f { padding:12px 18px 16px; border-top:1px solid var(--line); display:flex; gap:8px; flex-wrap:wrap; }
+.lbl { font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin:16px 0 6px; }
+.lbl:first-child { margin-top:0; }
+.ptxt { white-space:pre-wrap; word-break:break-word; }
+.reply { white-space:pre-wrap; word-break:break-word; color:var(--muted); font-size:13px; background:var(--bg); border-radius:10px; padding:10px 12px; }
+.files div { font:12px ui-monospace, SFMono-Regular, Menlo, monospace; color:var(--ok); padding:2px 0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.hint { font-size:12px; color:var(--muted); margin-top:8px; width:100%; }
+.toast { position:fixed; bottom:70px; left:50%; transform:translateX(-50%); background:var(--ink); color:var(--bg); padding:9px 16px; border-radius:10px; font-size:13px; opacity:0; transition:opacity .2s; pointer-events:none; z-index:9; }
+.toast.show { opacity:1; }
+.proto { font-size:10.5px; background:var(--accent-soft); color:var(--accent); padding:1px 6px; border-radius:5px; font-weight:600; }
+@media (max-width: 700px) { .help { display:none; } .search { flex-basis:160px; } .crumbs .brand { display:none; } }
+</style>
+</head>
+<body>
+<div id="stage"><div id="world"><svg id="edges"></svg><div id="cards"></div></div></div>
+
+<div class="bar">
+  <div class="pill crumbs" id="crumbs"></div>
+  <div class="pill search"><span style="color:var(--muted)">⌕</span><input id="q" placeholder="Suchen, oder #tag" autocomplete="off"><span class="cnt" id="cnt"></span></div>
+</div>
+<div class="pill zoombar"><button data-z="out" title="Herauszoomen">−</button><span id="zl">100%</span><button data-z="in" title="Hineinzoomen">+</button><button data-z="fit" title="Alles zeigen">⤢</button></div>
+<div class="pill help" id="help"></div>
+
+<aside class="panel" id="panel">
+  <div class="panel-h" id="panel-h"></div>
+  <div class="panel-b" id="panel-b"></div>
+  <div class="panel-f" id="panel-f"></div>
+</aside>
+<div class="toast" id="toast"></div>
+
+<script src="data.js"></script>
+<script>
+const D = window.SESSION_DATA || { sessions: [], home: "" };
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
+const short = (p) => (p || "?").replace(D.home, "~");
+const projName = (p) => { const s = short(p); return s === "~" ? "Home-Ordner" : s.split("/").filter(Boolean).pop(); };
+const COLORS = ["#4263eb","#e8590c","#2f9e44","#ae3ec9","#1098ad","#f08c00","#d6336c","#5c940d","#7048e8","#1c7ed6"];
+function rel(ts) {
+  const d = (Date.now() - new Date(ts)) / 1000;
+  if (d < 3600) return `vor ${Math.max(1, Math.round(d / 60))} Min.`;
+  if (d < 86400) return `vor ${Math.round(d / 3600)} Std.`;
+  if (d < 172800) return "gestern";
+  if (d < 86400 * 30) return `vor ${Math.round(d / 86400)} Tagen`;
+  return new Date(ts).toLocaleDateString("de-DE");
+}
+const fmt = (ts) => new Date(ts).toLocaleString("de-DE", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
+
+// ---------- Daten vorbereiten ----------
+const EXT = { ts:"typescript", tsx:"react", cs:"dotnet", py:"python", sql:"sql", prisma:"prisma", md:"doku", html:"html", css:"css" };
+const projects = new Map();
+for (const s of D.sessions) {
+  s.project = s.cwd || s.dir;
+  s.label = s.title || s.aiTitle || s.nodes[0]?.text.slice(0, 60) || "Session";
+  const t = new Set(s.hashtags);
+  for (const f of s.files) { const e = f.split(".").pop().toLowerCase(); if (EXT[e]) t.add(EXT[e]); if (/docker|compose/i.test(f)) t.add("docker"); }
+  for (const tool of s.tools) { if (tool.startsWith("mcp__claude-in-chrome")) t.add("browser"); if (tool.startsWith("mcp__azure-devops")) t.add("azure-devops"); }
+  s.tags = [...t].slice(0, 5);
+  s.byId = Object.fromEntries(s.nodes.map(n => [n.id, n]));
+  s.kids = {}; s.nodes.forEach(n => { if (n.parent) (s.kids[n.parent] ||= []).push(n); });
+  s.last = s.nodes[s.nodes.length - 1];
+  // Hauptpfad = Weg vom Anfang bis zum letzten Stand
+  s.path = []; for (let c = s.last; c; c = s.byId[c.parent]) s.path.unshift(c);
+  s.onPath = new Set(s.path.map(n => n.id));
+  s.edits = s.nodes.filter(n => n.edits.length).length;
+  if (!projects.has(s.project)) projects.set(s.project, { path: s.project, sessions: [], color: COLORS[projects.size % COLORS.length] });
+  projects.get(s.project).sessions.push(s);
+}
+const cmd = (s, fork) => `cd '${short(s.cwd)}' && claude --resume ${s.id}${fork ? " --fork-session" : ""}`;
+
+// ---------- Zustand & Kamera ----------
+const state = { level: "all", project: null, session: null, card: null, q: "" };
+const cam = { x: 0, y: 0, k: 1 };
+const world = $("#world"), stage = $("#stage");
+function applyCam(animate) {
+  world.classList.toggle("anim", !!animate);
+  world.style.transform = `translate(${cam.x}px, ${cam.y}px) scale(${cam.k})`;
+  stage.style.backgroundSize = `${24 * cam.k}px ${24 * cam.k}px`;
+  stage.style.backgroundPosition = `${cam.x}px ${cam.y}px`;
+  world.classList.toggle("far", cam.k < 0.62);
+  world.style.setProperty("--inv", (1 / cam.k).toFixed(3));
+  $("#zl").textContent = Math.round(cam.k * 100) + "%";
+}
+let bounds = { x: 0, y: 0, w: 1000, h: 800 };
+function fit(animate = true, maxK = 1) {
+  const vw = innerWidth, vh = innerHeight, pad = 90;
+  const k = Math.min(maxK, (vw - pad * 2) / bounds.w, (vh - pad * 2 - 40) / bounds.h);
+  cam.k = Math.max(0.08, k);
+  cam.x = (vw - bounds.w * cam.k) / 2 - bounds.x * cam.k;
+  cam.y = Math.max(80, (vh - bounds.h * cam.k) / 2 + 20) - bounds.y * cam.k;
+  applyCam(animate);
+}
+function zoomAt(f, cx = innerWidth / 2, cy = innerHeight / 2, animate) {
+  const k = Math.min(2.5, Math.max(0.08, cam.k * f));
+  cam.x = cx - (cx - cam.x) * (k / cam.k); cam.y = cy - (cy - cam.y) * (k / cam.k); cam.k = k; applyCam(animate);
+}
+function focusBox(x, y, w, h) {
+  // Karte sichtbar machen, ohne den Zoom zu aendern
+  const sx = x * cam.k + cam.x, sy = y * cam.k + cam.y, panelW = $("#panel").classList.contains("open") ? 440 : 0;
+  const right = innerWidth - panelW - 40;
+  if (sx < 40 || sx + w * cam.k > right || sy < 90 || sy + h * cam.k > innerHeight - 70) {
+    cam.x = (right + 40) / 2 - (x + w / 2) * cam.k; cam.y = innerHeight / 2 - (y + h / 2) * cam.k; applyCam(true);
+  }
+}
+
+// ---------- Suche ----------
+function matches(s, n) {
+  const q = state.q.trim().toLowerCase(); if (!q) return true;
+  if (q.startsWith("#")) { const t = q.slice(1); return s.tags.some(x => x.startsWith(t)); }
+  if (n) return n.text.toLowerCase().includes(q) || (n.reply || "").toLowerCase().includes(q);
+  return (s.label + " " + s.nodes.map(n => n.text).join(" ") + " " + s.files.join(" ")).toLowerCase().includes(q);
+}
+
+// ---------- Ebene 1: alle Projekte ----------
+const SC = { w: 320, h: 196, gap: 26, pad: 34 };
+function layoutAll() {
+  const list = [...projects.values()].sort((a, b) => b.sessions[0].end.localeCompare(a.sessions[0].end));
+  // Zeilenbreite so waehlen, dass das Gesamtbild ungefaehr das Bildschirmformat hat
+  const area = list.reduce((a, p) => { const n = p.sessions.length, c = Math.min(3, n), r = Math.ceil(n / c);
+    return a + (c * (SC.w + SC.gap) + SC.pad * 2 + 60) * (r * (SC.h + SC.gap) + SC.pad * 2 + 70); }, 0);
+  const maxRow = Math.max(1100, Math.sqrt(area * (innerWidth / Math.max(400, innerHeight - 100))) * 1.05);
+  let x = 0, y = 0, rowH = 0; const out = [];
+  for (const p of list) {
+    const ss = p.sessions.slice().sort((a, b) => b.end.localeCompare(a.end));
+    const cols = Math.min(3, ss.length), rows = Math.ceil(ss.length / cols);
+    const w = cols * SC.w + (cols - 1) * SC.gap + SC.pad * 2, h = rows * SC.h + (rows - 1) * SC.gap + SC.pad * 2;
+    if (x > 0 && x + w > maxRow) { x = 0; y += rowH + 70; rowH = 0; }
+    out.push({ p, ss, x, y, w, h, cols });
+    x += w + 110; rowH = Math.max(rowH, h);
+  }
+  return out;
+}
+
+function sessionCard(s, x, y) {
+  const sel = state.card === s.id, hit = state.q && matches(s);
+  const prog = s.nodes.length > 40 ? s.path.slice(-40) : s.path;
+  return `<div class="card scard ${sel ? "sel" : ""} ${!matches(s) ? "dim" : hit ? "hit" : ""}" data-open="${s.id}" style="left:${x}px;top:${y}px;width:${SC.w}px;height:${SC.h}px">
+    <h3>${esc(s.label)}</h3>
+    <div class="sub"><span>${rel(s.end)}</span><span>${s.nodes.length} Prompts</span>${s.edits ? `<span style="color:var(--ok)">✎ ${s.edits}× geändert</span>` : ""}</div>
+    <div class="last"><b>Zuletzt:</b> ${esc(s.last.text)}</div>
+    <div class="tags">${s.tags.slice(0, 3).map(t => `<span class="chip" data-tag="${esc(t)}">#${esc(t)}</span>`).join("")}</div>
+    <div class="foot"><div class="progress">${prog.map(n => `<i class="${n.edits.length ? "e" : ""}"></i>`).join("")}</div><button class="go" data-resume="${s.id}">▶ Weiter</button></div>
+  </div>`;
+}
+
+function renderAll() {
+  const L = layoutAll(); let html = "";
+  for (const f of L) {
+    html += `<div class="frame" data-proj="${esc(f.p.path)}" style="left:${f.x}px;top:${f.y}px;width:${f.w}px;height:${f.h}px">
+      <div class="frame-h"><span class="dot" style="background:${f.p.color}"></span>${esc(projName(f.p.path))} <small>${f.ss.length} Session${f.ss.length > 1 ? "s" : ""}</small></div></div>`;
+    f.ss.forEach((s, i) => { html += sessionCard(s, f.x + SC.pad + (i % f.cols) * (SC.w + SC.gap), f.y + SC.pad + Math.floor(i / f.cols) * (SC.h + SC.gap)); });
+  }
+  $("#cards").innerHTML = html; $("#edges").innerHTML = "";
+  const last = L[L.length - 1];
+  bounds = { x: -30, y: -40, w: Math.max(...L.map(f => f.x + f.w)) + 60, h: Math.max(...L.map(f => f.y + f.h)) + 70 };
+  $("#cnt").textContent = state.q ? `${D.sessions.filter(s => matches(s)).length} Treffer` : "";
+}
+
+// ---------- Ebene 2: ein Projekt ----------
+function renderProject() {
+  const p = projects.get(state.project);
+  const ss = p.sessions.slice().sort((a, b) => b.end.localeCompare(a.end));
+  const cols = Math.min(4, Math.max(1, Math.ceil(Math.sqrt(ss.length * 1.6))));
+  let html = "";
+  ss.forEach((s, i) => { html += sessionCard(s, (i % cols) * (SC.w + SC.gap), Math.floor(i / cols) * (SC.h + SC.gap)); });
+  $("#cards").innerHTML = html; $("#edges").innerHTML = "";
+  const rows = Math.ceil(ss.length / cols);
+  bounds = { x: 0, y: 0, w: cols * (SC.w + SC.gap), h: rows * (SC.h + SC.gap) };
+  $("#cnt").textContent = state.q ? `${ss.filter(s => matches(s)).length} Treffer` : "";
+}
+
+// ---------- Ebene 3: eine Session als Karten-Board ----------
+const PC = { w: 270, h: 132, gx: 56, gy: 54, per: 5, top: 210 };
+function layoutSession(s) {
+  const pos = {};
+  // Hauptpfad in Lesereihenfolge (Zeilen von links nach rechts)
+  s.path.forEach((n, i) => { pos[n.id] = { x: (i % PC.per) * (PC.w + PC.gx), y: PC.top + Math.floor(i / PC.per) * (PC.h + PC.gy) }; });
+  let y = PC.top + Math.ceil(s.path.length / PC.per) * (PC.h + PC.gy) + 70;
+  // Abzweige: jeder Seitenzweig bekommt eine eigene Zeile darunter
+  const side = s.nodes.filter(n => !s.onPath.has(n.id));
+  const starts = side.filter(n => !n.parent || s.onPath.has(n.parent));
+  for (const st of starts) {
+    let x = 0, cur = st;
+    const chain = [];
+    (function walk(n) { chain.push(n); (s.kids[n.id] || []).forEach(walk); })(st);
+    chain.sort((a, b) => a.ts.localeCompare(b.ts)).forEach((n, i) => {
+      pos[n.id] = { x: (i % PC.per) * (PC.w + PC.gx), y: y + Math.floor(i / PC.per) * (PC.h + PC.gy) };
+    });
+    y += Math.ceil(chain.length / PC.per) * (PC.h + PC.gy) + 40;
+  }
+  return { pos, h: y };
+}
+
+function renderSession() {
+  const s = D.sessions.find(x => x.id === state.session);
+  const { pos, h } = layoutSession(s);
+  const W = PC.per * (PC.w + PC.gx) - PC.gx;
+  let html = `<div class="card hcard" style="left:0;top:0;width:${Math.min(W, 760)}px;height:170px;cursor:default">
+    <div class="sub" style="margin-bottom:4px"><span style="color:${projects.get(s.project).color}">● ${esc(projName(s.project))}</span>${s.branch ? `<span>⎇ ${esc(s.branch)}</span>` : ""}</div>
+    <h2>${esc(s.label)}</h2>
+    <div class="sub"><span>${fmt(s.start)} bis ${rel(s.end)}</span><span>${s.nodes.length} Prompts</span>${s.edits ? `<span style="color:var(--ok)">✎ in ${s.edits} Schritten Dateien geändert</span>` : ""}</div>
+    <div class="row"><button class="go" data-resume="${s.id}">▶ Am letzten Stand weitermachen</button><button class="go ghost" data-pick="${s.last.id}">Letzten Stand zeigen</button></div>
+  </div>`;
+  let edges = "";
+  for (const n of s.nodes) {
+    const p = pos[n.id]; if (!p) continue;
+    const isLast = n.id === s.last.id, isBr = (s.kids[n.id] || []).length > 1, off = !s.onPath.has(n.id);
+    const idx = off ? "⑂" : s.path.indexOf(n) + 1;
+    html += `<div class="card pcard ${isLast ? "latest" : ""} ${isBr ? "br" : ""} ${off ? "offpath" : ""} ${state.card === n.id ? "sel" : ""} ${matches(s, n) ? (state.q ? "hit" : "") : "dim"}" data-pick="${n.id}"
+      style="left:${p.x}px;top:${p.y}px;width:${PC.w}px;height:${PC.h}px">
+      <div class="num"><b>${idx}</b><span>${fmt(n.ts)}</span>${n.edits.length ? `<span class="badge">✎ ${n.edits.length} Datei${n.edits.length > 1 ? "en" : ""}</span>` : isLast ? `<span class="badge" style="background:var(--accent-soft);color:var(--accent)">letzter Stand</span>` : ""}</div>
+      <div class="txt">${esc(n.text)}</div></div>`;
+    const par = n.parent && pos[n.parent];
+    if (par) {
+      const sameRow = par.y === p.y && p.x > par.x;
+      const x1 = sameRow ? par.x + PC.w : par.x + PC.w / 2, y1 = sameRow ? par.y + PC.h / 2 : par.y + PC.h;
+      const x2 = sameRow ? p.x : p.x + PC.w / 2, y2 = sameRow ? p.y + PC.h / 2 : p.y;
+      const d = sameRow ? `M${x1},${y1} L${x2},${y2}` : `M${x1},${y1} C${x1},${y1 + 50} ${x2},${y2 - 50} ${x2},${y2}`;
+      edges += `<path d="${d}" fill="none" stroke="${off ? "var(--branch)" : "var(--edge)"}" stroke-width="2.5" ${off ? 'stroke-dasharray="6 5"' : ""} marker-end="url(#arr${off ? "b" : ""})"/>`;
+    }
+  }
+  $("#cards").innerHTML = html;
+  $("#edges").setAttribute("width", W); $("#edges").setAttribute("height", h);
+  $("#edges").innerHTML = `<defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--edge)"/></marker>
+    <marker id="arrb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--branch)"/></marker></defs>${edges}`;
+  bounds = { x: 0, y: 0, w: W, h };
+  G.pos = pos;
+  $("#cnt").textContent = state.q ? `${s.nodes.filter(n => matches(s, n)).length} Treffer` : "";
+}
+const G = { pos: {} };
+
+// ---------- Detail-Panel ----------
+function openPanel(s, n) {
+  const isLast = n.id === s.last.id, off = !s.onPath.has(n.id);
+  $("#panel-h").innerHTML = `<div><div class="sub">${off ? "Abzweig" : `Schritt ${s.path.indexOf(n) + 1} von ${s.path.length}`} · ${fmt(n.ts)}</div>
+    <div style="font-weight:650;margin-top:2px">${isLast ? "Hier hast du aufgehört" : esc(s.label)}</div></div><button class="x" data-close>✕</button>`;
+  $("#panel-b").innerHTML = `
+    <div class="lbl">Du hast geschrieben</div><div class="ptxt">${esc(n.text)}</div>
+    <div class="lbl">Claude hat geantwortet</div><div class="reply">${esc(n.reply || "Keine Textantwort")}</div>
+    ${n.edits.length ? `<div class="lbl">Geänderte Dateien in diesem Schritt</div><div class="files">${n.edits.map(f => `<div title="${esc(f)}">✎ ${esc(short(f))}</div>`).join("")}</div>` : ""}`;
+  $("#panel-f").innerHTML = isLast
+    ? `<button class="go" data-resume="${s.id}">▶ Hier weitermachen</button><button class="go ghost" data-fork="${s.id}">⑂ Als neuen Zweig</button>`
+    : `<button class="go" data-fork="${s.id}">↶ Ab hier weitermachen</button><button class="go ghost" data-resume="${s.id}">Zum letzten Stand</button>
+       <div class="hint">Im Prototyp wird der Befehl kopiert, danach mit /rewind zu diesem Schritt springen. Die echte App springt direkt hierher.</div>`;
+  $("#panel").classList.add("open");
+}
+const closePanel = () => { $("#panel").classList.remove("open"); state.card = null; document.querySelectorAll(".card.sel").forEach(c => c.classList.remove("sel")); };
+
+// ---------- Navigation ----------
+function crumbs() {
+  const parts = [`<span class="brand">Session Atlas</span><span class="proto">Prototyp</span>`, `<button class="${state.level === "all" ? "cur" : ""}" data-nav="all">Alle Projekte</button>`];
+  if (state.project) parts.push(`<span class="sep">›</span><button class="${state.level === "project" ? "cur" : ""}" data-nav="project">${esc(projName(state.project))}</button>`);
+  if (state.session) parts.push(`<span class="sep">›</span><button class="cur" data-nav="session">${esc(D.sessions.find(s => s.id === state.session).label.slice(0, 40))}</button>`);
+  $("#crumbs").innerHTML = parts.join("");
+  $("#help").innerHTML = state.level === "session"
+    ? "Karte anklicken = Details · ← → nächster Schritt · Esc zurück"
+    : "Ziehen = verschieben · ⌘ + Scrollen = zoomen · Karte anklicken = öffnen";
+}
+function render(refit = true) {
+  if (state.level === "all") renderAll(); else if (state.level === "project") renderProject(); else renderSession();
+  crumbs(); if (refit) fit(true, state.level === "session" ? 1 : 1);
+}
+function go(level, opts = {}) {
+  Object.assign(state, { level, card: null }, opts);
+  if (level === "all") { state.project = null; state.session = null; }
+  if (level === "project") state.session = null;
+  closePanel(); render();
+  if (level === "session") { // am Anfang der Session sinnvoll zoomen: Kopf + erste Reihen
+    const k = Math.min(1, (innerWidth - 120) / bounds.w);
+    cam.k = k; cam.x = (innerWidth - bounds.w * k) / 2; cam.y = 80; applyCam(true);
+  }
+}
+function pick(id) {
+  const s = D.sessions.find(x => x.id === state.session), n = s.byId[id];
+  state.card = id;
+  document.querySelectorAll(".card.sel").forEach(c => c.classList.remove("sel"));
+  document.querySelector(`[data-pick="${id}"].pcard`)?.classList.add("sel");
+  openPanel(s, n);
+  const p = G.pos[id]; if (p) focusBox(p.x, p.y, PC.w, PC.h);
+}
+
+let toastT; function toast(m) { const t = $("#toast"); t.textContent = m; t.classList.add("show"); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("show"), 1800); }
+async function copy(text) { try { await navigator.clipboard.writeText(text); toast("Befehl kopiert, im Terminal einfügen (⌘V)"); } catch { toast(text); } }
+
+// ---------- Maus & Tastatur ----------
+let drag = null, moved = 0;
+stage.addEventListener("pointerdown", (e) => { drag = { x: e.clientX, y: e.clientY, cx: cam.x, cy: cam.y }; moved = 0; });
+addEventListener("pointermove", (e) => {
+  if (!drag) return; const dx = e.clientX - drag.x, dy = e.clientY - drag.y; moved = Math.max(moved, Math.abs(dx) + Math.abs(dy));
+  if (moved > 4) { stage.classList.add("drag"); cam.x = drag.cx + dx; cam.y = drag.cy + dy; applyCam(false); }
+});
+addEventListener("pointerup", () => { drag = null; stage.classList.remove("drag"); });
+stage.addEventListener("wheel", (e) => {
+  e.preventDefault();
+  if (e.ctrlKey || e.metaKey) zoomAt(Math.exp(-e.deltaY * 0.01), e.clientX, e.clientY);
+  else { cam.x -= e.deltaX; cam.y -= e.deltaY; applyCam(false); }
+}, { passive: false });
+
+document.addEventListener("click", (e) => {
+  if (moved > 4) { moved = 0; return; }
+  const el = e.target.closest("[data-resume],[data-fork],[data-tag],[data-open],[data-pick],[data-nav],[data-z],[data-close],[data-proj]");
+  if (!el) { if (e.target === stage || e.target.id === "world") closePanel(); return; }
+  const d = el.dataset;
+  if (d.resume) return copy(cmd(D.sessions.find(s => s.id === d.resume)));
+  if (d.fork) return copy(cmd(D.sessions.find(s => s.id === d.fork), true));
+  if (d.tag) { e.stopPropagation(); $("#q").value = "#" + d.tag; state.q = "#" + d.tag; render(false); return; }
+  if (d.open) { const s = D.sessions.find(x => x.id === d.open); return go("session", { project: s.project, session: s.id }); }
+  if (d.pick) return pick(d.pick);
+  if (d.proj) return go("project", { project: d.proj });
+  if (d.nav) return go(d.nav);
+  if (d.close !== undefined) return closePanel();
+  if (d.z) return d.z === "fit" ? fit(true) : zoomAt(d.z === "in" ? 1.25 : 0.8, innerWidth / 2, innerHeight / 2, true);
+});
+// Doppelklick auf Projektrahmen = Projekt oeffnen
+document.addEventListener("dblclick", (e) => { const f = e.target.closest(".frame"); if (f) go("project", { project: f.dataset.proj }); });
+
+$("#q").addEventListener("input", (e) => { state.q = e.target.value; render(false); });
+document.addEventListener("keydown", (e) => {
+  if (e.target.matches("input")) { if (e.key === "Escape") { e.target.value = ""; state.q = ""; e.target.blur(); render(false); } return; }
+  if (e.key === "Escape") {
+    if ($("#panel").classList.contains("open")) return closePanel();
+    if (state.level === "session") return go("project"); if (state.level === "project") return go("all");
+  }
+  if (e.key === "/") { e.preventDefault(); $("#q").focus(); }
+  if (state.level === "session" && (e.key === "ArrowRight" || e.key === "ArrowLeft")) {
+    const s = D.sessions.find(x => x.id === state.session);
+    const i = state.card ? s.path.findIndex(n => n.id === state.card) : (e.key === "ArrowRight" ? -1 : s.path.length);
+    const ni = Math.max(0, Math.min(s.path.length - 1, i + (e.key === "ArrowRight" ? 1 : -1)));
+    pick(s.path[ni].id); e.preventDefault();
+  }
+});
+addEventListener("resize", () => { if (state.level !== "session") fit(false); });
+
+// Direktlinks: #s=<session-id> oder #p=<projektname>
+const h = location.hash; const hs = h.match(/s=([\w-]+)/)?.[1], hp = decodeURIComponent(h.match(/p=([^&]+)/)?.[1] || "");
+const ss = hs && D.sessions.find(s => s.id.startsWith(hs)); const pp = hp && [...projects.keys()].find(k => projName(k) === hp);
+if (ss) go("session", { project: ss.project, session: ss.id }); else if (pp) go("project", { project: pp }); else render();
+</script>
+</body>
+</html>

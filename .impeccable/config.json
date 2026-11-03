@@ -1,0 +1,26 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "marquee",
+        "value": "*",
+        "files": [
+          ".impeccable/fragerunde/index.html"
+        ],
+        "createdAt": "2026-11-03T10:22:44.062Z",
+        "reason": "Intentional preview of the user's own Flohmarkt app style (it ships a marquee) inside the question round"
+      },
+      {
+        "rule": "cream-palette",
+        "value": "*",
+        "files": [
+          ".impeccable/fragerunde/index.html"
+        ],
+        "createdAt": "2026-11-03T10:22:44.079Z",
+        "reason": "Warm ground is the visual world the user chose on the decision page (warm consumer app)"
+      }
+    ]
+  }
+}

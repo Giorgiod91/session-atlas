@@ -1,0 +1,757 @@
+<!doctype html>
+<html lang="de" data-theme="warm">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Session Atlas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* ================= Welt 1: freundliche App ================= */
+:root {
+  --ground: #fff4e6; --grid: #ecdcc6; --card: #ffffff; --surface: #f7ebdd; --border: #e7dacb;
+  --ink: #2b241f; --ink-2: #6f625a; --ink-3: #7a6c62;
+  --action: #cc4213; --action-ink: #ffffff; --action-soft: #ffe6dc; --action-deep: #b93b10;
+  --edge: #dcc9b4; --edge-path: #b9a28c;
+  --r-lg: 28px; --r-md: 20px; --r-sm: 14px; --r-xs: 10px;
+  --shadow: 0 2px 4px rgba(90, 55, 25, .04), 0 10px 28px rgba(90, 55, 25, .07);
+  --shadow-hi: 0 4px 8px rgba(90, 55, 25, .06), 0 22px 48px rgba(90, 55, 25, .13);
+  --font: "Figtree", ui-rounded, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  html[data-theme="warm"] {
+    --ground: #1f1a16; --grid: #3a3029; --card: #2a2420; --surface: #362d27; --border: #41372f;
+    --ink: #f8ede2; --ink-2: #c4b3a5; --ink-3: #a89789;
+    --action: #ff6a3d; --action-ink: #1f1a16; --action-deep: #ff8a63;
+    --action-soft: #4a2a1f; --edge: #4d4038; --edge-path: #7d6a5c;
+    --shadow: 0 2px 4px rgba(0,0,0,.25), 0 10px 28px rgba(0,0,0,.28);
+    --shadow-hi: 0 4px 8px rgba(0,0,0,.3), 0 22px 48px rgba(0,0,0,.45);
+    color-scheme: dark;
+  }
+}
+/* ================= Welt 2: Neovim (gruvbox) ================= */
+html[data-theme="vim"] {
+  --ground: #1d2021; --grid: #32302f; --card: #282828; --surface: #3c3836; --border: #504945;
+  --ink: #ebdbb2; --ink-2: #bdae93; --ink-3: #a89984;
+  --action: #fabd2f; --action-ink: #1d2021; --action-soft: #3d3420; --action-deep: #d79921;
+  --edge: #504945; --edge-path: #83a598;
+  --r-lg: 3px; --r-md: 3px; --r-sm: 2px; --r-xs: 2px;
+  --shadow: none; --shadow-hi: 0 0 0 1px #665c54;
+  --font: "JetBrains Mono", ui-monospace, Menlo, monospace;
+  --green: #b8bb26; --aqua: #8ec07c; --blue: #83a598; --red: #fb4934; --purple: #d3869b; --orange: #fe8019;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; overflow: hidden; }
+body { background: var(--ground); color: var(--ink); font: 500 15px/1.45 var(--font); -webkit-font-smoothing: antialiased; }
+button { font: inherit; color: inherit; cursor: pointer; }
+::selection { background: var(--action-soft); color: var(--ink); }
+:focus-visible { outline: 2.5px solid var(--action); outline-offset: 3px; border-radius: 8px; }
+svg.i { width: 20px; height: 20px; flex: none; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+/* Arbeitsflaeche */
+#stage { position: fixed; inset: 0; cursor: grab; background-color: var(--ground);
+  background-image: radial-gradient(var(--grid) 1.6px, transparent 1.7px); background-size: 28px 28px; }
+html[data-theme="vim"] #stage { background-image: none; }
+html[data-theme="vim"] #stage::before { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .5;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='28'%3E%3Ctext x='3' y='19' font-family='monospace' font-size='15' fill='%23458588' opacity='.35'%3E~%3C/text%3E%3C/svg%3E");
+  background-size: var(--tsz, 22px 28px); background-position: var(--tpos, 0 0); }
+#stage.drag { cursor: grabbing; }
+#world { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+#world.fly { transition: transform .55s cubic-bezier(.16, 1, .3, 1); }
+#edges { position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none; }
+
+/* Karten allgemein */
+.card { position: absolute; background: var(--card); border-radius: var(--r-lg); box-shadow: var(--shadow); border: 1px solid transparent;
+  transition: box-shadow .2s, transform .2s cubic-bezier(.16,1,.3,1), opacity .25s, border-color .2s; }
+.card.dim { opacity: .22; }
+.card.hit { border-color: var(--action); }
+html[data-theme="vim"] .card { border-color: var(--border); }
+html[data-theme="vim"] .card.hit { border-color: var(--action); }
+
+.tile { width: 46px; height: 46px; border-radius: var(--r-sm); background: var(--surface); display: grid; place-items: center; color: var(--ink); flex: none; }
+.tile.sm { width: 38px; height: 38px; border-radius: 12px; }
+.tile.sm svg.i { width: 18px; height: 18px; }
+.muted { color: var(--ink-2); }
+.cap { font-size: 13px; color: var(--ink-2); font-weight: 500; }
+.dotsep::before { content: "·"; margin: 0 6px; color: var(--ink-3); }
+
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 0; border-radius: var(--r-sm); padding: 12px 18px; font-weight: 700; font-size: 15px; transition: transform .15s cubic-bezier(.34,1.56,.64,1), background .15s; }
+.btn:active { transform: scale(.96); }
+.btn.primary { background: var(--action); color: var(--action-ink); }
+.btn.primary:hover { background: var(--action-deep); }
+.btn.secondary { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--ink); }
+.btn.secondary:hover { background: var(--surface); box-shadow: none; }
+.btn.small { padding: 8px 13px; font-size: 13.5px; border-radius: 12px; }
+.link { border: 0; background: none; color: var(--action-deep); font-weight: 700; font-size: 14px; display: inline-flex; align-items: center; gap: 2px; padding: 4px 2px; }
+html[data-theme="vim"] .link { color: var(--action); }
+.link svg.i { width: 16px; height: 16px; }
+
+/* Schritt-Leiste: echte Schritte, nicht Fortschritt */
+.steps { display: flex; gap: 3px; align-items: center; height: 8px; }
+.steps i { flex: 1; max-width: 12px; height: 8px; border-radius: 4px; background: var(--surface); }
+.steps i.e { background: var(--edge-path); }
+.steps i.now { background: var(--action); }
+html[data-theme="vim"] .steps i { border-radius: 0; }
+html[data-theme="vim"] .steps i.e { background: var(--green); }
+
+/* --- Weitermachen-Karte --- */
+.resume { padding: 24px 26px; display: flex; flex-direction: column; }
+.resume h1 { margin: 0; font-size: 46px; line-height: 1.05; letter-spacing: -.03em; font-weight: 800; text-wrap: balance; }
+.resume .bar { width: 36px; height: 4px; background: var(--action); border-radius: 3px; margin: 12px 0 16px; }
+.resume .what { display: flex; gap: 14px; align-items: center; }
+.resume .what b { font-size: 21px; font-weight: 800; letter-spacing: -.01em; display: block; line-height: 1.25; }
+.resume ol { list-style: none; margin: 14px 0 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+.resume li { display: flex; gap: 12px; align-items: baseline; padding: 7px 10px; border-radius: 12px; font-size: 14.5px; color: var(--ink-2); }
+.resume li span:last-child { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; }
+.resume li .n { font-size: 12px; font-weight: 700; color: var(--ink-3); min-width: 22px; font-variant-numeric: tabular-nums; }
+.resume li.now { background: var(--action-soft); color: var(--ink); font-weight: 600; }
+.resume li.now .n { color: var(--action-deep); }
+.resume .row { display: flex; flex-direction: column; align-items: center; gap: 6px; margin-top: auto; padding-top: 16px; }
+.resume .row .btn.primary { width: 100%; }
+.resume .row .btn.primary { flex: 1; padding: 15px; font-size: 16px; }
+html[data-theme="vim"] .resume h1 { font-size: 30px; color: var(--ink); }
+html[data-theme="vim"] .resume h1::before { content: "\" "; color: var(--ink-3); }
+html[data-theme="vim"] .resume .bar { background: none; height: 0; margin: 10px 0 14px; }
+
+/* --- Session-Kennzeichen: jede Session hat ihr eigenes Kuerzel und Farbton --- */
+.av { width: 40px; height: 40px; border-radius: 12px; flex: none; display: grid; place-items: center; font-weight: 800; font-size: 14px; letter-spacing: -.02em;
+  background: hsl(var(--h) 60% 91%); color: hsl(var(--h) 50% 28%); }
+.av.lg { width: 56px; height: 56px; border-radius: 16px; font-size: 19px; }
+@media (prefers-color-scheme: dark) { html[data-theme="warm"] .av { background: hsl(var(--h) 28% 24%); color: hsl(var(--h) 70% 82%); } }
+html[data-theme="vim"] .av { background: none; border: 1px solid hsl(var(--h) 45% 55%); color: hsl(var(--h) 55% 68%); border-radius: 2px; }
+.about { color: var(--ink-2); font-size: 13.5px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.about b { color: var(--ink-3); font-weight: 600; }
+
+/* --- Projektkarte mit Session-Zeilen --- */
+.pcard { padding: 16px 12px 10px; border-radius: 22px; }
+.phead { display: flex; align-items: center; gap: 10px; margin: 0 6px 6px; cursor: pointer; }
+.phead .tile { width: 32px; height: 32px; border-radius: 10px; }
+.phead .tile svg.i { width: 17px; height: 17px; }
+.phead h2 { margin: 0; font-size: 15px; color: var(--ink-2); text-transform: none; letter-spacing: -.02em; font-weight: 750; line-height: 1.15; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.phead .grow { flex: 1; min-width: 0; }
+.srow { display: flex; align-items: center; gap: 12px; padding: 8px 8px; border-radius: 14px; cursor: pointer; transition: background .15s; height: 64px; }
+.srow:hover { background: var(--surface); }
+.srow + .srow { box-shadow: 0 -1px 0 var(--border); }
+.srow:hover, .srow:hover + .srow { box-shadow: none; }
+.srow .grow { flex: 1; min-width: 0; }
+.srow .t { font-weight: 750; font-size: 16px; letter-spacing: -.01em; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.srow .steps { margin-top: 6px; max-width: 220px; }
+.srow .when { font-size: 12.5px; color: var(--ink-2); white-space: nowrap; text-align: right; align-self: flex-start; padding-top: 4px; }
+.srow .chev { color: var(--ink-3); }
+.more { padding: 8px 10px 4px; }
+html[data-theme="vim"] .pcard { padding: 0 0 8px; }
+html[data-theme="vim"] .phead { background: var(--surface); padding: 8px 14px; margin: 0 0 4px; }
+html[data-theme="vim"] .phead .tile { display: none; }
+html[data-theme="vim"] .phead h2 { font-size: 15px; }
+html[data-theme="vim"] .phead h2::before { content: "▸ "; color: var(--aqua); }
+html[data-theme="vim"] .srow { border-radius: 0; height: 64px; margin: 0 8px; }
+
+
+/* --- Session-Karte (Projektebene) --- */
+.scard { padding: 22px 24px; display: flex; flex-direction: column; cursor: pointer; }
+.scard:hover { box-shadow: var(--shadow-hi); transform: translateY(-2px); }
+.scard h3 { margin: 0; font-size: 20px; letter-spacing: -.02em; line-height: 1.2; font-weight: 750; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.scard .about { margin-top: 6px; }
+.scard .last { margin-top: 10px; font-size: 14.5px; color: var(--ink-2); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; flex: 1; }
+.scard .foot { display: flex; align-items: center; gap: 12px; margin-top: 12px; }
+.scard .foot .steps { flex: 1; }
+.tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+.tag { border: 0; font-size: 12.5px; font-weight: 600; padding: 3px 10px; border-radius: 99px; background: var(--surface); color: var(--ink-2); }
+.tag:hover { color: var(--ink); }
+.tag.on { background: var(--ink); color: var(--card); }
+html[data-theme="vim"] .tag { border-radius: 0; background: none; color: var(--purple); padding: 0 6px 0 0; }
+html[data-theme="vim"] .tag.on { background: var(--purple); color: var(--ground); }
+
+/* --- Session-Kopf und Schritt-Karten --- */
+.shead { padding: 26px 30px; }
+.shead .crumb svg.i { width: 15px; height: 15px; }
+.shead .crumb { display: flex; align-items: center; gap: 6px; font-size: 14px; color: var(--ink-2); font-weight: 600; }
+.shead .titlerow { display: flex; gap: 16px; align-items: center; margin: 14px 0 10px; }
+.shead .about { white-space: normal; font-size: 15.5px; line-height: 1.45; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; max-width: 760px; color: var(--ink); }
+.shead h1 { margin: 0; font-size: 36px; line-height: 1.08; letter-spacing: -.03em; font-weight: 800; text-wrap: balance; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.shead .row { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+html[data-theme="vim"] .shead h1 { font-size: 28px; color: var(--ink); }
+
+.step { border-radius: 18px; padding: 14px 16px; cursor: pointer; display: flex; flex-direction: column; }
+.step:hover { box-shadow: var(--shadow-hi); transform: translateY(-2px); }
+.step .top { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.step .num { min-width: 26px; height: 26px; padding: 0 8px; border-radius: 10px; background: var(--surface); display: grid; place-items: center; font-weight: 750; font-size: 13.5px; font-variant-numeric: tabular-nums; }
+.step .num svg.i { width: 16px; height: 16px; }
+.step .badge { margin-left: auto; display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; font-weight: 650; color: var(--ink-2); background: var(--surface); padding: 4px 10px 4px 8px; border-radius: 99px; white-space: nowrap; }
+.step .badge svg.i { width: 14px; height: 14px; }
+.step .txt { font-size: 14px; line-height: 1.42; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.step.sel { border-color: var(--ink); box-shadow: var(--shadow-hi); }
+.step.now { box-shadow: 0 0 0 3px var(--action), var(--shadow-hi); }
+.step.now .num { background: var(--action); color: var(--action-ink); }
+.step.now .txt { -webkit-line-clamp: 1; }
+.step.off { background: color-mix(in srgb, var(--card) 55%, var(--surface)); }
+.step.off .num { background: var(--card); box-shadow: inset 0 0 0 1.5px var(--edge-path); }
+html[data-theme="vim"] .step .num { background: none; color: var(--ink-3); padding: 0; justify-content: start; min-width: 0; display: flex; }
+html[data-theme="vim"] .step .num::after { content: " │"; color: var(--border); white-space: pre; }
+html[data-theme="vim"] .step .badge { background: none; color: var(--green); padding: 0; }
+html[data-theme="vim"] .step.now { box-shadow: none; border-color: var(--action); }
+html[data-theme="vim"] .step.now .num { background: none; color: var(--action); }
+html[data-theme="vim"] .step.sel { border-color: var(--aqua); background: #32302f; }
+
+/* Weit herausgezoomt: weniger Details, groessere Titel */
+.far .srow .steps, .far .srow .when, .far .scard .last, .far .tags, .far .step .txt, .far .resume ol, .far .shead .row, .far .scard .foot .btn { visibility: hidden; }
+.far .phead h2 { font-size: min(calc(17px * var(--inv)), 70px); white-space: normal; }
+.far .srow .t { font-size: min(calc(12px * var(--inv)), 30px); }
+.far .scard h3 { font-size: min(calc(13px * var(--inv)), 44px); }
+.far .resume h1 { font-size: min(calc(20px * var(--inv)), 80px); }
+
+/* ================= Schwebende Bedienung ================= */
+.float { position: fixed; z-index: 5; background: var(--card); border-radius: 18px; box-shadow: var(--shadow); }
+.topl { top: 16px; left: 16px; display: flex; align-items: center; gap: 4px; padding: 6px 8px 6px 6px; max-width: calc(100vw - 560px); }
+.logo { display: flex; align-items: center; gap: 10px; padding-right: 10px; font-weight: 800; font-size: 17px; letter-spacing: -.02em; border: 0; background: none; white-space: nowrap; }
+.logo .tile { width: 36px; height: 36px; border-radius: 12px; background: var(--action); color: var(--action-ink); }
+.crumbs { display: flex; align-items: center; gap: 2px; min-width: 0; }
+.crumbs button { border: 0; background: none; padding: 7px 10px; border-radius: 10px; color: var(--ink-2); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 260px; }
+.crumbs button:hover { background: var(--surface); color: var(--ink); }
+.crumbs button.cur { color: var(--ink); }
+.crumbs .sep { color: var(--ink-3); display: flex; }
+.crumbs .sep svg.i { width: 15px; height: 15px; }
+.topr { top: 16px; right: 16px; display: flex; gap: 8px; align-items: center; padding: 6px; }
+.search { display: flex; align-items: center; gap: 8px; background: var(--surface); border-radius: 12px; padding: 0 12px; height: 40px; width: min(300px, 30vw); color: var(--ink-2); }
+.search input { border: 0; outline: 0; background: none; font: inherit; color: var(--ink); width: 100%; font-weight: 500; }
+.search input::placeholder { color: var(--ink-3); }
+.search .cnt { font-size: 12.5px; white-space: nowrap; color: var(--ink-2); }
+.theme { display: flex; background: var(--surface); border-radius: 12px; padding: 3px; }
+.theme button { border: 0; background: none; padding: 7px 12px; border-radius: 9px; font-weight: 650; font-size: 13.5px; color: var(--ink-2); display: flex; gap: 6px; align-items: center; }
+.theme button.on { background: var(--card); color: var(--ink); box-shadow: var(--shadow); }
+.theme button svg.i { width: 16px; height: 16px; }
+
+.tabbar { left: 50%; bottom: 18px; transform: translateX(-50%); display: flex; align-items: flex-end; gap: 4px; padding: 8px 14px; border-radius: 24px; }
+.tab { border: 0; background: none; display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 12px; font-weight: 650; color: var(--ink-2); padding: 6px 14px; border-radius: 14px; min-width: 76px; }
+.tab:hover { color: var(--ink); background: var(--surface); }
+.tab.on { color: var(--action-deep); }
+.fab { border: 0; width: 62px; height: 62px; border-radius: 50%; background: var(--action); color: var(--action-ink); display: grid; place-items: center; margin: -30px 10px 0; box-shadow: 0 0 0 7px var(--card), 0 8px 18px rgba(0, 0, 0, .2); transition: transform .2s cubic-bezier(.34,1.56,.64,1); }
+.fab:hover { transform: translateY(-2px) scale(1.04); }
+.fab:active { transform: scale(.94); }
+.fab svg.i { width: 26px; height: 26px; fill: currentColor; stroke-width: 0; }
+.fabwrap { display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 12px; font-weight: 700; color: var(--action-deep); }
+
+.zoom { right: 16px; bottom: 18px; display: flex; flex-direction: column; padding: 5px; gap: 2px; }
+.zoom button { border: 0; background: none; width: 38px; height: 38px; border-radius: 12px; display: grid; place-items: center; color: var(--ink-2); }
+.zoom button:hover { background: var(--surface); color: var(--ink); }
+.zoom span { font-size: 11px; text-align: center; color: var(--ink-3); font-weight: 650; font-variant-numeric: tabular-nums; padding: 2px 0; }
+
+/* Vim: Statuszeile statt Tableiste */
+.statusline { display: none; }
+html[data-theme="vim"] .tabbar, html[data-theme="vim"] .zoom { display: none; }
+html[data-theme="vim"] .float { border-radius: 2px; box-shadow: none; border: 1px solid var(--border); }
+html[data-theme="vim"] .logo .tile { border-radius: 2px; }
+html[data-theme="vim"] .statusline { display: flex; position: fixed; z-index: 6; left: 0; right: 0; bottom: 22px; height: 26px; background: var(--surface); font-size: 13px; align-items: stretch; }
+.statusline > * { display: flex; align-items: center; padding: 0 12px; white-space: nowrap; }
+.statusline .mode { background: var(--green); color: var(--ground); font-weight: 700; }
+.statusline .mode.search { background: var(--orange); }
+.statusline .mode.detail { background: var(--blue); }
+.statusline .file { background: #504945; color: var(--ink); max-width: 40vw; overflow: hidden; }
+.statusline .fill { flex: 1; color: var(--ink-2); overflow: hidden; }
+.statusline .pos { background: #504945; }
+.statusline .pct { background: var(--ink-2); color: var(--ground); font-weight: 700; }
+.cmdline { display: none; position: fixed; z-index: 6; left: 0; right: 0; bottom: 0; height: 22px; background: var(--ground); font: 13px var(--mono); align-items: center; padding: 0 8px; color: var(--ink-2); }
+html[data-theme="vim"] .cmdline { display: flex; }
+.cmdline input { border: 0; outline: 0; background: none; color: var(--ink); font: inherit; flex: 1; }
+.cmdpop { position: fixed; left: 50%; top: 22%; transform: translateX(-50%); z-index: 8; width: min(520px, calc(100vw - 32px)); background: var(--card); border-radius: 18px; box-shadow: var(--shadow-hi); padding: 10px; display: none; }
+.cmdpop.open { display: block; }
+html[data-theme="vim"] .cmdpop { display: none !important; }
+.cmdpop input { width: 100%; border: 0; outline: 0; background: var(--surface); border-radius: 12px; padding: 12px 14px; font: inherit; color: var(--ink); }
+.cmdpop .hint { padding: 8px 6px 2px; font-size: 13px; color: var(--ink-2); }
+
+/* Detail-Blatt rechts */
+.sheet { position: fixed; z-index: 7; top: 80px; right: 16px; bottom: 112px; width: min(440px, calc(100vw - 32px)); background: var(--card); border-radius: var(--r-lg); box-shadow: var(--shadow-hi);
+  display: flex; flex-direction: column; transform: translateX(calc(100% + 40px)); transition: transform .45s cubic-bezier(.16,1,.3,1); }
+.sheet.open { transform: none; }
+html[data-theme="vim"] .sheet { border: 1px solid var(--blue); bottom: 60px; top: 70px; box-shadow: none; }
+.sheet-h { display: flex; gap: 14px; align-items: flex-start; padding: 24px 24px 14px; }
+.sheet-h h2 { margin: 2px 0 0; font-size: 22px; letter-spacing: -.02em; line-height: 1.2; font-weight: 800; }
+.sheet-h .x { margin-left: auto; border: 0; background: var(--surface); width: 38px; height: 38px; border-radius: 12px; display: grid; place-items: center; flex: none; }
+.sheet-b { padding: 4px 24px 18px; overflow: auto; flex: 1; }
+.sheet-f { padding: 16px 24px 22px; display: flex; flex-direction: column; gap: 10px; border-top: 1px solid var(--border); }
+.sheet-f .btn { width: 100%; }
+.sheet-f .hint { font-size: 13px; color: var(--ink-2); }
+.who { font-size: 13px; font-weight: 700; color: var(--ink-2); margin: 18px 0 8px; display: flex; gap: 8px; align-items: center; }
+.who:first-child { margin-top: 0; }
+.who svg.i { width: 16px; height: 16px; }
+.bubble { white-space: pre-wrap; word-break: break-word; padding: 14px 16px; border-radius: 18px; font-size: 15px; line-height: 1.5; }
+.bubble.me { background: var(--action-soft); border-bottom-right-radius: 6px; }
+.bubble.ai code { font: 12.5px var(--mono); background: var(--card); padding: 1px 5px; border-radius: 5px; }
+.bubble.ai { background: var(--surface); color: var(--ink); border-bottom-left-radius: 6px; font-size: 14.5px; }
+html[data-theme="vim"] .bubble { border-radius: 0; border-left: 1px solid var(--action); background: none; padding: 4px 12px; }
+html[data-theme="vim"] .bubble.ai { border-left-color: var(--blue); color: var(--ink-2); }
+.files { display: flex; flex-direction: column; gap: 6px; }
+.file { display: flex; gap: 10px; align-items: center; padding: 10px 12px; border-radius: 12px; background: var(--surface); font-size: 13.5px; min-width: 0; }
+.file span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; direction: rtl; text-align: left; }
+.file svg.i { width: 17px; height: 17px; color: var(--ink-2); }
+
+/* Tags-Blatt */
+.tagsheet { position: fixed; z-index: 7; left: 50%; bottom: 112px; transform: translate(-50%, 20px); opacity: 0; pointer-events: none; width: min(520px, calc(100vw - 32px)); background: var(--card); border-radius: var(--r-lg); box-shadow: var(--shadow-hi); padding: 20px 22px; transition: .3s cubic-bezier(.16,1,.3,1); }
+.tagsheet.open { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
+.tagsheet h3 { margin: 0 0 12px; font-size: 18px; }
+.tagsheet .tags .tag { font-size: 14px; padding: 6px 13px; }
+
+.toast { position: fixed; z-index: 9; left: 50%; top: 22px; transform: translate(-50%, -10px); background: var(--ink); color: var(--card); padding: 12px 18px; border-radius: 14px; font-weight: 600; font-size: 14px; opacity: 0; transition: .25s; pointer-events: none; display: flex; gap: 10px; align-items: center; max-width: calc(100vw - 32px); }
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+.toast code { font: 12px var(--mono); opacity: .7; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 380px; }
+
+@media (max-width: 900px) {
+  .topl { max-width: calc(100vw - 32px); }
+  .topr { top: 72px; }
+  .crumbs button:not(.cur) { display: none; } .crumbs .sep { display: none; }
+  .search { width: 170px; } .theme button span { display: none; }
+  .tab { min-width: 56px; padding: 6px 8px; } .zoom { display: none; }
+  @media (max-width: 700px) { .topr { left: 16px; right: 16px; } .search { flex: 1; width: auto; } .tabbar { padding: 8px 6px; } .tab { min-width: 0; padding: 6px 6px; font-size: 11px; } .fab { margin: -30px 2px 0; } .resume h1 { font-size: 34px; } }
+  .sheet { top: auto; height: 72vh; bottom: 0; right: 0; width: 100vw; border-radius: var(--r-lg) var(--r-lg) 0 0; transform: translateY(105%); z-index: 8; }
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5.5h-5V20H5a1 1 0 0 1-1-1z"/></symbol>
+  <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3.5 7.5a2 2 0 0 1 2-2h4l2 2.2h7a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"/></symbol>
+  <symbol id="i-chat" viewBox="0 0 24 24"><path d="M5 5.5h14a1.5 1.5 0 0 1 1.5 1.5v8.5A1.5 1.5 0 0 1 19 17h-8l-4.5 3.5V17H5a1.5 1.5 0 0 1-1.5-1.5V7A1.5 1.5 0 0 1 5 5.5z"/><path d="M8 10h8M8 13h5"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.6v12.8a1 1 0 0 0 1.5.86l10.2-6.4a1 1 0 0 0 0-1.72L9.5 4.74A1 1 0 0 0 8 5.6z"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></symbol>
+  <symbol id="i-tag" viewBox="0 0 24 24"><path d="M3.8 12.6V5a1.2 1.2 0 0 1 1.2-1.2h7.6l7.6 7.6a1.5 1.5 0 0 1 0 2.1l-6.1 6.1a1.5 1.5 0 0 1-2.1 0z"/><circle cx="8.3" cy="8.3" r="1.4"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="m9.5 6 6 6-6 6"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24"><path d="M7 3.8h6.5L18.2 8.5V19a1.2 1.2 0 0 1-1.2 1.2H7A1.2 1.2 0 0 1 5.8 19V5A1.2 1.2 0 0 1 7 3.8z"/><path d="M13.2 4v4.6h4.6"/></symbol>
+  <symbol id="i-pen" viewBox="0 0 24 24"><path d="M14.5 5.5l4 4L8.5 19.5H4.5v-4z"/><path d="m12.5 7.5 4 4"/></symbol>
+  <symbol id="i-branch" viewBox="0 0 24 24"><circle cx="7" cy="5.5" r="2"/><circle cx="7" cy="18.5" r="2"/><circle cx="17" cy="8.5" r="2"/><path d="M7 7.5v9M17 10.5c0 4-10 2.5-10 6"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 7.5V12l3 2"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 6v12M6 12h12"/></symbol>
+  <symbol id="i-minus" viewBox="0 0 24 24"><path d="M6 12h12"/></symbol>
+  <symbol id="i-fit" viewBox="0 0 24 24"><path d="M4.5 9V5.5a1 1 0 0 1 1-1H9M15 4.5h3.5a1 1 0 0 1 1 1V9M19.5 15v3.5a1 1 0 0 1-1 1H15M9 19.5H5.5a1 1 0 0 1-1-1V15"/></symbol>
+  <symbol id="i-atlas" viewBox="0 0 24 24"><circle cx="6" cy="7" r="2.2"/><circle cx="18" cy="7" r="2.2"/><circle cx="12" cy="17.5" r="2.2"/><path d="M8.2 7h7.6M7.2 8.9l3.6 6.7M16.8 8.9l-3.6 6.7"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4"/></symbol>
+  <symbol id="i-term" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="14" rx="2"/><path d="m7.5 10 3 2.5-3 2.5M12.5 15.5h4"/></symbol>
+</svg>
+
+<div id="stage"><div id="world"><svg id="edges"></svg><div id="cards"></div></div></div>
+
+<div class="float topl">
+  <button class="logo" data-nav="all"><span class="tile"><svg class="i"><use href="#i-atlas"/></svg></span><span>Session Atlas</span></button>
+  <nav class="crumbs" id="crumbs"></nav>
+</div>
+<div class="float topr">
+  <label class="search"><svg class="i"><use href="#i-search"/></svg><input id="q" placeholder="Suchen oder #tag" autocomplete="off"><span class="cnt" id="cnt"></span></label>
+  <div class="theme" role="group" aria-label="Aussehen">
+    <button data-theme-set="warm"><svg class="i"><use href="#i-sun"/></svg><span>Freundlich</span></button>
+    <button data-theme-set="vim"><svg class="i"><use href="#i-term"/></svg><span>Vim</span></button>
+  </div>
+</div>
+
+<nav class="float tabbar" aria-label="Navigation">
+  <button class="tab" data-tab="all"><svg class="i"><use href="#i-home"/></svg>Übersicht</button>
+  <button class="tab" data-tab="recent"><svg class="i"><use href="#i-clock"/></svg>Zuletzt</button>
+  <div class="fabwrap"><button class="fab" data-tab="resume" aria-label="Weitermachen"><svg class="i"><use href="#i-play"/></svg></button>Weitermachen</div>
+  <button class="tab" data-tab="search"><svg class="i"><use href="#i-search"/></svg>Suchen</button>
+  <button class="tab" data-tab="tags"><svg class="i"><use href="#i-tag"/></svg>Tags</button>
+</nav>
+<div class="float zoom">
+  <button data-z="in" aria-label="Hineinzoomen"><svg class="i"><use href="#i-plus"/></svg></button>
+  <span id="zl">100%</span>
+  <button data-z="out" aria-label="Herauszoomen"><svg class="i"><use href="#i-minus"/></svg></button>
+  <button data-z="fit" aria-label="Alles zeigen"><svg class="i"><use href="#i-fit"/></svg></button>
+</div>
+
+<div class="statusline" id="status"></div>
+<div class="cmdline"><span id="cmdprefix"></span><input id="cmd" autocomplete="off" spellcheck="false" aria-label="Befehl"></div>
+<div class="cmdpop" id="cmdpop"><input id="cmd2" placeholder="Befehl, z. B. vim, warm, zurück" autocomplete="off"><div class="hint">vim · warm · zurück · weiter · suche &lt;text&gt;</div></div>
+
+<aside class="sheet" id="sheet" aria-live="polite">
+  <div class="sheet-h" id="sheet-h"></div>
+  <div class="sheet-b" id="sheet-b"></div>
+  <div class="sheet-f" id="sheet-f"></div>
+</aside>
+<div class="tagsheet" id="tagsheet"><h3>Nach Tag filtern</h3><div class="tags" id="taglist"></div></div>
+<div class="toast" id="toast"></div>
+
+<script src="data.js"></script>
+<script>
+const D = window.SESSION_DATA || { sessions: [], home: "" };
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
+const ic = (n, cls = "") => `<svg class="i ${cls}"><use href="#i-${n}"/></svg>`;
+const short = (p) => (p || "?").replace(D.home, "~");
+const projName = (p) => { const s = short(p); return s === "~" ? "Home-Ordner" : s.split("/").filter(Boolean).pop(); };
+const vim = () => document.documentElement.dataset.theme === "vim";
+function rel(ts) {
+  const d = (Date.now() - new Date(ts)) / 1000;
+  if (d < 3600) return `vor ${Math.max(1, Math.round(d / 60))} Min.`;
+  if (d < 86400) return `vor ${Math.round(d / 3600)} Std.`;
+  if (d < 172800) return "gestern";
+  if (d < 86400 * 30) return `vor ${Math.round(d / 86400)} Tagen`;
+  return new Date(ts).toLocaleDateString("de-DE", { day: "numeric", month: "short" });
+}
+// Markdown der Antworten lesbar machen (fett, Code, Ueberschriften, Links, Tabellen)
+function md(t) {
+  return esc(t)
+    .replace(/^#{1,6}\s*(.+)$/gm, "<b>$1</b>")
+    .replace(/\*\*(.+?)\*\*/g, "<b>$1</b>")
+    .replace(/`([^`]+)`/g, "<code>$1</code>")
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+    .replace(/^\|?[-:| ]+\|?$/gm, "")
+    .replace(/^\|(.+?)\|?\s*$/gm, (m, row) => "• " + row.split("|").map(c => c.trim()).filter(Boolean).join("  ·  "))
+    .replace(/\n{3,}/g, "\n\n");
+}
+const when = (ts) => new Date(ts).toLocaleString("de-DE", { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+
+// ---------- Daten ----------
+const EXT = { ts:"typescript", tsx:"react", cs:"dotnet", py:"python", sql:"sql", prisma:"prisma", md:"doku", html:"html", css:"css" };
+const projects = new Map();
+for (const s of D.sessions) {
+  s.project = s.cwd || s.dir;
+  s.label = s.title || s.aiTitle || s.nodes[0]?.text.slice(0, 60) || "Session";
+  const t = new Set(s.hashtags);
+  for (const f of s.files) { const e = f.split(".").pop().toLowerCase(); if (EXT[e]) t.add(EXT[e]); if (/docker|compose/i.test(f)) t.add("docker"); }
+  for (const tool of s.tools) { if (tool.startsWith("mcp__claude-in-chrome")) t.add("browser"); if (tool.startsWith("mcp__azure-devops")) t.add("azure-devops"); }
+  s.tags = [...t].slice(0, 5);
+  s.byId = Object.fromEntries(s.nodes.map(n => [n.id, n]));
+  s.kids = {}; s.nodes.forEach(n => { if (n.parent) (s.kids[n.parent] ||= []).push(n); });
+  s.last = s.nodes[s.nodes.length - 1];
+  s.path = []; for (let c = s.last; c; c = s.byId[c.parent]) s.path.unshift(c);
+  s.onPath = new Set(s.path.map(n => n.id));
+  s.edits = s.nodes.filter(n => n.edits.length).length;
+  if (!projects.has(s.project)) projects.set(s.project, { path: s.project, sessions: [] });
+  projects.get(s.project).sessions.push(s);
+}
+for (const p of projects.values()) p.sessions.sort((a, b) => b.end.localeCompare(a.end));
+const latest = D.sessions.slice().sort((a, b) => b.end.localeCompare(a.end))[0];
+const cmd = (s, fork) => `cd '${short(s.cwd)}' && claude --resume ${s.id}${fork ? " --fork-session" : ""}`;
+function hue(str) { let h = 0; for (const c of str) h = (h * 31 + c.charCodeAt(0)) >>> 0; return [18, 32, 145, 168, 200, 222, 262, 290, 330, 350, 88, 48][h % 12]; }
+function initials(label) { const w = label.replace(/[^\p{L}\p{N} ]/gu, " ").split(/\s+/).filter(x => x.length > 1); return ((w[0]?.[0] || "?") + (w[1]?.[0] || "")).toUpperCase(); }
+const av = (s, lg) => `<span class="av ${lg ? "lg" : ""}" style="--h:${hue(s.id)}" aria-hidden="true">${esc(initials(s.label))}</span>`;
+const about = (s) => s.path[0]?.text.replace(/\s+/g, " ").slice(0, 160) || "";
+const stepsBar = (s, max = 32) => { const p = s.path.slice(-max); return `<div class="steps" aria-hidden="true">${p.map((n, i) => `<i class="${i === p.length - 1 ? "now" : n.edits.length ? "e" : ""}"></i>`).join("")}</div>`; };
+
+// ---------- Zustand & Kamera ----------
+const state = { level: "all", project: null, session: null, card: null, q: "" };
+const cam = { x: 0, y: 0, k: 1 };
+const world = $("#world"), stage = $("#stage");
+let bounds = { x: 0, y: 0, w: 1000, h: 800 };
+function applyCam(fly) {
+  world.classList.toggle("fly", !!fly);
+  world.style.transform = `translate(${cam.x}px, ${cam.y}px) scale(${cam.k})`;
+  stage.style.backgroundSize = `${28 * cam.k}px ${28 * cam.k}px`;
+  stage.style.backgroundPosition = `${cam.x}px ${cam.y}px`;
+  stage.style.setProperty("--tsz", `${22 * cam.k}px ${28 * cam.k}px`);
+  stage.style.setProperty("--tpos", `${cam.x}px ${cam.y}px`);
+  world.classList.toggle("far", cam.k < 0.55);
+  world.style.setProperty("--inv", (1 / cam.k).toFixed(3));
+  $("#zl").textContent = Math.round(cam.k * 100) + "%";
+  status();
+}
+function fit(fly = true, maxK = 1) {
+  const vw = innerWidth, vh = innerHeight, padX = 60, top = 92, bottom = 118;
+  const narrow = vw < 700 || state.level === "all"; // Uebersicht und Handy: auf Breite einpassen, nach unten wird geblaettert
+  cam.k = Math.max(0.1, Math.min(maxK, (vw - (narrow ? 32 : padX * 2)) / bounds.w, narrow ? 9 : (vh - top - bottom) / bounds.h));
+  if (narrow) { cam.k = Math.min(1, (vw - (vw < 700 ? 32 : 80)) / bounds.w); cam.x = (vw - bounds.w * cam.k) / 2 - bounds.x * cam.k; cam.y = (vw < 700 ? 124 : 92) - bounds.y * cam.k; return applyCam(fly); }
+  cam.x = (vw - bounds.w * cam.k) / 2 - bounds.x * cam.k;
+  cam.y = top + Math.max(0, (vh - top - bottom - bounds.h * cam.k) / 2) - bounds.y * cam.k;
+  applyCam(fly);
+}
+function zoomAt(f, cx = innerWidth / 2, cy = innerHeight / 2, fly) {
+  const k = Math.min(2.2, Math.max(0.1, cam.k * f));
+  cam.x = cx - (cx - cam.x) * (k / cam.k); cam.y = cy - (cy - cam.y) * (k / cam.k); cam.k = k; applyCam(fly);
+}
+function reveal(x, y, w, h) {
+  const sheet = $("#sheet").classList.contains("open") && innerWidth > 900 ? 470 : 0;
+  const L = 30, R = innerWidth - sheet - 30, T = 90, B = innerHeight - (innerWidth > 900 ? 120 : innerHeight * .72);
+  const sx = x * cam.k + cam.x, sy = y * cam.k + cam.y, sw = w * cam.k, sh = h * cam.k;
+  if (sx < L || sx + sw > R || sy < T || sy + sh > B) { cam.x = (L + R) / 2 - (x + w / 2) * cam.k; cam.y = (T + B) / 2 - (y + h / 2) * cam.k; applyCam(true); }
+}
+
+// ---------- Suche ----------
+function matches(s, n) {
+  const q = state.q.trim().toLowerCase(); if (!q) return true;
+  if (q.startsWith("#")) { const t = q.slice(1); return !t || s.tags.some(x => x.startsWith(t)); }
+  if (n) return n.text.toLowerCase().includes(q) || (n.reply || "").toLowerCase().includes(q);
+  return (s.label + " " + projName(s.project) + " " + s.nodes.map(n => n.text).join(" ") + " " + s.files.join(" ")).toLowerCase().includes(q);
+}
+const cls = (s, n) => (state.q ? (matches(s, n) ? "hit" : "dim") : "");
+
+// ---------- Ebene 1: Uebersicht ----------
+const COL = 420, GAP = 24, RES_H = 452, ROW_H = 64; let RES_W = 500;
+const projectCardHeight = (p) => 58 + p.sessions.length * ROW_H + 14;
+function renderAll() {
+  RES_W = innerWidth < 700 ? innerWidth - 32 : 500; // Handy: Karten so breit wie der Bildschirm
+  const list = [...projects.values()].sort((a, b) => b.sessions[0].end.localeCompare(a.sessions[0].end));
+  const cols = innerWidth < 700 ? 0 : Math.max(1, Math.min(4, Math.floor((innerWidth / 0.92 - 80 - RES_W - GAP) / (COL + GAP)) + (innerWidth > 1700 ? 0 : 0)));
+  const colX = [0], colY = [RES_H + GAP];
+  for (let i = 0; i < cols; i++) { colX.push(RES_W + GAP + i * (COL + GAP)); colY.push(0); }
+  let html = resumeCard(latest);
+  for (const p of list) {
+    const h = projectCardHeight(p);
+    let c = colX.length > 1 ? 1 : 0; for (let i = 0; i < colX.length; i++) if (colY[i] < colY[c] - 60) c = i;
+    html += projectCard(p, colX[c], colY[c], c === 0 ? RES_W : COL, h);
+    colY[c] += h + GAP;
+  }
+  $("#cards").innerHTML = html; $("#edges").innerHTML = "";
+  bounds = { x: 0, y: 0, w: cols ? colX[colX.length - 1] + COL : RES_W, h: Math.max(...colY) - GAP };
+  $("#cnt").textContent = state.q ? `${D.sessions.filter(s => matches(s)).length} Treffer` : "";
+}
+function resumeCard(s) {
+  const last = s.path.slice(-3);
+  return `<section class="card resume ${cls(s)}" style="left:0;top:0;width:${RES_W}px;height:${RES_H}px">
+    <h1>Hier hast du aufgehört.</h1><div class="bar"></div>
+    <div class="what">${av(s, true)}<div style="min-width:0"><b>${esc(s.label)}</b><span class="cap">${esc(projName(s.project))}<span class="dotsep"></span>${rel(s.end)}<span class="dotsep"></span>${s.path.length} Schritte</span></div></div>
+    <ol>${last.map((n, i) => `<li class="${i === last.length - 1 ? "now" : ""}"><span class="n">${s.path.indexOf(n) + 1}</span><span>${esc(n.text)}</span></li>`).join("")}</ol>
+    <div class="row"><button class="btn primary" data-resume="${s.id}">${ic("play")} Weitermachen</button><button class="link" data-open="${s.id}">Ganzen Verlauf ansehen ${ic("chev")}</button></div>
+  </section>`;
+}
+function projectCard(p, x, y, w, h) {
+  const ss = p.sessions;
+  const anyHit = !state.q || p.sessions.some(s => matches(s));
+  return `<section class="card pcard ${state.q ? (anyHit ? "" : "dim") : ""}" style="left:${x}px;top:${y}px;width:${w}px;height:${h}px">
+    <div class="phead" data-proj="${esc(p.path)}" title="${esc(short(p.path))}"><span class="tile">${ic("folder")}</span><div class="grow"><h2>${esc(projName(p.path))} <span class="cap">· ${p.sessions.length}</span></h2></div><span class="link">${ic("chev")}</span></div>
+    ${ss.map(s => `<div class="srow" data-open="${s.id}" style="${state.q && !matches(s) ? "opacity:.3" : ""}">
+      ${av(s)}
+      <div class="grow"><div class="t">${esc(s.label)}</div><div class="about">${esc(about(s))}</div></div>
+      <div class="when">${rel(s.end)}</div></div>`).join("")}
+  </section>`;
+}
+
+// ---------- Ebene 2: Projekt ----------
+const SC = { w: 400, h: 248, gap: 28 };
+function renderProject() {
+  const p = projects.get(state.project), ss = p.sessions;
+  const cols = Math.min(3, Math.max(1, Math.ceil(Math.sqrt(ss.length))));
+  $("#cards").innerHTML = ss.map((s, i) => `<article class="card scard ${cls(s)}" data-open="${s.id}" style="left:${(i % cols) * (SC.w + SC.gap)}px;top:${Math.floor(i / cols) * (SC.h + SC.gap)}px;width:${SC.w}px;height:${SC.h}px">
+      <div class="cap" style="display:flex;align-items:center;gap:8px;margin-bottom:8px">${ic("clock")} ${rel(s.end)}<span class="dotsep"></span>${s.nodes.length} Schritte</div>
+      <div style="display:flex;gap:12px;align-items:center">${av(s)}<h3>${esc(s.label)}</h3></div>
+      <div class="about"><b>Worum es geht:</b> ${esc(about(s))}</div>
+      <div class="last"><b style="color:var(--ink-3)">Zuletzt:</b> ${esc(s.last.text)}</div>
+      ${s.tags.length ? `<div class="tags">${s.tags.slice(0, 3).map(t => `<button class="tag" data-tag="${esc(t)}">#${esc(t)}</button>`).join("")}</div>` : ""}
+      <div class="foot">${stepsBar(s, 30)}<button class="btn primary small" data-resume="${s.id}">${ic("play")} Weiter</button></div>
+    </article>`).join("");
+  $("#edges").innerHTML = "";
+  bounds = { x: 0, y: 0, w: cols * (SC.w + SC.gap) - SC.gap, h: Math.ceil(ss.length / cols) * (SC.h + SC.gap) - SC.gap };
+  $("#cnt").textContent = state.q ? `${ss.filter(s => matches(s)).length} Treffer` : "";
+}
+
+// ---------- Ebene 3: Session ----------
+const PC = { w: 280, h: 136, gx: 48, gy: 44, per: 5, top: 312 };
+let POS = {};
+function layoutSession(s) {
+  const pos = {};
+  s.path.forEach((n, i) => { pos[n.id] = { x: (i % PC.per) * (PC.w + PC.gx), y: PC.top + Math.floor(i / PC.per) * (PC.h + PC.gy) }; });
+  let y = PC.top + Math.ceil(s.path.length / PC.per) * (PC.h + PC.gy) + 60;
+  const side = s.nodes.filter(n => !s.onPath.has(n.id));
+  for (const st of side.filter(n => !n.parent || s.onPath.has(n.parent))) {
+    const chain = []; (function walk(n) { chain.push(n); (s.kids[n.id] || []).forEach(walk); })(st);
+    chain.sort((a, b) => a.ts.localeCompare(b.ts)).forEach((n, i) => { pos[n.id] = { x: (i % PC.per) * (PC.w + PC.gx), y: y + Math.floor(i / PC.per) * (PC.h + PC.gy) }; });
+    y += Math.ceil(chain.length / PC.per) * (PC.h + PC.gy) + 30;
+  }
+  return { pos, h: y };
+}
+function renderSession() {
+  const s = D.sessions.find(x => x.id === state.session);
+  const { pos, h } = layoutSession(s); POS = pos;
+  const W = PC.per * (PC.w + PC.gx) - PC.gx;
+  let html = `<section class="card shead" style="left:0;top:0;width:${Math.min(W, 960)}px;height:272px">
+    <div class="titlerow" style="margin-top:0">${av(s, true)}<div style="min-width:0"><h1>${esc(s.label)}</h1><div class="crumb" style="margin-top:4px">${ic("folder")} ${esc(projName(s.project))}${s.branch ? `<span class="dotsep"></span>${ic("branch")} ${esc(s.branch)}` : ""}</div></div></div>
+    <div class="about"><b>Worum es geht:</b> ${esc(about(s))}</div>
+    <div class="cap" style="margin-top:10px">${when(s.start)} bis ${rel(s.end)}<span class="dotsep"></span>${s.path.length} Schritte${s.edits ? `<span class="dotsep"></span>in ${s.edits} Schritten Dateien geändert` : ""}</div>
+    <div class="row"><button class="btn primary" data-resume="${s.id}">${ic("play")} Am letzten Stand weitermachen</button><button class="btn secondary" data-pick="${s.last.id}">Letzten Schritt zeigen</button></div>
+  </section>`;
+  let edges = "";
+  for (const n of s.nodes) {
+    const p = pos[n.id]; if (!p) continue;
+    const isNow = n.id === s.last.id, off = !s.onPath.has(n.id);
+    html += `<article class="card step ${isNow ? "now" : ""} ${off ? "off" : ""} ${state.card === n.id ? "sel" : ""} ${cls(s, n)}" data-pick="${n.id}" style="left:${p.x}px;top:${p.y}px;width:${PC.w}px;height:${PC.h}px">
+      <div class="top"><span class="num">${off ? ic("branch") : s.path.indexOf(n) + 1}</span><span class="cap">${when(n.ts)}</span>${n.edits.length ? `<span class="badge">${ic("pen")} ${n.edits.length} Datei${n.edits.length > 1 ? "en" : ""}</span>` : ""}</div>
+      <div class="txt">${esc(n.text)}</div>
+      ${isNow ? `<button class="btn primary small" data-resume="${s.id}" style="align-self:flex-start;margin-top:auto">${ic("play")} Hier weitermachen</button>` : ""}
+    </article>`;
+    const par = n.parent && pos[n.parent];
+    if (par) {
+      const same = par.y === p.y && p.x > par.x;
+      const x1 = same ? par.x + PC.w : par.x + PC.w / 2, y1 = same ? par.y + PC.h / 2 : par.y + PC.h;
+      const x2 = same ? p.x : p.x + PC.w / 2, y2 = same ? p.y + PC.h / 2 : p.y;
+      const d = same ? `M${x1},${y1} L${x2},${y2}` : `M${x1},${y1} C${x1},${y1 + 70} ${x2},${y2 - 70} ${x2},${y2}`;
+      edges += `<path d="${d}" fill="none" stroke="${off ? "var(--edge)" : "var(--edge-path)"}" stroke-width="3" stroke-linecap="round" ${off ? 'stroke-dasharray="2 9"' : ""}/>`;
+      edges += `<circle cx="${x2}" cy="${y2}" r="5" fill="var(--card)" stroke="${off ? "var(--edge)" : "var(--edge-path)"}" stroke-width="3"/>`;
+    }
+  }
+  $("#cards").innerHTML = html;
+  $("#edges").innerHTML = edges;
+  bounds = { x: 0, y: 0, w: W, h };
+  $("#cnt").textContent = state.q ? `${s.nodes.filter(n => matches(s, n)).length} Treffer` : "";
+}
+
+// ---------- Detail-Blatt ----------
+function openSheet(s, n) {
+  const isNow = n.id === s.last.id, off = !s.onPath.has(n.id);
+  $("#sheet-h").innerHTML = `<span class="tile">${ic(isNow ? "play" : off ? "branch" : "chat")}</span>
+    <div><h2>${isNow ? "Hier hast du aufgehört" : off ? "Ein anderer Weg" : "So war der Stand hier"}</h2><div class="cap" style="margin-top:4px">${off ? "Abzweig" : `Schritt ${s.path.indexOf(n) + 1} von ${s.path.length}`}<span class="dotsep"></span>${when(n.ts)}</div></div>
+    <button class="x" data-close aria-label="Schließen">${ic("x")}</button>`;
+  $("#sheet-b").innerHTML = `
+    <div class="who">Du</div><div class="bubble me">${esc(n.text)}</div>
+    <div class="who">Claude</div><div class="bubble ai">${n.reply ? md(n.reply) : "Keine Textantwort in diesem Schritt."}</div>
+    ${n.edits.length ? `<div class="who">${ic("pen")} Geänderte Dateien</div><div class="files">${n.edits.map(f => `<div class="file" title="${esc(f)}">${ic("file")}<span>${esc(short(f))}</span></div>`).join("")}</div>` : ""}`;
+  $("#sheet-f").innerHTML = isNow
+    ? `<button class="btn primary" data-resume="${s.id}">${ic("play")} Hier weitermachen</button><button class="btn secondary" data-fork="${s.id}">${ic("branch")} Als neuen Weg fortsetzen</button>`
+    : `<button class="btn primary" data-fork="${s.id}">${ic("play")} Ab hier weitermachen</button><button class="btn secondary" data-resume="${s.id}">Zum letzten Stand</button>
+       <div class="hint">Im Prototyp wird der Befehl kopiert; zu diesem Schritt springst du dann mit /rewind. Die fertige App macht das mit einem Klick.</div>`;
+  $("#sheet").classList.add("open");
+}
+const closeSheet = () => { $("#sheet").classList.remove("open"); state.card = null; document.querySelectorAll(".step.sel").forEach(c => c.classList.remove("sel")); status(); };
+
+// ---------- Navigation ----------
+function crumbs() {
+  const sep = `<span class="sep">${ic("chev")}</span>`;
+  const parts = [`<button class="${state.level === "all" ? "cur" : ""}" data-nav="all">Übersicht</button>`];
+  if (state.project) parts.push(sep + `<button class="${state.level === "project" ? "cur" : ""}" data-nav="project">${esc(projName(state.project))}</button>`);
+  if (state.session) parts.push(sep + `<button class="cur" data-nav="session">${esc(D.sessions.find(s => s.id === state.session).label)}</button>`);
+  $("#crumbs").innerHTML = parts.join("");
+  document.querySelectorAll(".tab").forEach(t => t.classList.toggle("on", (t.dataset.tab === "all" && state.level === "all") || (t.dataset.tab === "recent" && state.session === latest?.id)));
+}
+function status() {
+  const el = $("#status"); if (!vim() || !el) return;
+  const s = state.session && D.sessions.find(x => x.id === state.session);
+  const mode = document.activeElement?.id === "q" ? ["SUCHE", "search"] : $("#sheet").classList.contains("open") ? ["DETAIL", "detail"] : ["NORMAL", ""];
+  let pos = "", pct = "Alle";
+  if (s) { const i = state.card ? s.path.findIndex(n => n.id === state.card) + 1 : s.path.length; pos = `${i}/${s.path.length}`; pct = i <= 1 ? "Top" : i >= s.path.length ? "Bot" : Math.round(i / s.path.length * 100) + "%"; }
+  const file = s ? s.label : state.project ? projName(state.project) + "/" : "~/.claude/projects";
+  el.innerHTML = `<span class="mode ${mode[1]}">${mode[0]}</span><span class="file">${esc(file)}</span><span class="fill">${s?.branch ? esc(s.branch) + " · " : ""}j/k Schritt · Enter weiter · / suchen · : Befehl · Esc zurück</span><span class="pos">${pos || D.sessions.length + " Sessions"}</span><span class="pct">${pct}</span>`;
+}
+function render(refit = true) {
+  if (state.level === "all") renderAll(); else if (state.level === "project") renderProject(); else renderSession();
+  crumbs(); if (refit) fit(true); else status();
+}
+function go(level, opts = {}) {
+  Object.assign(state, { level, card: null }, opts);
+  if (level === "all") { state.project = null; state.session = null; }
+  if (level === "project") state.session = null;
+  $("#tagsheet").classList.remove("open"); closeSheet(); render(level !== "session");
+  if (level === "session") {
+    cam.k = Math.max(.45, Math.min(1, (innerWidth - 120) / bounds.w));
+    cam.x = Math.max(40, (innerWidth - bounds.w * cam.k) / 2); cam.y = 96; applyCam(true);
+  }
+}
+function pick(id) {
+  const s = D.sessions.find(x => x.id === state.session); const n = s?.byId[id]; if (!n) return;
+  state.card = id;
+  document.querySelectorAll(".step.sel").forEach(c => c.classList.remove("sel"));
+  document.querySelector(`.step[data-pick="${id}"]`)?.classList.add("sel");
+  openSheet(s, n); const p = POS[id]; if (p) reveal(p.x, p.y, PC.w, PC.h); status();
+}
+function setTheme(t) {
+  document.documentElement.dataset.theme = t;
+  document.querySelectorAll("[data-theme-set]").forEach(b => b.classList.toggle("on", b.dataset.themeSet === t));
+  try { localStorage.setItem("atlas.theme", t); } catch {}
+  status();
+}
+
+let toastT;
+function toast(msg, sub) { const t = $("#toast"); t.innerHTML = `${ic("term")}<span>${esc(msg)}</span>${sub ? `<code>${esc(sub)}</code>` : ""}`; t.classList.add("show"); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("show"), 2600); }
+async function copy(text, label) { try { await navigator.clipboard.writeText(text); toast(label, text); } catch { toast("Kopieren nicht erlaubt, Befehl:", text); } }
+const resume = (s, fork) => s && copy(cmd(s, fork), fork ? "Neuer Weg: Befehl kopiert, im Terminal einfügen" : "Befehl kopiert, im Terminal einfügen");
+
+// ---------- Maus ----------
+let drag = null, moved = 0;
+stage.addEventListener("pointerdown", (e) => { if (e.button !== 0) return; drag = { x: e.clientX, y: e.clientY, cx: cam.x, cy: cam.y }; moved = 0; });
+addEventListener("pointermove", (e) => {
+  if (!drag) return; const dx = e.clientX - drag.x, dy = e.clientY - drag.y; moved = Math.max(moved, Math.abs(dx) + Math.abs(dy));
+  if (moved > 5) { stage.classList.add("drag"); cam.x = drag.cx + dx; cam.y = drag.cy + dy; applyCam(false); }
+});
+addEventListener("pointerup", () => { drag = null; stage.classList.remove("drag"); });
+stage.addEventListener("wheel", (e) => {
+  e.preventDefault();
+  if (e.ctrlKey || e.metaKey) zoomAt(Math.exp(-e.deltaY * 0.01), e.clientX, e.clientY);
+  else { cam.x -= e.deltaX; cam.y -= e.deltaY; applyCam(false); }
+}, { passive: false });
+
+document.addEventListener("click", (e) => {
+  if (moved > 5) { moved = 0; return; }
+  const el = e.target.closest("[data-resume],[data-fork],[data-tag],[data-open],[data-pick],[data-nav],[data-z],[data-close],[data-proj],[data-tab],[data-theme-set]");
+  if (!el) { if (e.target === stage || e.target === world || e.target.id === "cards") { closeSheet(); $("#tagsheet").classList.remove("open"); } return; }
+  const d = el.dataset;
+  if (d.resume) return resume(D.sessions.find(s => s.id === d.resume));
+  if (d.fork) return resume(D.sessions.find(s => s.id === d.fork), true);
+  if (d.tag) { setQuery("#" + d.tag); $("#tagsheet").classList.remove("open"); return; }
+  if (d.open) { const s = D.sessions.find(x => x.id === d.open); return go("session", { project: s.project, session: s.id }); }
+  if (d.pick) return pick(d.pick);
+  if (d.proj) return go("project", { project: d.proj });
+  if (d.nav) return go(d.nav);
+  if (d.close !== undefined) return closeSheet();
+  if (d.themeSet) return setTheme(d.themeSet);
+  if (d.z) return d.z === "fit" ? fit(true) : zoomAt(d.z === "in" ? 1.25 : .8, innerWidth / 2, innerHeight / 2, true);
+  if (d.tab) {
+    if (d.tab === "all") return go("all");
+    if (d.tab === "recent") return go("session", { project: latest.project, session: latest.id });
+    if (d.tab === "search") return $("#q").focus();
+    if (d.tab === "resume") return resume(state.session ? D.sessions.find(x => x.id === state.session) : latest);
+    if (d.tab === "tags") { renderTagSheet(); return $("#tagsheet").classList.toggle("open"); }
+  }
+});
+function renderTagSheet() {
+  const f = {}; D.sessions.forEach(s => s.tags.forEach(t => f[t] = (f[t] || 0) + 1));
+  const cur = state.q.startsWith("#") ? state.q.slice(1) : "";
+  $("#taglist").innerHTML = Object.entries(f).sort((a, b) => b[1] - a[1]).map(([t, n]) => `<button class="tag ${cur === t ? "on" : ""}" data-tag="${esc(t)}">#${esc(t)} <span style="opacity:.6">${n}</span></button>`).join("") || `<span class="cap">Noch keine Tags</span>`;
+}
+function setQuery(v) { $("#q").value = v; state.q = v; render(false); }
+$("#q").addEventListener("input", (e) => { state.q = e.target.value; render(false); });
+$("#q").addEventListener("focus", status); $("#q").addEventListener("blur", status);
+
+// ---------- Tastatur: in beiden Welten gleich, im Vim-Look sichtbar ----------
+let lastG = 0;
+function stepBy(delta, abs) {
+  if (state.level !== "session") return;
+  const s = D.sessions.find(x => x.id === state.session);
+  const i = state.card ? s.path.findIndex(n => n.id === state.card) : s.path.length;
+  let ni = abs != null ? abs : i + delta; if (ni < 0) ni = abs != null ? s.path.length - 1 : 0;
+  pick(s.path[Math.min(s.path.length - 1, ni)].id);
+}
+function runCmd(c) {
+  c = c.trim().replace(/^:/, "");
+  if (/^(vim|colo(rscheme)? gruvbox)$/.test(c)) return setTheme("vim");
+  if (/^(warm|freundlich|colo(rscheme)? warm)$/.test(c)) return setTheme("warm");
+  if (/^(q|zurück|zurueck)$/.test(c)) return back();
+  if (/^(weiter|resume|r)$/.test(c)) return resume(state.session ? D.sessions.find(x => x.id === state.session) : latest);
+  const m = c.match(/^(suche|s)\s+(.+)/); if (m) return setQuery(m[2]);
+  if (c) toast(`Unbekannter Befehl: ${c}`);
+}
+function back() {
+  if ($("#sheet").classList.contains("open")) return closeSheet();
+  if (state.level === "session") return go("project"); if (state.level === "project") return go("all");
+}
+const closeCmd = (t) => { t.value = ""; t.blur(); $("#cmdpop").classList.remove("open"); $("#cmdprefix").textContent = ""; };
+document.addEventListener("keydown", (e) => {
+  const t = e.target;
+  if (t.id === "cmd" || t.id === "cmd2") { if (e.key === "Enter") { const v = t.value; closeCmd(t); runCmd(v); } if (e.key === "Escape") closeCmd(t); return; }
+  if (t.matches("input")) { if (e.key === "Escape") { setQuery(""); t.blur(); } else if (e.key === "Enter") t.blur(); return; }
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  const k = e.key;
+  if (k === "Escape") return back();
+  if (k === "/") { e.preventDefault(); return $("#q").focus(); }
+  if (k === ":") { e.preventDefault(); if (vim()) { $("#cmdprefix").textContent = ":"; $("#cmd").focus(); } else { $("#cmdpop").classList.add("open"); $("#cmd2").focus(); } return; }
+  if (["j", "l", "ArrowRight", "ArrowDown"].includes(k)) { e.preventDefault(); return stepBy(1); }
+  if (["k", "h", "ArrowLeft", "ArrowUp"].includes(k)) { e.preventDefault(); return stepBy(-1); }
+  if (k === "G") return stepBy(0, -1);
+  if (k === "g") { if (Date.now() - lastG < 400) stepBy(0, 0); lastG = Date.now(); return; }
+  if (k === "Enter") { const s = state.session ? D.sessions.find(x => x.id === state.session) : latest; return resume(s, !!(state.card && state.card !== s.last.id)); }
+});
+addEventListener("resize", () => { if (state.level !== "session") render(true); });
+
+// ---------- Start ----------
+let saved = "warm"; try { saved = localStorage.getItem("atlas.theme") || "warm"; } catch {}
+const h = location.hash; if (/vim/.test(h)) saved = "vim"; if (/warm/.test(h)) saved = "warm";
+document.documentElement.dataset.theme = saved;
+document.querySelectorAll("[data-theme-set]").forEach(b => b.classList.toggle("on", b.dataset.themeSet === saved));
+const hs = h.match(/s=([\w-]+)/)?.[1], hp = decodeURIComponent(h.match(/p=([^&]+)/)?.[1] || "");
+const ss = hs && D.sessions.find(s => s.id.startsWith(hs)), pp = hp && [...projects.keys()].find(k => projName(k) === hp);
+if (!D.sessions.length) { $("#cards").innerHTML = `<section class="card resume" style="left:0;top:0;width:560px;height:260px"><h1>Noch keine Sessions gefunden.</h1><div class="bar"></div><p class="muted">Starte im Projektordner <b>node scripts/extract.mjs</b> und lade die Seite neu.</p></section>`; bounds = { x: 0, y: 0, w: 560, h: 260 }; fit(false); }
+else if (ss) { go("session", { project: ss.project, session: ss.id }); if (/step/.test(h)) pick(ss.last.id); }
+else if (pp) go("project", { project: pp });
+else render();
+</script>
+</body>
+</html>
