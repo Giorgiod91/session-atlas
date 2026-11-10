@@ -1,0 +1,22 @@
+{
+  "name": "session-atlas-app",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Session Atlas desktop app: browse Claude Code sessions and resume them in a built-in terminal.",
+  "type": "module",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "rebuild": "electron-rebuild -f -w node-pty",
+    "postinstall": "electron-rebuild -f -w node-pty"
+  },
+  "dependencies": {
+    "@xterm/addon-fit": "0.10.0",
+    "@xterm/xterm": "5.5.0",
+    "node-pty": "1.0.0"
+  },
+  "devDependencies": {
+    "@electron/rebuild": "3.7.1",
+    "electron": "33.2.1"
+  }
+}

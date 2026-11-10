@@ -12,3 +12,4 @@ node_modules/
 # Persoenliche Antworten und Entscheidungsprotokolle bleiben lokal
 .impeccable/fragerunde/answers.json
 .impeccable/questions/
+app/node_modules/
