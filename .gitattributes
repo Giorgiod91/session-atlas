@@ -1,0 +1,3 @@
+# Design prototypes are documentation, not the app: keep them out of the GitHub language stats
+prototype/** linguist-documentation
+docs/** linguist-documentation
