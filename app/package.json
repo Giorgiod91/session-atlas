@@ -1,14 +1,17 @@
 {
   "name": "session-atlas-app",
+  "productName": "Session Atlas",
   "private": true,
   "version": "0.1.0",
   "description": "Session Atlas desktop app: browse Claude Code sessions and resume them in a built-in terminal.",
   "type": "module",
   "main": "main.js",
   "scripts": {
-    "start": "electron .",
+    "build": "esbuild renderer/editor-src.js --bundle --format=iife --minify --outfile=renderer/editor.bundle.js",
+    "start": "bun run build && electron .",
+    "demo": "bun run build && ATLAS_DEMO=1 electron .",
     "rebuild": "electron-rebuild -f -w node-pty",
-    "postinstall": "electron-rebuild -f -w node-pty"
+    "postinstall": "electron-rebuild -f -w node-pty && bun run build"
   },
   "dependencies": {
     "@xterm/addon-fit": "0.10.0",
@@ -16,7 +19,15 @@
     "node-pty": "1.0.0"
   },
   "devDependencies": {
+    "@codemirror/commands": "6.11.1",
+    "@codemirror/lang-markdown": "6.5.2",
+    "@codemirror/language": "6.13.1",
+    "@codemirror/state": "6.7.6",
+    "@codemirror/view": "6.43.15",
     "@electron/rebuild": "3.7.1",
-    "electron": "33.2.1"
+    "@lezer/highlight": "1.2.5",
+    "@replit/codemirror-vim": "6.4.0",
+    "electron": "33.2.1",
+    "esbuild": "0.28.2"
   }
 }
