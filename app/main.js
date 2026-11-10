@@ -2,7 +2,7 @@
 // Main process: reads ~/.claude live, serves the session data to the UI, runs real terminals (node-pty)
 // so "Weitermachen" resumes Claude Code inside the app, stores notes and lists MCP servers.
 // ATLAS_DEMO=1 swaps all personal data for fictional demo data (for screenshots).
-import { app, BrowserWindow, ipcMain } from "electron";
+import { app, BrowserWindow, ipcMain, dialog } from "electron";
 import { join, dirname, resolve, basename, isAbsolute } from "node:path";
 import { fileURLToPath } from "node:url";
 import { watch, existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync, lstatSync, statSync, realpathSync } from "node:fs";
@@ -54,16 +54,24 @@ let nextId = 1;
 const SID = /^[0-9a-f-]{36}$/i;
 
 // ---------- New project: folder (+ git init + README) under ~/gitroot, then Claude starts there ----------
-ipcMain.handle("project:create", async (_e, { name } = {}) => {
+ipcMain.handle("project:create", async (_e, { name, parent } = {}) => {
   const slug = String(name || "").trim().toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9._-]/g, "");
   if (!slug || slug.startsWith(".") || slug.length > 60) throw new Error("Ungültiger Projektname");
-  const parent = join(homedir(), "gitroot");
-  const dir = join(parent, slug);
+  // Parent must be an existing folder inside the home directory (default: ~/projects for own projects)
+  const base = resolve(typeof parent === "string" && parent ? parent : join(homedir(), "projects"));
+  if (!(base + "/").startsWith(homedir() + "/")) throw new Error("Ordner muss in deinem Benutzerordner liegen");
+  mkdirSync(base, { recursive: true });
+  const dir = join(base, slug);
   const existed = existsSync(dir);
   mkdirSync(dir, { recursive: true });
   if (!existsSync(join(dir, ".git"))) await new Promise((ok) => execFile("git", ["init", "-q", "-b", "main"], { cwd: dir }, () => ok()));
-  if (!existsSync(join(dir, "README.md"))) writeFileSync(join(dir, "README.md"), `# ${name.trim()}\n`);
+  if (!existsSync(join(dir, "README.md"))) writeFileSync(join(dir, "README.md"), `# ${String(name).trim()}\n`);
   return { path: dir, existed };
+});
+// Native folder picker for "Anderer Ordner..."
+ipcMain.handle("project:pick-parent", async () => {
+  const r = await dialog.showOpenDialog(win, { title: "Wo soll das Projekt liegen?", defaultPath: homedir(), properties: ["openDirectory", "createDirectory"] });
+  return r.canceled ? null : r.filePaths[0];
 });
 
 ipcMain.handle("pty:spawn", (_e, { sessionId, cwd, fork, prompt, cols = 100, rows = 30 } = {}) => {

@@ -1142,7 +1142,7 @@
     const CMDS = [["Dashboard", "Startbildschirm mit Statistik"], ["Projects", "Projektbaum fokussieren"], ["Agents", "Agent-Bäume aller Sessions"], ["Recent", "Neueste Sessions, alle Projekte"],
       ["Find", "Telescope öffnen, z.B. :Find login"], ["Notes", "Notizen: Baum und Editor"], ["new", "Neue Notiz, z.B. :new Ideen"], ["Anforderungen", "Vorlage fürs gewählte Projekt, z.B. :Anforderungen Suche"],
       ["Agent", "Notiz an Claude geben"], ["w", "Notiz speichern"], ["wq", "Notiz speichern und schliessen"], ["Mcp", "MCP-Server anzeigen"], ["McpCheck", "MCP-Status prüfen (claude mcp list)"],
-      ["McpAdd", "MCP-Server hinzufügen"], ["NewProject", "Neues Projekt in ~/gitroot, startet Claude dort, z.B. :NewProject shop"], ["Terminal", "Terminal ein / aus (Ctrl+`)"], ["Resume", "Weitermachen-Befehl kopieren"], ["q", "Buffer schliessen"]];
+      ["McpAdd", "MCP-Server hinzufügen"], ["NewProject", "Neues Projekt anlegen (Ort wählbar), startet Claude dort, z.B. :NewProject shop"], ["Terminal", "Terminal ein / aus (Ctrl+`)"], ["Resume", "Weitermachen-Befehl kopieren"], ["q", "Buffer schliessen"]];
     const ARGS = new Set(["Find", "new", "Anforderungen", "NewProject"]);
     const cin = $("nvCmdIn"), wild = $("nvWild");
     function openCmd(pre = "") {
@@ -1167,11 +1167,20 @@
       const api = window.atlasApp?.projects;
       if (!api) return cmdMsg("Neue Projekte gibt es nur in der Desktop-App", "err");
       if (!name) return openCmd("NewProject ");
-      try {
-        const r = await api.create(name);
-        notify(`${r.existed ? "Ordner gab es schon" : "Angelegt"}: ${r.path.replace(/^\/Users\/[^/]+/, "~")}. Claude startet dort im Terminal.`, { title: ":NewProject", icon: "folder" });
-        window.AtlasTerminal?.open(null, false, { cwd: r.path, label: r.path.split("/").pop() });
-      } catch (e) { cmdMsg("E: " + String(e.message || e).replace(/^Error invoking remote method '[^']+': (Error: )?/, ""), "err"); }
+      const home = window.atlasApp?.info?.home || "";
+      openSelect(`Neues Projekt: ${name}`, [
+        { label: "Eigene Projekte", desc: "~/projects · private Projekte, z.B. für GitHub", hint: "~/projects" },
+        { label: "Firma", desc: "~/gitroot · Firmen-Repos (Azure DevOps)", hint: "~/gitroot" },
+        { label: "Anderer Ordner …", desc: "Ordner im Mac-Dialog auswählen", hint: "Finder" },
+      ], async (i) => {
+        const parent = i === 0 ? home + "/projects" : i === 1 ? home + "/gitroot" : await api.pickParent();
+        if (!parent) return cmdMsg("Abgebrochen", "");
+        try {
+          const r = await api.create(name, parent);
+          notify(`${r.existed ? "Ordner gab es schon" : "Angelegt"}: ${A.short(r.path)}. Claude startet dort im Terminal.`, { title: ":NewProject", icon: "folder" });
+          window.AtlasTerminal?.open(null, false, { cwd: r.path, label: r.path.split("/").pop() });
+        } catch (e) { cmdMsg("E: " + String(e.message || e).replace(/^Error invoking remote method '[^']+': (Error: )?/, ""), "err"); }
+      });
     }
     function runCmd(text) {
       closeCmd();

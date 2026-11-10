@@ -17,7 +17,10 @@ contextBridge.exposeInMainWorld("atlasApp", {
     write: (path, text) => ipcRenderer.invoke("notes:write", { path, text }),
     create: (opts) => ipcRenderer.invoke("notes:create", opts),
   },
-  projects: { create: (name) => ipcRenderer.invoke("project:create", { name }) },
+  projects: {
+    create: (name, parent) => ipcRenderer.invoke("project:create", { name, parent }),
+    pickParent: () => ipcRenderer.invoke("project:pick-parent"),
+  },
   mcp: {
     list: () => ipcRenderer.invoke("mcp:list"),
     check: (opts) => ipcRenderer.invoke("mcp:check", opts),
