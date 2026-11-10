@@ -605,7 +605,7 @@
     };
 
     const DASH_MENU = [["r", "Zuletzt", "clock", "#83a598"], ["f", "Suchen", "search", "#fabd2f"], ["p", "Projekte", "folder", "#8ec07c"], ["n", "Notizen", "note", "#b8bb26"],
-      ["a", "Agents", "bot", "#d3869b"], ["m", "MCP-Server", "plug", "#8ec07c"], ["s", "Statistik", "grid", "#fe8019"], ["q", "Schliessen", "x", "#928374"]];
+      ["a", "Agents", "bot", "#d3869b"], ["m", "MCP-Server", "plug", "#8ec07c"], ["o", "Neues Projekt", "folder", "#fabd2f"], ["s", "Statistik", "grid", "#fe8019"], ["q", "Schliessen", "x", "#928374"]];
     function renderDash() {
       const word = "SESSION ATLAS";
       const rows = [0, 1, 2, 3, 4, 5].map((r) => [...word].map((c) => FONT[c][r]).join(""));
@@ -1130,6 +1130,7 @@
       else if (k === "a") { showEditor("agents"); }
       else if (k === "n") showNotes();
       else if (k === "m") showMcp();
+      else if (k === "o") openCmd("NewProject ");
       else if (k === "s") {
         const el = $("nvStats"); el?.classList.add("pulse"); later(() => el?.classList.remove("pulse"), 1400);
         const peak = days30.reduce((a, b) => (b.v > a.v ? b : a), days30[0]);
@@ -1141,8 +1142,8 @@
     const CMDS = [["Dashboard", "Startbildschirm mit Statistik"], ["Projects", "Projektbaum fokussieren"], ["Agents", "Agent-Bäume aller Sessions"], ["Recent", "Neueste Sessions, alle Projekte"],
       ["Find", "Telescope öffnen, z.B. :Find login"], ["Notes", "Notizen: Baum und Editor"], ["new", "Neue Notiz, z.B. :new Ideen"], ["Anforderungen", "Vorlage fürs gewählte Projekt, z.B. :Anforderungen Suche"],
       ["Agent", "Notiz an Claude geben"], ["w", "Notiz speichern"], ["wq", "Notiz speichern und schliessen"], ["Mcp", "MCP-Server anzeigen"], ["McpCheck", "MCP-Status prüfen (claude mcp list)"],
-      ["McpAdd", "MCP-Server hinzufügen"], ["Terminal", "Terminal ein / aus (Ctrl+`)"], ["Resume", "Weitermachen-Befehl kopieren"], ["q", "Buffer schliessen"]];
-    const ARGS = new Set(["Find", "new", "Anforderungen"]);
+      ["McpAdd", "MCP-Server hinzufügen"], ["NewProject", "Neues Projekt in ~/gitroot, startet Claude dort, z.B. :NewProject shop"], ["Terminal", "Terminal ein / aus (Ctrl+`)"], ["Resume", "Weitermachen-Befehl kopieren"], ["q", "Buffer schliessen"]];
+    const ARGS = new Set(["Find", "new", "Anforderungen", "NewProject"]);
     const cin = $("nvCmdIn"), wild = $("nvWild");
     function openCmd(pre = "") {
       closeWk(); st.cmd = { i: -1 };
@@ -1159,6 +1160,18 @@
       const m = wildMatches();
       wild.hidden = !m.length || /\s/.test(cin.value.trim());
       wild.innerHTML = m.map(([c, d], i) => `<button data-cmd="${c}" class="${i === st.cmd?.i ? "on" : ""}"><i>:</i><b>${c}</b><span>${d}</span></button>`).join("");
+    }
+    // New project: create ~/gitroot/<name> (git init + README) and start a fresh Claude session there.
+    // It shows up in the tree as soon as Claude has written its first transcript line.
+    async function newProject(name) {
+      const api = window.atlasApp?.projects;
+      if (!api) return cmdMsg("Neue Projekte gibt es nur in der Desktop-App", "err");
+      if (!name) return openCmd("NewProject ");
+      try {
+        const r = await api.create(name);
+        notify(`${r.existed ? "Ordner gab es schon" : "Angelegt"}: ${r.path.replace(/^\/Users\/[^/]+/, "~")}. Claude startet dort im Terminal.`, { title: ":NewProject", icon: "folder" });
+        window.AtlasTerminal?.open(null, false, { cwd: r.path, label: r.path.split("/").pop() });
+      } catch (e) { cmdMsg("E: " + String(e.message || e).replace(/^Error invoking remote method '[^']+': (Error: )?/, ""), "err"); }
     }
     function runCmd(text) {
       closeCmd();
@@ -1182,6 +1195,7 @@
       else if (c === "Agent") agentHandoff();
       else if (c === "w" || c === "wq") { const b = curNote(); if (b) noteEx(b, c, {}); else cmdMsg("E32: Keine Notiz offen", "err"); }
       else if (c === "Mcp") showMcp();
+      else if (c === "NewProject") newProject(arg);
       else if (c === "McpCheck") { (st.view === "mcp" ? Promise.resolve() : showMcp()).then(mcpCheck); }
       else if (c === "McpAdd") { (st.view === "mcp" ? Promise.resolve() : showMcp()).then(openMcpForm); }
       else if (c === "Terminal") { if (window.AtlasTerminal) window.AtlasTerminal.toggle(); else cmdMsg("Das Terminal gibt es nur in der Desktop-App", "err"); }
@@ -1301,7 +1315,7 @@
 
     // ================= which-key =================
     const wk = $("nvWk");
-    const wkList = () => [["f", "Suchen (Telescope)", "f"], st.view === "notes" ? ["a", "Notiz an Claude geben", "a"] : ["a", "Agents-Bäume", "a"], ["n", "Notizen", "n"], ["m", "MCP-Server", "m"],
+    const wkList = () => [["f", "Suchen (Telescope)", "f"], st.view === "notes" ? ["a", "Notiz an Claude geben", "a"] : ["a", "Agents-Bäume", "a"], ["n", "Notizen", "n"], ["m", "MCP-Server", "m"], ["N", "Neues Projekt", "N"],
       ["t", "Terminal ein / aus", "t"], ["d", "Dashboard", "d"], ["p", "Projektbaum", "p"], ["r", "Neueste Sessions", "r"], ["y", "Weitermachen-Befehl kopieren", "y"],
       ["b", "Buffer schliessen", "b"], ["o", "Session im Detail öffnen", "o"], ...(st.view === "notes" ? [["w", "Notiz speichern", "w"]] : [])];
     const KEYS_NOTES = [["j / k", "Notiz wählen"], ["Enter / l", "öffnen, in den Editor"], ["h", "Ordner zu / hoch"], ["Ctrl-w h", "Editor zurück zum Baum"], ["i a o", "schreiben (INSERT)"],
@@ -1330,6 +1344,7 @@
       if (k === "f") { if (st.view === "dash") showEditor(); openTel(""); }
       else if (k === "a") { if (st.view === "notes") agentHandoff(); else runCmd("Agents"); }
       else if (k === "n") runCmd("Notes");
+      else if (k === "N") openCmd("NewProject ");
       else if (k === "m") runCmd("Mcp");
       else if (k === "t") runCmd("Terminal");
       else if (k === "w") { if (st.view === "notes") runCmd("w"); }

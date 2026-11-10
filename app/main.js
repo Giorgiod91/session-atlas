@@ -53,6 +53,19 @@ const terms = new Map();
 let nextId = 1;
 const SID = /^[0-9a-f-]{36}$/i;
 
+// ---------- New project: folder (+ git init + README) under ~/gitroot, then Claude starts there ----------
+ipcMain.handle("project:create", async (_e, { name } = {}) => {
+  const slug = String(name || "").trim().toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9._-]/g, "");
+  if (!slug || slug.startsWith(".") || slug.length > 60) throw new Error("Ungültiger Projektname");
+  const parent = join(homedir(), "gitroot");
+  const dir = join(parent, slug);
+  const existed = existsSync(dir);
+  mkdirSync(dir, { recursive: true });
+  if (!existsSync(join(dir, ".git"))) await new Promise((ok) => execFile("git", ["init", "-q", "-b", "main"], { cwd: dir }, () => ok()));
+  if (!existsSync(join(dir, "README.md"))) writeFileSync(join(dir, "README.md"), `# ${name.trim()}\n`);
+  return { path: dir, existed };
+});
+
 ipcMain.handle("pty:spawn", (_e, { sessionId, cwd, fork, prompt, cols = 100, rows = 30 } = {}) => {
   if (sessionId && !SID.test(sessionId)) throw new Error("invalid session id");
   if (prompt != null && (typeof prompt !== "string" || prompt.length > 8000)) throw new Error("invalid prompt");
