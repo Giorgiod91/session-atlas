@@ -1,0 +1,375 @@
+<!doctype html>
+<!--
+  PROTOTYPE, throwaway. Question: what should the Session Atlas desktop app look like
+  (glass, motion, retro Neovim)? Three structurally different variants of the Agents view,
+  switchable via ?variant=A|B|C and the floating bar (arrow keys cycle).
+  Reads the same local prototype/data.js as index.html (gitignored, never committed).
+-->
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Atlas Look Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700;800&family=VT323&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0b0d12; --ink: #e9e6f2; --ink-2: #a7a3b8; --ink-3: #6f6b80;
+  --glass: rgba(255,255,255,.055); --glass-2: rgba(255,255,255,.09); --line: rgba(255,255,255,.11);
+  --violet: #8b6cff; --teal: #2dd4bf; --amber: #fabd2f; --rose: #fb7185; --green: #4ade80;
+  --sans: "Figtree", -apple-system, sans-serif; --mono: "JetBrains Mono", ui-monospace, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body { background: var(--bg); color: var(--ink); font: 500 14px/1.45 var(--sans); overflow: hidden; -webkit-font-smoothing: antialiased; }
+button { font: inherit; color: inherit; cursor: pointer; border: 0; background: none; }
+svg.i { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+
+/* Shared backdrop: slow aurora + scanlines + vignette */
+.aurora { position: fixed; inset: -20%; z-index: 0; filter: blur(70px); opacity: .75; pointer-events: none; }
+.aurora i { position: absolute; width: 46vw; height: 46vw; border-radius: 50%; mix-blend-mode: screen; animation: drift 26s ease-in-out infinite alternate; }
+.aurora i:nth-child(1) { background: radial-gradient(circle, #5b3cff 0%, transparent 65%); left: 5%; top: 10%; }
+.aurora i:nth-child(2) { background: radial-gradient(circle, #0fb5a0 0%, transparent 65%); right: 0; top: 30%; animation-delay: -9s; }
+.aurora i:nth-child(3) { background: radial-gradient(circle, #c2410c 0%, transparent 65%); left: 30%; bottom: -5%; animation-delay: -17s; opacity: .7; }
+@keyframes drift { to { transform: translate(8vw, -6vh) scale(1.15); } }
+.scan { position: fixed; inset: 0; z-index: 50; pointer-events: none;
+  background: repeating-linear-gradient(to bottom, rgba(255,255,255,.025) 0 1px, transparent 1px 3px);
+  box-shadow: inset 0 0 160px rgba(0,0,0,.65); }
+.glass { background: var(--glass); border: 1px solid var(--line); border-radius: 18px;
+  backdrop-filter: blur(22px) saturate(160%); -webkit-backdrop-filter: blur(22px) saturate(160%);
+  box-shadow: 0 1px 0 rgba(255,255,255,.08) inset, 0 20px 50px rgba(0,0,0,.35); }
+.app { position: fixed; inset: 0; z-index: 1; }
+.mono { font-family: var(--mono); }
+.cap { color: var(--ink-2); font-size: 12.5px; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ink-3); display: inline-block; flex: none; }
+.dot.live { background: var(--green); box-shadow: 0 0 10px var(--green); animation: blink 1.4s ease-in-out infinite; }
+@keyframes blink { 50% { opacity: .35; } }
+.mp { display: inline-flex; align-items: center; gap: 5px; font: 700 11.5px var(--mono); padding: 2px 8px; border-radius: 999px; white-space: nowrap;
+  background: color-mix(in srgb, var(--mc) 20%, transparent); color: color-mix(in srgb, var(--mc) 55%, white); border: 1px solid color-mix(in srgb, var(--mc) 40%, transparent); }
+.opus { --mc: #8b6cff; } .sonnet { --mc: #3b82f6; } .haiku { --mc: #22c55e; } .fable { --mc: #f97316; } .x { --mc: #8a8799; }
+.pop { animation: pop .55s cubic-bezier(.2, 1.4, .4, 1) both; animation-delay: calc(var(--d, 0) * 45ms); }
+@keyframes pop { from { opacity: 0; transform: translateY(10px) scale(.97); } }
+.fade { animation: fade .5s ease both; animation-delay: calc(var(--d, 0) * 40ms); }
+@keyframes fade { from { opacity: 0; } }
+.scroll { overflow: auto; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,.15) transparent; }
+
+/* ================= A: Glass Cockpit ================= */
+.A { display: grid; grid-template-rows: 44px 1fr 30px; padding: 12px; gap: 12px; }
+.A .titlebar { display: flex; align-items: center; gap: 14px; padding: 0 14px; border-radius: 14px; }
+.A .lights { display: flex; gap: 8px; } .A .lights i { width: 12px; height: 12px; border-radius: 50%; background: #ff5f57; } .A .lights i:nth-child(2) { background: #febc2e; } .A .lights i:nth-child(3) { background: #28c840; }
+.A .titlebar b { font-weight: 800; letter-spacing: -.01em; }
+.A .kbar { margin-left: auto; display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 10px; background: rgba(0,0,0,.25); color: var(--ink-2); font-size: 13px; min-width: 280px; }
+.A .kbar kbd { margin-left: auto; font: 11px var(--mono); padding: 1px 6px; border: 1px solid var(--line); border-radius: 5px; }
+.A .body { display: grid; grid-template-columns: 290px minmax(0, 1fr) 340px; gap: 12px; min-height: 0; }
+.A .side { padding: 12px; display: flex; flex-direction: column; min-height: 0; }
+.A .side h4 { margin: 14px 8px 6px; font: 700 10.5px var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--ink-3); }
+.A .srow { width: 100%; text-align: left; display: grid; grid-template-columns: 10px 1fr auto; gap: 10px; align-items: center; padding: 9px 10px; border-radius: 12px; transition: background .2s, transform .2s; }
+.A .srow:hover { background: var(--glass-2); transform: translateX(2px); }
+.A .srow.on { background: linear-gradient(90deg, rgba(139,108,255,.28), rgba(139,108,255,.06)); box-shadow: inset 2px 0 0 var(--violet); }
+.A .srow .t { font-weight: 700; font-size: 13.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.A .srow .n { font: 700 11px var(--mono); color: var(--ink-3); }
+.A .main { display: flex; flex-direction: column; gap: 12px; min-height: 0; }
+.A .hero { padding: 18px 22px; display: flex; gap: 22px; align-items: center; }
+.A .hero h1 { margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -.02em; line-height: 1.15; }
+.A .kpis { margin-left: auto; display: flex; gap: 20px; }
+.A .kpis div { text-align: right; } .A .kpis b { display: block; font: 800 22px var(--mono); }
+.A .graph { flex: 1; min-height: 260px; position: relative; overflow: hidden; }
+.A .graph svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.A .thread { fill: none; stroke: url(#gA); stroke-width: 2.2; stroke-dasharray: 600; stroke-dashoffset: 600; animation: draw 1.1s cubic-bezier(.6,0,.2,1) forwards; animation-delay: calc(var(--d) * 120ms + 200ms); }
+@keyframes draw { to { stroke-dashoffset: 0; } }
+.A .node { position: absolute; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; width: 150px; }
+.A .orb { width: 54px; height: 54px; border-radius: 50%; display: grid; place-items: center; background: rgba(255,255,255,.08); border: 1px solid var(--line);
+  backdrop-filter: blur(12px); box-shadow: 0 0 0 0 rgba(139,108,255,.0); transition: transform .25s cubic-bezier(.2,1.4,.4,1), box-shadow .25s; }
+.A .node:hover .orb, .A .node.on .orb { transform: scale(1.12); box-shadow: 0 0 30px rgba(139,108,255,.6); border-color: var(--violet); }
+.A .node.main .orb { width: 72px; height: 72px; background: radial-gradient(circle at 30% 30%, #a48bff, #5b3cff); box-shadow: 0 0 40px rgba(124,77,255,.55); }
+.A .node.main .orb svg.i { width: 30px; height: 30px; }
+.A .node .lb { font-weight: 700; font-size: 12.5px; } .A .node .ds { font-size: 11.5px; color: var(--ink-2); line-height: 1.25; max-height: 2.6em; overflow: hidden; }
+.A .graph .hint { position: absolute; left: 18px; top: 14px; font: 700 10.5px var(--mono); letter-spacing: .14em; color: var(--ink-3); text-transform: uppercase; }
+.A .strip { padding: 12px 14px; display: flex; gap: 8px; overflow-x: auto; }
+.A .pchip { flex: none; width: 210px; padding: 10px 12px; border-radius: 12px; background: rgba(0,0,0,.22); border: 1px solid var(--line); font-size: 12.5px; transition: border-color .2s, transform .2s; }
+.A .pchip:hover { border-color: var(--teal); transform: translateY(-2px); }
+.A .pchip .no { font: 800 11px var(--mono); color: var(--teal); }
+.A .pchip .tx { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-top: 3px; }
+.A .insp { padding: 18px; display: flex; flex-direction: column; gap: 14px; min-height: 0; }
+.A .insp h3 { margin: 0; font-size: 18px; font-weight: 800; }
+.A .insp .lbl { font: 700 10.5px var(--mono); letter-spacing: .14em; color: var(--ink-3); text-transform: uppercase; margin-bottom: 6px; }
+.A .insp .box { background: rgba(0,0,0,.25); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; font-size: 12.5px; color: var(--ink-2); white-space: pre-wrap; max-height: 190px; overflow: auto; }
+.A .row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.A .tag { font: 600 11.5px var(--mono); padding: 2px 8px; border-radius: 6px; background: rgba(255,255,255,.07); color: var(--ink-2); }
+.A .status { display: flex; align-items: center; gap: 0; border-radius: 10px; overflow: hidden; font: 600 11.5px var(--mono); }
+.A .status span { padding: 0 12px; height: 30px; display: flex; align-items: center; gap: 6px; }
+.A .status .m { background: var(--violet); color: #0b0d12; font-weight: 800; }
+.A .status .fill { flex: 1; color: var(--ink-3); }
+
+/* ================= B: Neovim Splits ================= */
+.B { font-family: var(--mono); font-size: 13px; display: grid; grid-template-rows: 30px 1fr 26px 26px; padding: 14px; gap: 8px; }
+.B .tabline { display: flex; gap: 2px; align-items: stretch; }
+.B .tabline span { padding: 0 14px; display: flex; align-items: center; gap: 8px; border-radius: 8px 8px 0 0; color: var(--ink-3); background: rgba(255,255,255,.03); }
+.B .tabline span.on { color: var(--amber); background: rgba(250,189,47,.12); box-shadow: inset 0 -2px 0 var(--amber); }
+.B .tabline .r { margin-left: auto; color: var(--ink-3); background: none; }
+.B .wins { display: grid; grid-template-columns: 330px minmax(0, 1fr); grid-template-rows: minmax(0, 1.1fr) minmax(0, 1fr); gap: 8px; min-height: 0; }
+.B .win { border-radius: 10px; display: flex; flex-direction: column; min-height: 0; background: rgba(10,12,16,.45); }
+.B .win.tree { grid-row: 1 / 3; }
+.B .win.focus { border-color: rgba(250,189,47,.55); box-shadow: 0 0 0 1px rgba(250,189,47,.25), 0 0 40px rgba(250,189,47,.08); }
+.B .wbar { display: flex; justify-content: space-between; padding: 6px 12px; font-size: 11.5px; color: var(--ink-3); border-bottom: 1px solid var(--line); }
+.B .wbar b { color: var(--amber); font-weight: 700; }
+.B .buf { flex: 1; padding: 6px 0; }
+.B .ln { display: grid; grid-template-columns: 44px 1fr; white-space: pre; line-height: 1.75; }
+.B .ln .nr { text-align: right; padding-right: 12px; color: var(--ink-3); opacity: .7; }
+.B .ln.cur { background: rgba(250,189,47,.08); } .B .ln.cur .nr { color: var(--amber); opacity: 1; font-weight: 800; }
+.B .ln .tx { overflow: hidden; text-overflow: ellipsis; padding-right: 12px; }
+.B .ln.click { cursor: pointer; } .B .ln.click:hover { background: rgba(255,255,255,.04); }
+.B .fold { color: #83a598; } .B .str { color: #b8bb26; } .B .kw { color: #fb4934; } .B .fn { color: #fabd2f; } .B .cm { color: #928374; font-style: italic; } .B .num { color: #d3869b; } .B .aq { color: #8ec07c; }
+.B .typing { overflow: hidden; display: inline-block; vertical-align: bottom; animation: type .7s steps(40) both; animation-delay: calc(var(--d) * 90ms); width: 0; }
+@keyframes type { to { width: 100%; } }
+.B .ln .tx:has(.typing) { display: flex; } .B .typing { white-space: pre; }
+.B .tilde { color: #458588; opacity: .5; }
+.B .stl { display: flex; align-items: stretch; border-radius: 8px; overflow: hidden; font-size: 12px; }
+.B .stl span { display: flex; align-items: center; padding: 0 12px; gap: 6px; }
+.B .stl .mode { background: var(--amber); color: #1d2021; font-weight: 800; }
+.B .stl .s2 { background: rgba(255,255,255,.1); }
+.B .stl .s3 { background: rgba(255,255,255,.04); flex: 1; color: var(--ink-2); }
+.B .stl .s4 { background: #458588; color: #1d2021; font-weight: 800; }
+.B .cmd { display: flex; align-items: center; padding: 0 6px; color: var(--ink-2); }
+.B .cursor { display: inline-block; width: 8px; height: 15px; background: var(--amber); margin-left: 2px; animation: blink 1s steps(1) infinite; vertical-align: middle; }
+.B .crt { font-family: "VT323", var(--mono); font-size: 20px; letter-spacing: .02em; color: var(--amber); text-shadow: 0 0 8px rgba(250,189,47,.5); }
+
+/* ================= C: Mission Control (swimlanes) ================= */
+.C { display: grid; grid-template-rows: auto auto 1fr; gap: 14px; padding: 18px 22px 74px; }
+.C .top { display: flex; align-items: center; gap: 16px; }
+.C .brand { font: 800 20px var(--sans); letter-spacing: -.02em; display: flex; align-items: center; gap: 10px; }
+.C .brand i { width: 30px; height: 30px; border-radius: 9px; background: conic-gradient(from 200deg, var(--violet), var(--teal), var(--amber), var(--violet)); animation: spin 8s linear infinite; }
+@keyframes spin { to { filter: hue-rotate(360deg); } }
+.C .cmdk { flex: 1; max-width: 560px; margin: 0 auto; display: flex; gap: 10px; align-items: center; padding: 11px 16px; border-radius: 14px; color: var(--ink-2); }
+.C .cmdk kbd { margin-left: auto; font: 11px var(--mono); padding: 2px 7px; border: 1px solid var(--line); border-radius: 6px; }
+.C .chips { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 4px; }
+.C .chip { flex: none; display: flex; gap: 10px; align-items: center; padding: 10px 14px; border-radius: 14px; max-width: 280px; transition: transform .2s, border-color .2s; }
+.C .chip:hover { transform: translateY(-2px); }
+.C .chip.on { border-color: rgba(45,212,191,.6); box-shadow: 0 0 0 1px rgba(45,212,191,.3), 0 10px 40px rgba(45,212,191,.15); }
+.C .chip .t { font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 190px; }
+.C .chip .ag { font: 700 11px var(--mono); color: var(--teal); }
+.C .stage { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 14px; min-height: 0; }
+.C .lanes { padding: 18px 0 14px; display: flex; flex-direction: column; min-height: 0; }
+.C .lhead { display: flex; align-items: baseline; gap: 14px; padding: 0 20px 14px; }
+.C .lhead h2 { margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -.02em; }
+.C .grid { position: relative; flex: 1; min-height: 0; }
+.C .lane { display: grid; grid-template-columns: 190px 1fr; align-items: center; height: 54px; border-top: 1px solid rgba(255,255,255,.05); }
+.C .lane .who { padding: 0 20px; display: flex; gap: 10px; align-items: center; min-width: 0; }
+.C .lane .who b { font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+.C .lane .who small { font: 600 10.5px var(--mono); color: var(--ink-3); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.C .track { position: relative; height: 100%;
+  background-image: linear-gradient(to right, rgba(255,255,255,.05) 1px, transparent 1px); background-size: var(--slot) 100%; }
+.C .bar { position: absolute; top: 14px; height: 26px; border-radius: 8px; transform-origin: left; animation: grow .8s cubic-bezier(.2,1,.3,1) both; animation-delay: calc(var(--d) * 50ms + 150ms);
+  background: linear-gradient(90deg, color-mix(in srgb, var(--mc) 85%, white), var(--mc)); box-shadow: 0 0 18px color-mix(in srgb, var(--mc) 55%, transparent); cursor: pointer; }
+.C .bar:hover { filter: brightness(1.2); }
+.C .bar.on { outline: 2px solid white; }
+@keyframes grow { from { transform: scaleX(0); opacity: 0; } }
+.C .tick { position: absolute; top: 19px; width: 16px; height: 16px; border-radius: 50%; background: var(--teal); box-shadow: 0 0 12px var(--teal); transform: translateX(-50%) scale(0); animation: tick .5s cubic-bezier(.2,1.6,.4,1) forwards; animation-delay: calc(var(--d) * 50ms); cursor: pointer; }
+@keyframes tick { to { transform: translateX(-50%) scale(1); } }
+.C .axis { display: grid; grid-template-columns: 190px 1fr; font: 600 10.5px var(--mono); color: var(--ink-3); height: 22px; }
+.C .axis div { position: relative; } .C .axis span { position: absolute; transform: translateX(-50%); }
+.C .now { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--rose); box-shadow: 0 0 14px var(--rose); animation: sweep 1.6s cubic-bezier(.6,0,.2,1) both; }
+@keyframes sweep { from { left: 190px !important; opacity: 0; } }
+.C .card { padding: 18px; display: flex; flex-direction: column; gap: 12px; min-height: 0; }
+.C .card h3 { margin: 0; font-size: 17px; font-weight: 800; }
+.C .card .box { background: rgba(0,0,0,.25); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; font-size: 12.5px; color: var(--ink-2); white-space: pre-wrap; max-height: 230px; overflow: auto; }
+.C .kp { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.C .kp div { background: rgba(0,0,0,.22); border-radius: 12px; padding: 10px 12px; } .C .kp b { display: block; font: 800 20px var(--mono); }
+
+/* Prototype switcher, deliberately not part of the design */
+.switch { position: fixed; z-index: 100; left: 50%; bottom: 16px; transform: translateX(-50%); display: flex; align-items: center; gap: 4px; padding: 6px; border-radius: 999px;
+  background: #fff; color: #111; box-shadow: 0 8px 30px rgba(0,0,0,.5); font: 700 13px var(--sans); }
+.switch button { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; color: #111; }
+.switch button:hover { background: #eee; }
+.switch span { padding: 0 10px; min-width: 210px; text-align: center; }
+.empty { padding: 40px; color: var(--ink-2); }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-bot" viewBox="0 0 24 24"><rect x="4.5" y="8" width="15" height="11" rx="3.5"/><path d="M12 5v3M9.5 13v1M14.5 13v1M2.5 13v2M21.5 13v2"/><circle cx="12" cy="4" r="1.2"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></symbol>
+  <symbol id="i-l" viewBox="0 0 24 24"><path d="m14.5 6-6 6 6 6"/></symbol>
+  <symbol id="i-r" viewBox="0 0 24 24"><path d="m9.5 6 6 6-6 6"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 19.5c1.2-3.5 4-5 7-5s5.8 1.5 7 5"/></symbol>
+</svg>
+<div class="aurora"><i></i><i></i><i></i></div>
+<div class="app" id="app"></div>
+<div class="scan"></div>
+<div class="switch"><button data-step="-1" aria-label="Vorherige Variante"><svg class="i"><use href="#i-l"/></svg></button><span id="vlabel"></span><button data-step="1" aria-label="Naechste Variante"><svg class="i"><use href="#i-r"/></svg></button></div>
+
+<script src="data.js"></script>
+<script>
+// ---------- Data helpers (shared, layout is not) ----------
+const D = window.SESSION_DATA || { sessions: [], home: "" };
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const ic = (n) => `<svg class="i"><use href="#i-${n}"/></svg>`;
+const short = (p) => (p || "?").replace(D.home, "~");
+const projName = (p) => { const s = short(p); return s === "~" ? "Home" : s.split("/").filter(Boolean).pop(); };
+const rel = (ts) => { const d = (Date.now() - new Date(ts)) / 1000; if (d < 3600) return `${Math.max(1, Math.round(d / 60))}m`; if (d < 86400) return `${Math.round(d / 3600)}h`; return `${Math.round(d / 86400)}d`; };
+const hhmm = (ts) => new Date(ts).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
+function modelInfo(m) {
+  if (!m) return { fam: "x", name: "?" };
+  const k = m.match(/opus|sonnet|haiku|fable/i), v = m.match(/-(\d+)-(\d+)(?:-\d{8})?$/);
+  if (!k) return { fam: "x", name: m.replace(/^claude-/, "") };
+  const fam = k[0].toLowerCase(); return { fam, name: fam[0].toUpperCase() + fam.slice(1) + (v ? ` ${v[1]}.${v[2]}` : "") };
+}
+const mp = (m) => { const x = modelInfo(m); return `<span class="mp ${x.fam}">${esc(x.name)}</span>`; };
+const NAMES = { "general-purpose": "Allrounder", Explore: "Sucher", Plan: "Planer", "claude-code-guide": "Claude-Code-Hilfe", fork: "Abzweig" };
+const aName = (t) => { const n = t.includes(":") ? t.split(":")[1] : t; return NAMES[n] || n.replace(/^impeccable-/, "").replace(/[-_]/g, " ").replace(/^./, (c) => c.toUpperCase()); };
+const fmtTok = (n) => n < 1000 ? `${n}` : n < 1e6 ? `${Math.round(n / 1000)}k` : `${(n / 1e6).toFixed(1)}M`;
+const fmtDur = (ms) => { const s = ms / 1000; return s < 60 ? `${Math.round(s)}s` : s < 3600 ? `${Math.round(s / 60)}m` : `${Math.floor(s / 3600)}h${Math.round((s % 3600) / 60)}m`; };
+const usd = (u) => u == null ? "-" : `$${u.toFixed(2)}`;
+const fresh = () => Date.now() - Date.parse(D.generatedAt) < 90e3;
+const live = (s) => fresh() && Date.parse(D.generatedAt) - (s.fileMtime || 0) < 180e3;
+for (const s of D.sessions) {
+  s.label = s.title || s.aiTitle || s.nodes[0]?.text.slice(0, 60) || "Session";
+  s.project = s.cwd || s.dir; s.agents ||= []; s.models ||= {};
+  s.mainModels = Object.keys(s.models);
+  s.nodes.sort((a, b) => a.ts.localeCompare(b.ts));
+}
+const sessions = D.sessions.slice().sort((a, b) => b.end.localeCompare(a.end));
+const ui = { sel: (sessions.find((s) => s.agents.length > 2) || sessions[0])?.id, agent: null, cur: 0 };
+const S = () => sessions.find((s) => s.id === ui.sel);
+const selAgent = (s) => s.agents.find((a) => a.id === ui.agent);
+
+// ---------- Variant A: Glass Cockpit ----------
+function A() {
+  const s = S(), a = selAgent(s);
+  const W = 1000, H = 420, cx = W / 2, cy = 90, n = s.agents.length;
+  const pos = s.agents.map((_, i) => { const t = n === 1 ? 0.5 : i / (n - 1); const ang = Math.PI * (0.15 + 0.7 * t); return { x: cx - Math.cos(ang) * 380, y: cy + Math.sin(ang) * 250 }; });
+  const groups = {}; sessions.forEach((x) => (groups[projName(x.project)] ||= []).push(x));
+  return `<div class="app A">
+    <header class="titlebar glass fade"><span class="lights"><i></i><i></i><i></i></span><b>Session Atlas</b><span class="cap mono">~/.claude</span>
+      <span class="kbar">${ic("search")} Session, Agent oder Anfrage suchen<kbd>Cmd K</kbd></span></header>
+    <div class="body">
+      <aside class="side glass scroll fade">${Object.entries(groups).map(([p, ss], gi) => `<h4>${esc(p)}</h4>` + ss.map((x, i) => `
+        <button class="srow pop ${x.id === ui.sel ? "on" : ""}" style="--d:${gi + i}" data-sel="${x.id}"><span class="dot ${live(x) ? "live" : ""}"></span>
+          <span style="min-width:0"><span class="t" style="display:block">${esc(x.label)}</span><span class="cap">${x.nodes.length} Anfragen${x.agents.length ? ` · ${x.agents.length} Agents` : ""}</span></span>
+          <span class="n">${rel(x.end)}</span></button>`).join("")).join("")}</aside>
+      <main class="main">
+        <section class="hero glass pop"><div style="min-width:0"><div class="cap mono">${esc(projName(s.project))}${s.branch ? " / " + esc(s.branch) : ""}</div><h1>${esc(s.label)}</h1>
+          <div style="display:flex;gap:6px;margin-top:8px">${s.mainModels.map(mp).join("")}</div></div>
+          <div class="kpis"><div><span class="cap">Anfragen</span><b>${s.nodes.length}</b></div><div><span class="cap">Agents</span><b>${1 + n}</b></div><div><span class="cap">Kosten</span><b>${usd(s.cost?.usd)}</b></div></div></section>
+        <section class="graph glass pop" style="--d:2"><span class="hint">Agent-Graph</span>
+          <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet"><defs><linearGradient id="gA" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#8b6cff"/><stop offset="1" stop-color="#2dd4bf"/></linearGradient></defs>
+            ${pos.map((p, i) => `<path class="thread" style="--d:${i}" id="th${i}" d="M${cx},${cy} C${cx},${cy + 120} ${p.x},${p.y - 120} ${p.x},${p.y}"/>
+              <circle r="3.5" fill="#2dd4bf"><animateMotion dur="${2.2 + i * 0.3}s" repeatCount="indefinite" begin="${1 + i * 0.15}s"><mpath href="#th${i}"/></animateMotion></circle>`).join("")}
+          </svg>
+          <div style="position:absolute;inset:0" id="nodes">
+            <div class="node main pop" style="left:50%;top:${cy / H * 100}%"><span class="orb">${ic("bot")}</span><span class="lb">${esc(s.agentName || "Claude")}</span><span class="ds">Hauptagent</span></div>
+            ${s.agents.map((x, i) => `<button class="node pop ${x.id === ui.agent ? "on" : ""}" style="--d:${i + 4};left:${pos[i].x / W * 100}%;top:${pos[i].y / H * 100}%" data-agent="${x.id}">
+              <span class="orb">${ic("bot")}</span><span class="lb">${esc(aName(x.type))}</span><span class="ds">${esc(x.description || "")}</span></button>`).join("")}
+            ${n ? "" : `<div class="node fade" style="left:50%;top:70%;width:300px"><span class="ds">Hier hat Claude allein gearbeitet. Subagents erscheinen als Orbits um den Hauptagent.</span></div>`}
+          </div></section>
+        <section class="strip glass scroll pop" style="--d:3">${s.nodes.map((x, i) => `<div class="pchip pop" style="--d:${i}"><span class="no">#${i + 1} · ${hhmm(x.ts)}</span>${x.agents?.length ? ` <span class="tag">${x.agents.length} Agents</span>` : ""}<div class="tx">${esc(x.text)}</div></div>`).join("")}</section>
+      </main>
+      <aside class="insp glass scroll pop" style="--d:4">${a ? `<div class="cap mono">Subagent</div><h3>${esc(aName(a.type))}</h3><div class="cap">${esc(a.description || "")}</div>
+          <div class="row">${Object.keys(a.models).map(mp).join("")}<span class="tag">${fmtDur(Date.parse(a.end) - Date.parse(a.start))}</span><span class="tag">${a.steps} Schritte</span><span class="tag">${fmtTok(a.tokens)} Tokens</span></div>
+          <div><div class="lbl">Werkzeuge</div><div class="row">${Object.entries(a.tools).sort((x, y) => y[1] - x[1]).map(([t, c]) => `<span class="tag">${esc(t)} ${c}</span>`).join("")}</div></div>
+          ${a.task ? `<div><div class="lbl">Auftrag</div><div class="box">${esc(a.task)}</div></div>` : ""}${a.result ? `<div><div class="lbl">Ergebnis</div><div class="box">${esc(a.result)}</div></div>` : ""}`
+        : `<div class="cap mono">Inspector</div><h3>Agent anklicken</h3><div class="cap">Klick auf einen Orbit im Graph zeigt hier Auftrag, Ergebnis, Werkzeuge und Modell.</div>
+          <div class="lbl" style="margin-top:8px">Hauptagent</div><div class="row">${Object.entries(s.models).map(([m, u]) => `${mp(m)}<span class="tag">${u.replies} Antworten</span><span class="tag">${fmtTok(u.tokens)} Tokens</span>`).join("")}</div>`}</aside>
+    </div>
+    <footer class="status glass fade"><span class="m">NORMAL</span><span>${esc(projName(s.project))}</span><span class="fill">j/k Session · Klick Agent · Cmd K suchen</span><span>${sessions.length} Sessions</span><span style="color:var(--teal)">${fresh() ? "LIVE" : "Stand " + rel(D.generatedAt)}</span></footer>
+  </div>`;
+}
+
+// ---------- Variant B: Neovim Splits ----------
+function B() {
+  const s = S();
+  const groups = {}; sessions.forEach((x) => (groups[projName(x.project)] ||= []).push(x));
+  let ln = 0; const L = (tx, cls = "", attrs = "") => `<div class="ln ${cls}" ${attrs}><span class="nr">${++ln}</span><span class="tx">${tx}</span></div>`;
+  let tree = L(`<span class="fold">  ~/.claude/projects</span>`);
+  for (const [p, ss] of Object.entries(groups)) {
+    tree += L(`<span class="fold"> ${esc(p)}/</span>`);
+    ss.forEach((x, i) => { tree += L(`<span class="cm">${i === ss.length - 1 ? "  └ " : "  ├ "}</span>${live(x) ? `<span class="str">●</span> ` : ""}<span class="${x.id === ui.sel ? "fn" : ""}">${esc(x.label.slice(0, 32))}</span> <span class="cm">${x.agents.length ? "+" + x.agents.length + "a " : ""}${rel(x.end)}</span>`, x.id === ui.sel ? "cur click" : "click", `data-sel="${x.id}"`); });
+  }
+  ln = 0; let d = 0;
+  const T = (h) => `<span class="typing" style="--d:${d++}">${h}</span>`;
+  let ag = L(T(`<span class="cm">-- agents.lua  ·  ${esc(s.label.slice(0, 50))}</span>`));
+  ag += L(T(`<span class="kw">local</span> team = {`));
+  ag += L(T(`  <span class="aq">main</span> = { name = <span class="str">"${esc(s.agentName || "Claude")}"</span>, model = <span class="str">"${esc(s.mainModels.map((m) => modelInfo(m).name).join(", "))}"</span>, replies = <span class="num">${Object.values(s.models).reduce((n, u) => n + u.replies, 0)}</span> },`), "cur");
+  s.agents.forEach((a, i) => {
+    ag += L(T(`  ${i === s.agents.length - 1 ? "└─" : "├─"} <span class="fn">${esc(aName(a.type))}</span> <span class="cm">-- ${esc(a.description || "")}</span>`), "click", `data-agent="${a.id}"`);
+    if (a.id === ui.agent) {
+      ag += L(T(`  │    model = <span class="str">"${Object.keys(a.models).map((m) => modelInfo(m).name).join(", ")}"</span>, time = <span class="num">"${fmtDur(Date.parse(a.end) - Date.parse(a.start))}"</span>, tokens = <span class="num">${fmtTok(a.tokens)}</span>`));
+      ag += L(T(`  │    tools = { ${Object.entries(a.tools).map(([t, c]) => `<span class="aq">${esc(t)}</span>=<span class="num">${c}</span>`).join(", ")} }`));
+      if (a.result) ag += L(T(`  │    <span class="cm">-- ${esc(a.result.replace(/\s+/g, " ").slice(0, 110))}</span>`));
+    }
+  });
+  if (!s.agents.length) ag += L(T(`  <span class="cm">-- keine Subagents, Claude hat allein gearbeitet</span>`));
+  ag += L(T(`}`));
+  for (let i = 0; i < 6; i++) ag += `<div class="ln"><span class="nr tilde">~</span><span></span></div>`;
+  ln = 0;
+  const pr = s.nodes.map((x, i) => L(`<span class="num">${hhmm(x.ts)}</span> ${x.agents?.length ? `<span class="aq">[${x.agents.length}a]</span> ` : ""}${esc(x.text.replace(/\s+/g, " "))}`, i === s.nodes.length - 1 ? "cur" : "")).join("");
+  return `<div class="app B">
+    <div class="tabline fade"><span class="on"><span class="crt">atlas</span></span><span>1 sessions</span><span class="on">2 agents.lua</span><span>3 prompts.log</span><span class="r">${fresh() ? "● live" : "snapshot " + rel(D.generatedAt)}</span></div>
+    <div class="wins">
+      <section class="win tree glass scroll pop"><div class="wbar"><b>NvimTree</b><span>${sessions.length}</span></div><div class="buf">${tree}</div></section>
+      <section class="win glass focus scroll pop" style="--d:2"><div class="wbar"><b>agents.lua</b><span>${s.agents.length + 1} agents</span></div><div class="buf">${ag}</div></section>
+      <section class="win glass scroll pop" style="--d:3"><div class="wbar"><b>prompts.log</b><span>${s.nodes.length} lines</span></div><div class="buf">${pr}</div></section>
+    </div>
+    <div class="stl fade"><span class="mode">NORMAL</span><span class="s2"> ${esc(s.branch || "no-branch")}</span><span class="s3">${esc(short(s.project))}</span><span class="s2">${s.mainModels.map((m) => modelInfo(m).name).join(" ")}</span><span class="s4">${usd(s.cost?.usd)}</span></div>
+    <div class="cmd">:Atlas agents ${esc(s.id.slice(0, 8))}<span class="cursor"></span></div>
+  </div>`;
+}
+
+// ---------- Variant C: Mission Control (swimlanes) ----------
+function C() {
+  const s = S(), a = selAgent(s), slot = Math.max(54, Math.min(140, 900 / Math.max(1, s.nodes.length)));
+  const idx = Object.fromEntries(s.nodes.map((n, i) => [n.id, i]));
+  const lanes = [
+    { who: `<b>Du</b><small>${s.nodes.length} Anfragen</small>`, icon: "user", body: s.nodes.map((n, i) => `<span class="tick" style="--d:${i};left:${(i + 0.5) * slot}px" title="${esc(n.text.slice(0, 120))}"></span>`).join("") },
+    { who: `<b>${esc(s.agentName || "Claude")}</b><small>${s.mainModels.map((m) => modelInfo(m).name).join(", ")}</small>`, icon: "bot",
+      body: s.nodes.map((n, i) => `<span class="bar ${modelInfo(n.models?.[0] || s.mainModels[0]).fam}" style="--d:${i};left:${i * slot + 4}px;width:${slot - 8}px;opacity:${n.edits.length ? 1 : .55}" title="${esc(n.text.slice(0, 120))}"></span>`).join("") },
+    ...s.agents.map((x, i) => { const at = idx[x.node] ?? 0; const fam = modelInfo(Object.keys(x.models)[0]).fam; return { who: `<b>${esc(aName(x.type))}</b><small>${esc((x.description || "").slice(0, 26))}</small>`, icon: "bot",
+      body: `<span class="bar ${fam} ${x.id === ui.agent ? "on" : ""}" data-agent="${x.id}" style="--d:${i + 3};left:${at * slot + 8}px;width:${Math.max(24, slot * 0.85)}px" title="${esc(x.description || "")}"></span>` }; })
+  ];
+  const kp = (k, v) => `<div><span class="cap">${k}</span><b>${v}</b></div>`;
+  return `<div class="app C">
+    <div class="top"><div class="brand fade"><i></i>Atlas</div><div class="cmdk glass pop">${ic("search")} Springe zu Session, Agent, Anfrage ...<kbd>Cmd K</kbd></div><span class="cap mono">${fresh() ? '<span class="dot live"></span> live' : "Stand " + rel(D.generatedAt)}</span></div>
+    <div class="chips scroll">${[S(), ...sessions.filter((x) => x.id !== ui.sel)].slice(0, 14).map((x, i) => `<button class="chip glass pop ${x.id === ui.sel ? "on" : ""}" style="--d:${i}" data-sel="${x.id}"><span class="dot ${live(x) ? "live" : ""}"></span><span style="min-width:0;text-align:left"><span class="t" style="display:block">${esc(x.label)}</span><span class="cap">${esc(projName(x.project))} · ${rel(x.end)}</span></span>${x.agents.length ? `<span class="ag">${x.agents.length}a</span>` : ""}</button>`).join("")}</div>
+    <div class="stage">
+      <section class="lanes glass pop" style="--d:2"><div class="lhead"><h2>${esc(s.label)}</h2><span class="cap mono">jede Spalte = eine Anfrage</span></div>
+        <div class="grid scroll"><div style="min-width:${190 + s.nodes.length * slot + 20}px;position:relative">
+          <div class="axis"><span></span><div>${s.nodes.map((n, i) => i % Math.ceil(70 / slot) ? "" : `<span style="left:${(i + 0.5) * slot}px">${hhmm(n.ts)}</span>`).join("")}</div></div>
+          ${lanes.map((l) => `<div class="lane"><div class="who">${ic(l.icon)}<span style="min-width:0">${l.who}</span></div><div class="track" style="--slot:${slot}px">${l.body}</div></div>`).join("")}
+          <span class="now" style="left:${190 + s.nodes.length * slot}px"></span>
+        </div></div></section>
+      <aside class="card glass scroll pop" style="--d:3">${a ? `<div class="cap mono">Subagent</div><h3>${esc(aName(a.type))}</h3><div class="cap">${esc(a.description || "")}</div>
+          <div class="kp">${kp("Modell", Object.keys(a.models).map((m) => modelInfo(m).name).join(", "))}${kp("Dauer", fmtDur(Date.parse(a.end) - Date.parse(a.start)))}${kp("Schritte", a.steps)}${kp("Tokens", fmtTok(a.tokens))}</div>
+          ${a.result ? `<div class="box">${esc(a.result)}</div>` : ""}`
+        : `<div class="cap mono">Session</div><h3>Überblick</h3><div class="kp">${kp("Anfragen", s.nodes.length)}${kp("Agents", 1 + s.agents.length)}${kp("Kosten", usd(s.cost?.usd))}${kp("Zeilen", s.cost ? `+${s.cost.added}` : s.files.length)}</div>
+          <div class="cap">Klick auf einen Agent-Balken zeigt Auftrag und Ergebnis. Grün pulsierend = läuft gerade.</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">${s.mainModels.map(mp).join("")}</div>`}</aside>
+    </div>
+  </div>`;
+}
+
+// ---------- Switcher ----------
+const V = { A: ["A", "Glass Cockpit", A], B: ["B", "Neovim Splits", B], C: ["C", "Mission Control", C] };
+const keys = Object.keys(V);
+let cur = new URLSearchParams(location.search).get("variant") || "A"; if (!V[cur]) cur = "A";
+function render() {
+  document.getElementById("vlabel").textContent = `${cur} / ${V[cur][1]}`;
+  document.getElementById("app").outerHTML = sessions.length ? V[cur][2]().replace('class="app', 'id="app" class="app') : `<div id="app" class="app empty">Keine Daten. Erst <code>node scripts/extract.mjs</code> laufen lassen.</div>`;
+}
+function setVariant(k) { cur = k; const u = new URL(location); u.searchParams.set("variant", k); history.replaceState(null, "", u); render(); }
+document.addEventListener("click", (e) => {
+  const el = e.target.closest("[data-step],[data-sel],[data-agent]"); if (!el) return;
+  if (el.dataset.step) return setVariant(keys[(keys.indexOf(cur) + +el.dataset.step + keys.length) % keys.length]);
+  if (el.dataset.sel) { ui.sel = el.dataset.sel; ui.agent = null; return render(); }
+  if (el.dataset.agent) { ui.agent = ui.agent === el.dataset.agent ? null : el.dataset.agent; return render(); }
+});
+document.addEventListener("keydown", (e) => {
+  if (e.target.matches("input,textarea,[contenteditable]")) return;
+  if (e.key === "ArrowLeft" || e.key === "ArrowRight") return setVariant(keys[(keys.indexOf(cur) + (e.key === "ArrowRight" ? 1 : -1) + keys.length) % keys.length]);
+  if (e.key === "j" || e.key === "k") { const i = sessions.findIndex((s) => s.id === ui.sel); ui.sel = sessions[Math.max(0, Math.min(sessions.length - 1, i + (e.key === "j" ? 1 : -1)))].id; ui.agent = null; render(); }
+});
+render();
+</script>
+</body>
+</html>

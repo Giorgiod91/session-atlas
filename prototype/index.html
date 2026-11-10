@@ -300,6 +300,101 @@ html[data-theme="vim"] .bubble.ai { border-left-color: var(--blue); color: var(-
 .toast.show { opacity: 1; transform: translate(-50%, 0); }
 .toast code { font: 12px var(--mono); opacity: .7; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 380px; }
 
+
+/* ================= Agents-Ansicht (Orca-artig, aber ruhiger) ================= */
+#board { position: fixed; inset: 0; overflow: auto; background: var(--ground); padding: 92px 32px 140px; display: none; z-index: 1; }
+body.boardmode #board { display: block; }
+body.boardmode #stage, body.boardmode .zoom { display: none; }
+.bwrap { max-width: 1280px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
+.bhead { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.bhead h1 { margin: 0; font-size: 34px; font-weight: 800; letter-spacing: -.025em; line-height: 1.1; }
+.bhead p { margin: 4px 0 0; }
+.livebadge { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--ink-2); background: var(--card); padding: 8px 14px; border-radius: 999px; box-shadow: var(--shadow); }
+.livebadge code { font: 12px var(--mono); }
+.dot { width: 9px; height: 9px; border-radius: 50%; background: var(--edge); flex: none; }
+.dot.live { background: #2fa35a; box-shadow: 0 0 0 0 rgba(47,163,90,.5); animation: pulse 1.6s infinite; }
+@keyframes pulse { 70% { box-shadow: 0 0 0 8px rgba(47,163,90,0); } 100% { box-shadow: 0 0 0 0 rgba(47,163,90,0); } }
+.stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)) minmax(0, 2fr); gap: 12px; }
+.stat { background: var(--card); border-radius: var(--r-md); box-shadow: var(--shadow); padding: 14px 16px; min-width: 0; }
+.stat b { display: block; font-size: 26px; font-weight: 800; letter-spacing: -.02em; font-variant-numeric: tabular-nums; line-height: 1.15; }
+html[data-theme="vim"] .stat, html[data-theme="vim"] .dcard, html[data-theme="vim"] .slist, html[data-theme="vim"] .livebadge { border: 1px solid var(--border); }
+.mbar { display: flex; height: 10px; border-radius: 6px; overflow: hidden; background: var(--surface); margin: 10px 0 8px; }
+.mbar i { display: block; height: 100%; background: var(--mc); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 12px; font-size: 12.5px; color: var(--ink-2); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend span::before { content: ""; width: 9px; height: 9px; border-radius: 3px; background: var(--mc); }
+.mp, .ap { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 700; padding: 3px 9px; border-radius: 999px; white-space: nowrap; line-height: 1.3; }
+.mp { background: color-mix(in srgb, var(--mc) 16%, transparent); color: color-mix(in srgb, var(--mc) 70%, var(--ink)); }
+.ap { background: var(--surface); color: var(--ink-2); border: 0; }
+.ap svg.i { width: 14px; height: 14px; }
+button.ap:hover { background: var(--action-soft); color: var(--ink); }
+.opus { --mc: #7c4dff; } .sonnet { --mc: #2f7de1; } .haiku { --mc: #1f9d55; } .fable { --mc: #e0761c; } .x { --mc: #8a7d72; }
+.filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.chip { border: 0; background: var(--card); box-shadow: var(--shadow); padding: 8px 14px; border-radius: 999px; font-weight: 700; font-size: 13.5px; color: var(--ink-2); display: inline-flex; gap: 6px; align-items: center; }
+.chip.on { background: var(--ink); color: var(--ground); }
+html[data-theme="vim"] .chip { border: 1px solid var(--border); }
+html[data-theme="vim"] .chip.on { background: var(--action); color: var(--action-ink); }
+.chip .n { opacity: .6; font-variant-numeric: tabular-nums; }
+.bgrid { display: grid; grid-template-columns: 380px minmax(0, 1fr); gap: 18px; align-items: start; }
+.slist { background: var(--card); border-radius: var(--r-lg); box-shadow: var(--shadow); padding: 10px; position: sticky; top: 0; max-height: calc(100vh - 250px); overflow: auto; }
+.slist h4 { margin: 12px 10px 6px; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--ink-3); font-weight: 700; }
+.brow { width: 100%; display: flex; gap: 11px; align-items: center; text-align: left; border: 0; background: none; padding: 10px; border-radius: var(--r-sm); }
+.brow:hover { background: var(--surface); }
+.brow.on { background: var(--action-soft); }
+.brow .grow { min-width: 0; flex: 1; }
+.brow .t { font-weight: 700; font-size: 14.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.brow .pills { display: flex; gap: 4px; margin-top: 5px; flex-wrap: wrap; }
+.brow .when { font-size: 12px; color: var(--ink-3); white-space: nowrap; align-self: flex-start; margin-top: 2px; }
+.dcol { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.dcard { background: var(--card); border-radius: var(--r-lg); box-shadow: var(--shadow); padding: 22px 24px; min-width: 0; }
+.dcard h2 { margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -.02em; line-height: 1.2; }
+.dcard h3 { margin: 0 0 14px; font-size: 17px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+.dcard h3 .cap { font-weight: 600; }
+.dhead { display: flex; gap: 14px; align-items: center; }
+.kv { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 18px 0; }
+.kv div { background: var(--surface); border-radius: var(--r-sm); padding: 10px 12px; }
+.kv b { display: block; font-size: 18px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.drow { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+/* Team-Baum: Hauptagent oben, Subagents haengen darunter */
+.tree { display: flex; flex-direction: column; }
+.anode { display: flex; gap: 12px; align-items: flex-start; background: var(--surface); border-radius: var(--r-md); padding: 14px; text-align: left; border: 1.5px solid transparent; width: 100%; }
+.anode .tile { background: var(--card); }
+.anode.main .tile { background: var(--action); color: var(--action-ink); }
+.anode .grow { min-width: 0; flex: 1; }
+.anode .nm { font-weight: 800; font-size: 15.5px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.anode .ds { margin-top: 3px; font-size: 14px; color: var(--ink-2); }
+.anode .meta { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; align-items: center; }
+.anode.sub { cursor: pointer; }
+.anode.sub:hover, .anode.sub.open { border-color: var(--action); }
+.anode.helper { background: transparent; border: 1.5px dashed var(--border); }
+.kids { margin-left: 22px; padding-left: 22px; border-left: 2.5px solid var(--edge); display: flex; flex-direction: column; gap: 10px; padding-top: 10px; }
+.kids > * { position: relative; }
+.kids > *::before { content: ""; position: absolute; left: -24px; top: 30px; width: 22px; height: 2.5px; background: var(--edge); }
+.state { font-size: 12px; font-weight: 700; display: inline-flex; gap: 6px; align-items: center; color: var(--ink-2); }
+.adetail { margin-top: 12px; display: grid; gap: 10px; }
+.adetail .lbl { font-size: 12px; font-weight: 700; color: var(--ink-3); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px; }
+.adetail .box { background: var(--card); border-radius: var(--r-sm); padding: 10px 12px; font-size: 13.5px; white-space: pre-wrap; max-height: 220px; overflow: auto; color: var(--ink-2); }
+/* Anfragen-Zeitleiste */
+.tl { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.tl li { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 12px; padding: 10px; border-radius: var(--r-sm); cursor: pointer; }
+.tl li:hover { background: var(--surface); }
+.tl .n { width: 30px; height: 30px; border-radius: 50%; background: var(--surface); display: grid; place-items: center; font-size: 12px; font-weight: 800; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.tl .n svg.i { width: 15px; height: 15px; }
+.tl li.now .n { background: var(--action); color: var(--action-ink); }
+.tl .txt { font-size: 14.5px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.tl .meta { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; align-items: center; }
+.empty { padding: 30px; text-align: center; color: var(--ink-2); }
+.badge.ag { background: color-mix(in srgb, #7c4dff 16%, transparent); }
+@media (max-width: 1100px) { .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } .stats .wide { grid-column: 1 / -1; } }
+@media (max-width: 900px) {
+  #board { padding: 132px 16px 140px; }
+  .bgrid { grid-template-columns: minmax(0, 1fr); }
+  .slist { position: static; max-height: 46vh; }
+  .kv { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .bhead h1 { font-size: 28px; }
+  .kids { margin-left: 8px; padding-left: 16px; } .kids > *::before { left: -18px; width: 16px; }
+}
+
 @media (max-width: 900px) {
   .topl { max-width: calc(100vw - 32px); }
   .topr { top: 72px; }
@@ -330,9 +425,11 @@ html[data-theme="vim"] .bubble.ai { border-left-color: var(--blue); color: var(-
   <symbol id="i-fit" viewBox="0 0 24 24"><path d="M4.5 9V5.5a1 1 0 0 1 1-1H9M15 4.5h3.5a1 1 0 0 1 1 1V9M19.5 15v3.5a1 1 0 0 1-1 1H15M9 19.5H5.5a1 1 0 0 1-1-1V15"/></symbol>
   <symbol id="i-atlas" viewBox="0 0 24 24"><circle cx="6" cy="7" r="2.2"/><circle cx="18" cy="7" r="2.2"/><circle cx="12" cy="17.5" r="2.2"/><path d="M8.2 7h7.6M7.2 8.9l3.6 6.7M16.8 8.9l-3.6 6.7"/></symbol>
   <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4"/></symbol>
+  <symbol id="i-bot" viewBox="0 0 24 24"><rect x="4.5" y="8" width="15" height="11" rx="3.5"/><path d="M12 5v3M9.5 13v1M14.5 13v1M2.5 13v2M21.5 13v2"/><circle cx="12" cy="4" r="1.2"/></symbol>
   <symbol id="i-term" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="14" rx="2"/><path d="m7.5 10 3 2.5-3 2.5M12.5 15.5h4"/></symbol>
 </svg>
 
+<main id="board" aria-label="Agents und Sessions"></main>
 <div id="stage"><div id="world"><svg id="edges"></svg><div id="cards"></div></div></div>
 
 <div class="float topl">
@@ -351,6 +448,7 @@ html[data-theme="vim"] .bubble.ai { border-left-color: var(--blue); color: var(-
   <button class="tab" data-tab="all"><svg class="i"><use href="#i-home"/></svg>Übersicht</button>
   <button class="tab" data-tab="recent"><svg class="i"><use href="#i-clock"/></svg>Zuletzt</button>
   <div class="fabwrap"><button class="fab" data-tab="resume" aria-label="Weitermachen"><svg class="i"><use href="#i-play"/></svg></button>Weitermachen</div>
+  <button class="tab" data-tab="agents"><svg class="i"><use href="#i-bot"/></svg>Agents</button>
   <button class="tab" data-tab="search"><svg class="i"><use href="#i-search"/></svg>Suchen</button>
   <button class="tab" data-tab="tags"><svg class="i"><use href="#i-tag"/></svg>Tags</button>
 </nav>
@@ -375,7 +473,7 @@ html[data-theme="vim"] .bubble.ai { border-left-color: var(--blue); color: var(-
 
 <script src="data.js"></script>
 <script>
-const D = window.SESSION_DATA || { sessions: [], home: "" };
+let D = window.SESSION_DATA || { sessions: [], home: "" };
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
 const ic = (n, cls = "") => `<svg class="i ${cls}"><use href="#i-${n}"/></svg>`;
@@ -405,7 +503,9 @@ const when = (ts) => new Date(ts).toLocaleString("de-DE", { weekday: "short", da
 
 // ---------- Daten ----------
 const EXT = { ts:"typescript", tsx:"react", cs:"dotnet", py:"python", sql:"sql", prisma:"prisma", md:"doku", html:"html", css:"css" };
-const projects = new Map();
+const projects = new Map(); let latest;
+function prep() {
+projects.clear();
 for (const s of D.sessions) {
   s.project = s.cwd || s.dir;
   s.label = s.title || s.aiTitle || s.nodes[0]?.text.slice(0, 60) || "Session";
@@ -423,7 +523,9 @@ for (const s of D.sessions) {
   projects.get(s.project).sessions.push(s);
 }
 for (const p of projects.values()) p.sessions.sort((a, b) => b.end.localeCompare(a.end));
-const latest = D.sessions.slice().sort((a, b) => b.end.localeCompare(a.end))[0];
+latest = D.sessions.slice().sort((a, b) => b.end.localeCompare(a.end))[0];
+}
+prep();
 const cmd = (s, fork) => `cd '${short(s.cwd)}' && claude --resume ${s.id}${fork ? " --fork-session" : ""}`;
 function hue(str) { let h = 0; for (const c of str) h = (h * 31 + c.charCodeAt(0)) >>> 0; return [18, 32, 145, 168, 200, 222, 262, 290, 330, 350, 88, 48][h % 12]; }
 function initials(label) { const w = label.replace(/[^\p{L}\p{N} ]/gu, " ").split(/\s+/).filter(x => x.length > 1); return ((w[0]?.[0] || "?") + (w[1]?.[0] || "")).toUpperCase(); }
@@ -566,7 +668,7 @@ function renderSession() {
     const p = pos[n.id]; if (!p) continue;
     const isNow = n.id === s.last.id, off = !s.onPath.has(n.id);
     html += `<article class="card step ${isNow ? "now" : ""} ${off ? "off" : ""} ${state.card === n.id ? "sel" : ""} ${cls(s, n)}" data-pick="${n.id}" style="left:${p.x}px;top:${p.y}px;width:${PC.w}px;height:${PC.h}px">
-      <div class="top"><span class="num">${off ? ic("branch") : s.path.indexOf(n) + 1}</span><span class="cap">${when(n.ts)}</span>${n.edits.length ? `<span class="badge">${ic("pen")} ${n.edits.length} Datei${n.edits.length > 1 ? "en" : ""}</span>` : ""}</div>
+      <div class="top"><span class="num">${off ? ic("branch") : s.path.indexOf(n) + 1}</span><span class="cap">${when(n.ts)}</span>${n.edits.length ? `<span class="badge">${ic("pen")} ${n.edits.length} Datei${n.edits.length > 1 ? "en" : ""}</span>` : ""}${n.agents?.length ? `<span class="badge ag">${ic("bot")} ${n.agents.length}</span>` : ""}</div>
       <div class="txt">${esc(n.text)}</div>
       ${isNow ? `<button class="btn primary small" data-resume="${s.id}" style="align-self:flex-start;margin-top:auto">${ic("play")} Hier weitermachen</button>` : ""}
     </article>`;
@@ -595,6 +697,7 @@ function openSheet(s, n) {
   $("#sheet-b").innerHTML = `
     <div class="who">Du</div><div class="bubble me">${esc(n.text)}</div>
     <div class="who">Claude</div><div class="bubble ai">${n.reply ? md(n.reply) : "Keine Textantwort in diesem Schritt."}</div>
+    ${(n.models || []).length || n.agents?.length ? `<div class="who">${ic("bot")} Wer hat geantwortet</div><div class="meta" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">${(n.models || []).map(m => mpill(m)).join("")}${s.agents.filter(a => a.node === n.id).map(a => `<span class="ap" title="${esc(a.description || "")}">${ic("bot")} ${esc(agentLabel(a.type).name)}${a.description ? `: ${esc(a.description)}` : ""}</span>`).join("")}</div>` : ""}
     ${n.edits.length ? `<div class="who">${ic("pen")} Geänderte Dateien</div><div class="files">${n.edits.map(f => `<div class="file" title="${esc(f)}">${ic("file")}<span>${esc(short(f))}</span></div>`).join("")}</div>` : ""}`;
   $("#sheet-f").innerHTML = isNow
     ? `<button class="btn primary" data-resume="${s.id}">${ic("play")} Hier weitermachen</button><button class="btn secondary" data-fork="${s.id}">${ic("branch")} Als neuen Weg fortsetzen</button>`
@@ -604,14 +707,148 @@ function openSheet(s, n) {
 }
 const closeSheet = () => { $("#sheet").classList.remove("open"); state.card = null; document.querySelectorAll(".step.sel").forEach(c => c.classList.remove("sel")); status(); };
 
+
+// ---------- Agents-Ansicht: wer hat gearbeitet, mit welchem Modell ----------
+const board = { sel: null, filter: "all", fam: null, open: null };
+function modelInfo(m) {
+  if (!m) return { fam: "x", name: "unbekannt" };
+  const k = m.match(/opus|sonnet|haiku|fable/i), v = m.match(/-(\d+)-(\d+)(?:-\d{8})?$/);
+  if (!k) return { fam: "x", name: m.replace(/^claude-/, "") };
+  const fam = k[0].toLowerCase();
+  return { fam, name: fam[0].toUpperCase() + fam.slice(1) + (v ? ` ${v[1]}.${v[2]}` : "") };
+}
+const mpill = (m, extra = "") => { const x = modelInfo(m); return `<span class="mp ${x.fam}" title="${esc(m || "")}">${esc(x.name)}${extra}</span>`; };
+const AGENT_NAMES = { "general-purpose": "Allrounder", "Explore": "Sucher", "Plan": "Planer", "claude-code-guide": "Claude-Code-Hilfe", "fork": "Abzweig", "statusline-setup": "Statuszeile" };
+function agentLabel(t) {
+  const [plugin, name] = t.includes(":") ? t.split(":") : [null, t];
+  const base = AGENT_NAMES[name] || name.replace(new RegExp("^" + (plugin || "@") + "-"), "").replace(/[-_]/g, " ").replace(/^./, c => c.toUpperCase());
+  return { name: base, plugin };
+}
+const fmtTok = (n) => n < 1000 ? `${n}` : n < 1e6 ? `${Math.round(n / 1000)} Tsd.` : `${(n / 1e6).toFixed(1).replace(".", ",")} Mio.`;
+const fmtDur = (ms) => { if (!ms && ms !== 0) return "–"; const s = ms / 1000; if (s < 60) return `${Math.round(s)} Sek.`; if (s < 3600) return `${Math.round(s / 60)} Min.`; return `${Math.floor(s / 3600)} Std. ${Math.round((s % 3600) / 60)} Min.`; };
+const fmtUsd = (u) => u == null ? "–" : `${u < 10 ? u.toFixed(2) : Math.round(u)} $`.replace(".", ",");
+const fresh = () => Date.now() - Date.parse(D.generatedAt) < 90e3; // Daten nur "live", wenn der Extractor gerade mitlaeuft
+const isLive = (s) => fresh() && Date.parse(D.generatedAt) - (s.fileMtime || 0) < 3 * 60e3;
+const agentLive = (a) => fresh() && !a.finished && Date.parse(D.generatedAt) - (a.mtime || 0) < 3 * 60e3;
+const sModels = (s) => Object.entries(s.models || {}).sort((a, b) => b[1].replies - a[1].replies).map(([m]) => m);
+const allModels = (s) => [...new Set([...sModels(s), ...s.agents.flatMap(a => Object.keys(a.models))])];
+const dayStart = (o = 0) => { const d = new Date(); d.setHours(0, 0, 0, 0); return d.getTime() - o * 864e5; };
+function boardFilter(s) {
+  if (board.filter === "live" && !isLive(s)) return false;
+  if (board.filter === "today" && Date.parse(s.end) < dayStart()) return false;
+  if (board.filter === "agents" && !s.agents.length) return false;
+  if (board.fam && !allModels(s).some(m => modelInfo(m).fam === board.fam)) return false;
+  return matches(s);
+}
+function renderBoard() {
+  const el = $("#board"), keep = [el.scrollTop, el.querySelector(".slist")?.scrollTop || 0];
+  const all = D.sessions.slice().sort((a, b) => b.end.localeCompare(a.end));
+  const list = all.filter(boardFilter);
+  if (!list.some(s => s.id === board.sel)) board.sel = list[0]?.id || null;
+  // Kennzahlen ueber die gefilterte Liste
+  const famUse = {}; let replies = 0;
+  for (const s of list) for (const src of [s.models, ...s.agents.map(a => a.models)]) for (const [m, u] of Object.entries(src || {})) { const f = modelInfo(m).fam; famUse[f] ||= { n: 0, name: modelInfo(m).name }; famUse[f].n += u.replies; replies += u.replies; }
+  const fams = Object.entries(famUse).sort((a, b) => b[1].n - a[1].n);
+  const nAgents = list.reduce((n, s) => n + s.agents.length, 0), nPrompts = list.reduce((n, s) => n + s.nodes.length, 0);
+  const costs = list.filter(s => s.cost?.usd != null), live = all.filter(isLive);
+  const cnt = (f) => all.filter(s => { const o = board.filter; board.filter = f; const r = boardFilter(s); board.filter = o; return r; }).length;
+  const famsAll = [...new Set(all.flatMap(allModels).map(m => modelInfo(m).fam))].map(f => [f, modelInfo(all.flatMap(allModels).find(m => modelInfo(m).fam === f)).name.split(" ")[0]]);
+  // Liste nach Zeit gruppieren
+  const groups = [["Läuft gerade", s => isLive(s)], ["Heute", s => Date.parse(s.end) >= dayStart()], ["Gestern", s => Date.parse(s.end) >= dayStart(1)], ["Diese Woche", s => Date.parse(s.end) >= dayStart(7)], ["Früher", () => true]];
+  const used = new Set(); let rows = "";
+  for (const [name, test] of groups) {
+    const g = list.filter(s => !used.has(s.id) && test(s)); if (!g.length) continue; g.forEach(s => used.add(s.id));
+    rows += `<h4>${name}</h4>` + g.map(s => `<button class="brow ${s.id === board.sel ? "on" : ""}" data-bsel="${s.id}">
+      <span class="dot ${isLive(s) ? "live" : ""}"></span>
+      <span class="grow"><span class="t" style="display:block">${esc(s.label)}</span><span class="cap">${esc(projName(s.project))}<span class="dotsep"></span>${s.nodes.length} Anfragen</span>
+      <span class="pills">${allModels(s).map(m => mpill(m)).join("")}${s.agents.length ? `<span class="ap">${ic("bot")} ${s.agents.length}</span>` : ""}</span></span>
+      <span class="when">${rel(s.end)}</span></button>`).join("");
+  }
+  el.innerHTML = `<div class="bwrap">
+    <header class="bhead"><div><h1>Agents &amp; Sessions</h1><p class="muted">Wer hat woran gearbeitet, mit welchem Modell, und was du gefragt hast.</p></div>
+      <span class="livebadge">${fresh() ? `<span class="dot live"></span> Live · ${live.length} aktiv` : `<span class="dot"></span> Stand ${rel(D.generatedAt)} · live mit <code>node scripts/extract.mjs --watch</code>`}</span></header>
+    <div class="stats">
+      <div class="stat"><span class="cap">Sessions</span><b>${list.length}</b></div>
+      <div class="stat"><span class="cap">Anfragen</span><b>${nPrompts}</b></div>
+      <div class="stat"><span class="cap">Subagents</span><b>${nAgents}</b></div>
+      <div class="stat"><span class="cap">Kosten${costs.length < list.length ? " (soweit erfasst)" : ""}</span><b>${fmtUsd(costs.reduce((n, s) => n + s.cost.usd, 0))}</b></div>
+      <div class="stat wide"><span class="cap">Antworten nach Modell</span>
+        <div class="mbar">${fams.map(([f, v]) => `<i class="${f}" style="width:${(v.n / replies * 100).toFixed(2)}%"></i>`).join("")}</div>
+        <div class="legend">${fams.map(([f, v]) => `<span class="${f}">${esc(v.name)} · ${Math.round(v.n / replies * 100)} %</span>`).join("") || "–"}</div></div>
+    </div>
+    <div class="filters">
+      ${[["all", "Alle"], ["live", "Läuft gerade"], ["today", "Heute"], ["agents", "Mit Subagents"]].map(([k, l]) => `<button class="chip ${board.filter === k ? "on" : ""}" data-bfilter="${k}">${k === "live" ? `<span class="dot ${live.length ? "live" : ""}"></span>` : ""}${l} <span class="n">${cnt(k)}</span></button>`).join("")}
+      <span class="cap" style="margin-left:8px">Modell:</span>
+      ${famsAll.map(([f, n]) => `<button class="chip ${board.fam === f ? "on" : ""}" data-bfam="${f}"><span class="mp ${f}" style="padding:0 6px">●</span>${esc(n)}</button>`).join("")}
+    </div>
+    <div class="bgrid"><nav class="slist" aria-label="Sessions">${rows || `<div class="empty">Keine Session passt zum Filter.</div>`}</nav>
+      <div class="dcol">${board.sel ? boardDetail(D.sessions.find(s => s.id === board.sel)) : `<div class="dcard empty">Wähle links eine Session.</div>`}</div></div>
+  </div>`;
+  el.scrollTop = keep[0]; const sl = el.querySelector(".slist"); if (sl) sl.scrollTop = keep[1];
+  $("#cnt").textContent = state.q ? `${list.length} Treffer` : "";
+}
+function boardDetail(s) {
+  const mainModels = sModels(s), mainTok = Object.values(s.models || {}).reduce((n, u) => n + u.tokens, 0), mainReplies = Object.values(s.models || {}).reduce((n, u) => n + u.replies, 0);
+  const helpers = Object.entries(s.cost?.byModel || {}).filter(([m]) => !s.models?.[m] && !s.agents.some(a => a.models[m]));
+  const stepNo = (id) => { const i = s.path.findIndex(n => n.id === id); return i >= 0 ? i + 1 : null; };
+  const nodes = s.nodes.slice().sort((a, b) => a.ts.localeCompare(b.ts));
+  const app = s.app === "claude-desktop" ? "Desktop-App" : s.app === "cli" ? "Terminal" : s.app;
+  const agentCard = (a) => {
+    const L = agentLabel(a.type), live = agentLive(a), n = a.node && stepNo(a.node), open = board.open === a.id;
+    const tools = Object.entries(a.tools).sort((x, y) => y[1] - x[1]);
+    const ms = Date.parse(a.end) - Date.parse(a.start);
+    return `<div class="anode sub ${open ? "open" : ""}" data-agent="${a.id}" id="ag-${a.id}" role="button" tabindex="0" aria-expanded="${open}">
+      <span class="tile sm">${ic("bot")}</span>
+      <div class="grow"><div class="nm">${esc(L.name)}${L.plugin ? `<span class="cap">aus ${esc(L.plugin)}</span>` : ""}</div>
+        ${a.description ? `<div class="ds">${esc(a.description)}</div>` : ""}
+        <div class="meta">${Object.keys(a.models).map(m => mpill(m)).join("") || (a.requestedModel ? mpill(a.requestedModel) : "")}
+          <span class="state"><span class="dot ${live ? "live" : ""}" style="${live ? "" : "background:var(--ink-3)"}"></span>${live ? "arbeitet gerade" : a.finished ? "fertig" : "abgebrochen"}</span>
+          <span class="ap">${ic("clock")} ${fmtDur(ms)}</span><span class="ap">${a.steps} Schritte</span><span class="ap">${fmtTok(a.tokens)} Tokens</span>
+          ${a.background ? `<span class="ap">im Hintergrund</span>` : ""}${n ? `<button class="ap" data-bstep="${a.node}">bei Anfrage ${n}</button>` : ""}</div>
+        ${open ? `<div class="adetail">
+          ${tools.length ? `<div><div class="lbl">Werkzeuge</div><div class="meta" style="margin:0">${tools.slice(0, 8).map(([t, c]) => `<span class="ap">${esc(t.replace(/^mcp__[^_]+__/, ""))} · ${c}</span>`).join("")}</div></div>` : ""}
+          ${a.task ? `<div><div class="lbl">Auftrag</div><div class="box">${esc(a.task)}</div></div>` : ""}
+          ${a.result ? `<div><div class="lbl">Ergebnis</div><div class="box">${md(a.result)}</div></div>` : ""}</div>` : ""}
+      </div></div>`;
+  };
+  return `<section class="dcard">
+      <div class="dhead">${av(s, true)}<div style="min-width:0"><h2>${esc(s.label)}</h2>
+        <div class="cap" style="margin-top:4px;display:flex;align-items:center;gap:6px;flex-wrap:wrap">${isLive(s) ? `<span class="dot live"></span> läuft gerade<span class="dotsep"></span>` : ""}${ic("folder")} ${esc(projName(s.project))}${s.branch ? `<span class="dotsep"></span>${ic("branch")} ${esc(s.branch)}` : ""}${app ? `<span class="dotsep"></span>${ic("term")} ${esc(app)}` : ""}<span class="dotsep"></span>${when(s.start)}</div></div></div>
+      <div class="kv"><div><span class="cap">Anfragen</span><b>${s.nodes.length}</b></div><div><span class="cap">Dauer</span><b>${fmtDur(s.cost?.ms ?? (Date.parse(s.end) - Date.parse(s.start)))}</b></div>
+        <div><span class="cap">Kosten</span><b>${fmtUsd(s.cost?.usd)}</b></div>${s.cost ? `<div><span class="cap">Zeilen geändert</span><b>+${s.cost.added} −${s.cost.removed}</b></div>` : `<div><span class="cap">Dateien geändert</span><b>${s.files.length}</b></div>`}</div>
+      <div class="drow"><button class="btn primary" data-resume="${s.id}">${ic("play")} Weitermachen</button><button class="btn secondary" data-open="${s.id}">Verlauf als Karte ansehen</button></div>
+    </section>
+    <section class="dcard"><h3>${ic("bot")} Wer hat gearbeitet <span class="cap">· ${1 + s.agents.length} ${s.agents.length ? "Agents" : "Agent"}</span></h3>
+      <div class="tree">
+        <div class="anode main"><span class="tile sm">${ic("bot")}</span><div class="grow">
+          <div class="nm">${esc(s.agentName || "Claude")} <span class="cap">Hauptagent, mit dir im Gespräch</span></div>
+          <div class="meta">${mainModels.map(m => mpill(m, ` · ${s.models[m].replies}`)).join("")}<span class="ap">${mainReplies} Antworten</span><span class="ap">${fmtTok(mainTok)} Tokens</span>${s.cost ? `<span class="ap">${fmtUsd(s.cost.usd)}</span>` : ""}</div></div></div>
+        ${s.agents.length || helpers.length ? `<div class="kids">${s.agents.map(agentCard).join("")}
+          ${helpers.map(([m, usd]) => `<div class="anode helper"><span class="tile sm">${ic("sun")}</span><div class="grow"><div class="nm">Helfer im Hintergrund</div><div class="ds">Kleine Nebenaufgaben wie Titel oder Zusammenfassungen.</div><div class="meta">${mpill(m)}<span class="ap">${fmtUsd(usd)}</span></div></div></div>`).join("")}</div>` : `<p class="cap" style="margin:12px 0 0">In dieser Session hat Claude allein gearbeitet, ohne Subagents.</p>`}
+      </div></section>
+    <section class="dcard"><h3>${ic("chat")} Deine Anfragen <span class="cap">· ${nodes.length}</span></h3>
+      <ol class="tl">${nodes.map(n => { const no = stepNo(n.id), ags = s.agents.filter(a => a.node === n.id); return `<li class="${n.id === s.last.id ? "now" : ""}" data-bstep="${n.id}">
+        <span class="n">${no ?? ic("branch")}</span><div style="min-width:0"><div class="txt">${esc(n.text)}</div>
+        <div class="meta"><span class="cap">${when(n.ts)}</span>${(n.models || []).map(m => mpill(m)).join("")}${ags.map(a => `<button class="ap" data-agentjump="${a.id}">${ic("bot")} ${esc(agentLabel(a.type).name)}</button>`).join("")}${n.edits.length ? `<span class="ap">${ic("pen")} ${n.edits.length} Datei${n.edits.length > 1 ? "en" : ""}</span>` : ""}</div></div></li>`; }).join("")}</ol>
+    </section>`;
+}
+// Live: data.js regelmaessig nachladen, solange der Extractor mit --watch laeuft
+setInterval(() => {
+  if (state.level !== "agents") return;
+  const sc = document.createElement("script"); sc.src = "data.js?t=" + Date.now();
+  sc.onload = () => { sc.remove(); const N = window.SESSION_DATA; if (N && N.generatedAt !== D.generatedAt) { D = N; prep(); if (state.level === "agents") renderBoard(); } };
+  sc.onerror = () => sc.remove(); document.body.appendChild(sc);
+}, 5000);
+
 // ---------- Navigation ----------
 function crumbs() {
   const sep = `<span class="sep">${ic("chev")}</span>`;
   const parts = [`<button class="${state.level === "all" ? "cur" : ""}" data-nav="all">Übersicht</button>`];
+  if (state.level === "agents") parts.push(sep + `<button class="cur" data-nav="agents">Agents</button>`);
   if (state.project) parts.push(sep + `<button class="${state.level === "project" ? "cur" : ""}" data-nav="project">${esc(projName(state.project))}</button>`);
   if (state.session) parts.push(sep + `<button class="cur" data-nav="session">${esc(D.sessions.find(s => s.id === state.session).label)}</button>`);
   $("#crumbs").innerHTML = parts.join("");
-  document.querySelectorAll(".tab").forEach(t => t.classList.toggle("on", (t.dataset.tab === "all" && state.level === "all") || (t.dataset.tab === "recent" && state.session === latest?.id)));
+  document.querySelectorAll(".tab").forEach(t => t.classList.toggle("on", (t.dataset.tab === "all" && state.level === "all") || (t.dataset.tab === "recent" && state.session === latest?.id) || (t.dataset.tab === "agents" && state.level === "agents")));
 }
 function status() {
   const el = $("#status"); if (!vim() || !el) return;
@@ -623,12 +860,14 @@ function status() {
   el.innerHTML = `<span class="mode ${mode[1]}">${mode[0]}</span><span class="file">${esc(file)}</span><span class="fill">${s?.branch ? esc(s.branch) + " · " : ""}j/k Schritt · Enter weiter · / suchen · : Befehl · Esc zurück</span><span class="pos">${pos || D.sessions.length + " Sessions"}</span><span class="pct">${pct}</span>`;
 }
 function render(refit = true) {
+  document.body.classList.toggle("boardmode", state.level === "agents");
+  if (state.level === "agents") { renderBoard(); crumbs(); status(); return; }
   if (state.level === "all") renderAll(); else if (state.level === "project") renderProject(); else renderSession();
   crumbs(); if (refit) fit(true); else status();
 }
 function go(level, opts = {}) {
   Object.assign(state, { level, card: null }, opts);
-  if (level === "all") { state.project = null; state.session = null; }
+  if (level === "all" || level === "agents") { state.project = null; state.session = null; }
   if (level === "project") state.session = null;
   $("#tagsheet").classList.remove("open"); closeSheet(); render(level !== "session");
   if (level === "session") {
@@ -671,9 +910,15 @@ stage.addEventListener("wheel", (e) => {
 
 document.addEventListener("click", (e) => {
   if (moved > 5) { moved = 0; return; }
-  const el = e.target.closest("[data-resume],[data-fork],[data-tag],[data-open],[data-pick],[data-nav],[data-z],[data-close],[data-proj],[data-tab],[data-theme-set]");
+  const el = e.target.closest("[data-bsel],[data-bfilter],[data-bfam],[data-bstep],[data-agentjump],[data-agent],[data-resume],[data-fork],[data-tag],[data-open],[data-pick],[data-nav],[data-z],[data-close],[data-proj],[data-tab],[data-theme-set]");
   if (!el) { if (e.target === stage || e.target === world || e.target.id === "cards") { closeSheet(); $("#tagsheet").classList.remove("open"); } return; }
   const d = el.dataset;
+  if (d.bsel) { board.sel = d.bsel; board.open = null; renderBoard(); if (innerWidth <= 900) document.querySelector(".dcol")?.scrollIntoView({ behavior: "smooth" }); return; }
+  if (d.bfilter) { board.filter = d.bfilter; return renderBoard(); }
+  if (d.bfam) { board.fam = board.fam === d.bfam ? null : d.bfam; return renderBoard(); }
+  if (d.agentjump) { board.open = d.agentjump; renderBoard(); return document.getElementById("ag-" + d.agentjump)?.scrollIntoView({ behavior: "smooth", block: "center" }); }
+  if (d.bstep) { const s = D.sessions.find(x => x.byId[d.bstep]); go("session", { project: s.project, session: s.id }); return pick(d.bstep); }
+  if (d.agent) { board.open = board.open === d.agent ? null : d.agent; return renderBoard(); }
   if (d.resume) return resume(D.sessions.find(s => s.id === d.resume));
   if (d.fork) return resume(D.sessions.find(s => s.id === d.fork), true);
   if (d.tag) { setQuery("#" + d.tag); $("#tagsheet").classList.remove("open"); return; }
@@ -686,6 +931,7 @@ document.addEventListener("click", (e) => {
   if (d.z) return d.z === "fit" ? fit(true) : zoomAt(d.z === "in" ? 1.25 : .8, innerWidth / 2, innerHeight / 2, true);
   if (d.tab) {
     if (d.tab === "all") return go("all");
+    if (d.tab === "agents") return go("agents");
     if (d.tab === "recent") return go("session", { project: latest.project, session: latest.id });
     if (d.tab === "search") return $("#q").focus();
     if (d.tab === "resume") return resume(state.session ? D.sessions.find(x => x.id === state.session) : latest);
@@ -721,7 +967,7 @@ function runCmd(c) {
 }
 function back() {
   if ($("#sheet").classList.contains("open")) return closeSheet();
-  if (state.level === "session") return go("project"); if (state.level === "project") return go("all");
+  if (state.level === "session") return go("project"); if (state.level === "project" || state.level === "agents") return go("all");
 }
 const closeCmd = (t) => { t.value = ""; t.blur(); $("#cmdpop").classList.remove("open"); $("#cmdprefix").textContent = ""; };
 document.addEventListener("keydown", (e) => {
@@ -733,13 +979,19 @@ document.addEventListener("keydown", (e) => {
   if (k === "Escape") return back();
   if (k === "/") { e.preventDefault(); return $("#q").focus(); }
   if (k === ":") { e.preventDefault(); if (vim()) { $("#cmdprefix").textContent = ":"; $("#cmd").focus(); } else { $("#cmdpop").classList.add("open"); $("#cmd2").focus(); } return; }
+  if (state.level === "agents" && ["j", "k", "ArrowDown", "ArrowUp"].includes(k)) {
+    e.preventDefault(); const ids = [...document.querySelectorAll(".brow")].map(b => b.dataset.bsel), i = ids.indexOf(board.sel);
+    board.sel = ids[Math.max(0, Math.min(ids.length - 1, i + (["j", "ArrowDown"].includes(k) ? 1 : -1)))]; board.open = null; renderBoard();
+    return document.querySelector(".brow.on")?.scrollIntoView({ block: "nearest" });
+  }
+  if (state.level === "agents" && k === "Enter") return resume(D.sessions.find(x => x.id === board.sel));
   if (["j", "l", "ArrowRight", "ArrowDown"].includes(k)) { e.preventDefault(); return stepBy(1); }
   if (["k", "h", "ArrowLeft", "ArrowUp"].includes(k)) { e.preventDefault(); return stepBy(-1); }
   if (k === "G") return stepBy(0, -1);
   if (k === "g") { if (Date.now() - lastG < 400) stepBy(0, 0); lastG = Date.now(); return; }
   if (k === "Enter") { const s = state.session ? D.sessions.find(x => x.id === state.session) : latest; return resume(s, !!(state.card && state.card !== s.last.id)); }
 });
-addEventListener("resize", () => { if (state.level !== "session") render(true); });
+addEventListener("resize", () => { if (state.level === "agents") renderBoard(); else if (state.level !== "session") render(true); });
 
 // ---------- Start ----------
 let saved = "warm"; try { saved = localStorage.getItem("atlas.theme") || "warm"; } catch {}
@@ -749,6 +1001,7 @@ document.querySelectorAll("[data-theme-set]").forEach(b => b.classList.toggle("o
 const hs = h.match(/s=([\w-]+)/)?.[1], hp = decodeURIComponent(h.match(/p=([^&]+)/)?.[1] || "");
 const ss = hs && D.sessions.find(s => s.id.startsWith(hs)), pp = hp && [...projects.keys()].find(k => projName(k) === hp);
 if (!D.sessions.length) { $("#cards").innerHTML = `<section class="card resume" style="left:0;top:0;width:560px;height:260px"><h1>Noch keine Sessions gefunden.</h1><div class="bar"></div><p class="muted">Starte im Projektordner <b>node scripts/extract.mjs</b> und lade die Seite neu.</p></section>`; bounds = { x: 0, y: 0, w: 560, h: 260 }; fit(false); }
+else if (/agents/.test(h)) go("agents");
 else if (ss) { go("session", { project: ss.project, session: ss.id }); if (/step/.test(h)) pick(ss.last.id); }
 else if (pp) go("project", { project: pp });
 else render();

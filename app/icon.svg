@@ -1,0 +1,19 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#32302f"/><stop offset="1" stop-color="#1d2021"/></linearGradient>
+<linearGradient id="arc" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fabd2f"/><stop offset=".5" stop-color="#fe8019"/><stop offset="1" stop-color="#8ec07c"/></linearGradient>
+<filter id="gl" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+</defs>
+<rect x="40" y="40" width="432" height="432" rx="96" fill="url(#bg)"/>
+<rect x="40.5" y="40.5" width="431" height="431" rx="95.5" fill="none" stroke="#504945" stroke-width="3"/>
+<g fill="none" stroke-linecap="round">
+<circle cx="256" cy="246" r="128" stroke="#3c3836" stroke-width="10"/>
+<ellipse cx="256" cy="246" rx="58" ry="128" stroke="#3c3836" stroke-width="8"/>
+<path d="M128 246h256M146 182h220M146 310h220" stroke="#3c3836" stroke-width="8"/>
+<path d="M150 330 C 200 230, 300 300, 362 158" stroke="url(#arc)" stroke-width="16" filter="url(#gl)"/>
+</g>
+<circle cx="150" cy="330" r="17" fill="#1d2021" stroke="#fabd2f" stroke-width="8"/>
+<circle cx="256" cy="268" r="13" fill="#fe8019"/>
+<circle cx="362" cy="158" r="17" fill="#1d2021" stroke="#8ec07c" stroke-width="8"/>
+<text x="256" y="430" text-anchor="middle" font-family="JetBrains Mono, Menlo, monospace" font-weight="800" font-size="56" fill="#ebdbb2" letter-spacing="6">SA<tspan fill="#fabd2f">_</tspan></text>
+</svg></body></html>
