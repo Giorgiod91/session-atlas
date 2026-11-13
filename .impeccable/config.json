@@ -38,6 +38,21 @@
         "value": "cubic-bezier(.2, .9, .3, 1.15)",
         "createdAt": "2026-11-10T12:09:38.718Z",
         "reason": "user asked for Framer Motion style spring animations (2026-11-10)"
+      },
+      {
+        "rule": "bounce-easing",
+        "value": "cubic-bezier(.3, 1.6, .6, 1)",
+        "createdAt": "2026-11-13T13:56:40.906Z",
+        "reason": "Claude decided: playful speech-bubble pop of the pixel mascot, short overshoot is the intended character motion; reduced-motion is respected"
+      },
+      {
+        "rule": "gradient-text",
+        "value": "*",
+        "files": [
+          "prototype/prototype-term-drawer.html"
+        ],
+        "createdAt": "2026-11-13T14:29:41.294Z",
+        "reason": "Claude decided: the ATLAS wordmark copies the app's existing gradient pixel wordmark (app/renderer/nvim.js), brand element in a throwaway prototype"
       }
     ]
   }

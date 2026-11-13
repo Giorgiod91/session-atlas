@@ -179,6 +179,40 @@ function hue(str) { let h = 0; for (const c of str) h = (h * 31 + c.charCodeAt(0
 const initials = (label) => { const w = label.replace(/[^\p{L}\p{N} ]/gu, " ").split(/\s+/).filter((x) => x.length > 1); return ((w[0]?.[0] || "?") + (w[1]?.[0] || "")).toUpperCase(); };
 const fresh = () => Date.now() - Date.parse(RAW.generatedAt) < 90e3;
 
+// Live state of a session, read from how its transcript ended and how long ago it was written:
+// run = Claude is working, wait = Claude finished its turn (or waits for a permission) and needs you,
+// err = the last tool failed, done = nothing happened for a while.
+function agentState(s, now = Date.now()) {
+  const a = s.activity || {}, age = now - (s.fileMtime || Date.parse(s.end));
+  const lastT = a.recent?.[a.recent.length - 1];
+  if (age < 90e3 && ["tool", "result", "prompt"].includes(a.last)) return { st: "run", why: "arbeitet" };
+  if (a.openAgents && age < 5 * 60e3) return { st: "run", why: "Agent arbeitet" };
+  if (age < 30 * 60e3) {
+    if (a.last === "tool") return { st: "wait", why: "wartet auf Freigabe" };
+    if (lastT?.err) return { st: "err", why: `Fehler: ${lastT.result || lastT.tool}` };
+    return { st: "wait", why: "fertig, wartet auf dich" };
+  }
+  if (window.AtlasTerminal?.hasSession?.(s.id)) return { st: "wait", why: "im Terminal offen" };
+  return { st: "done", why: "fertig" };
+}
+// The question Claude asked at the end of its last reply, if any
+function askOf(s) {
+  const t = (s.last?.reply || "").replace(/\s+/g, " ").trim(); if (!t.includes("?")) return null;
+  const parts = t.split(/(?<=[.!?])\s+/); const q = [...parts].reverse().find((p) => p.endsWith("?"));
+  return q && q.length < 240 ? q : null;
+}
+// Send a prompt: into the session's open terminal tab, by resuming it, or as a fresh claude in a folder
+function sendPrompt({ session, cwd, text, label } = {}) {
+  text = String(text || "").trim(); if (!text) return false;
+  if (text.length > 8000) { toast("Prompt zu lang", "höchstens 8000 Zeichen"); return false; }
+  const T = window.AtlasTerminal;
+  if (!T) { navigator.clipboard?.writeText(text); toast("Prompt kopiert", "die Desktop-App schickt ihn direkt an Claude"); return false; }
+  if (session && T.sendTo(session.id, text)) { toast(`An „${session.label}“ gesendet`); return true; }
+  if (session) { T.open(session, false, { after: text }); return true; }
+  T.open(null, false, { cwd, prompt: text, label: label || text.slice(0, 40) });
+  return true;
+}
+
 // Build the view model; called again with fresh data in the desktop app (arrays are refilled in place)
 const sessions = [], projects = [];
 const DATA = { sessions, projects, generatedAt: "", home: "", totals: {} };
@@ -255,7 +289,7 @@ function renderDrawer() {
 // ================= Look registry =================
 const LOOKS = []; let LOOK = null, cleanup = [];
 const dataListeners = new Set();
-window.Atlas = { DATA, esc, ic, short, projName, rel, relShort, hhmm, day, modelInfo, mp, aName, fmtTok, fmtDur, usd, hue, initials, fresh,
+window.Atlas = { DATA, esc, ic, short, projName, rel, relShort, hhmm, day, modelInfo, mp, aName, fmtTok, fmtDur, usd, hue, initials, fresh, agentState, askOf, sendPrompt,
   open: openSession, close: closeDrawer, resume, toast, register: (l) => LOOKS.push(l), onCleanup: (fn) => cleanup.push(fn),
   notifier: null, // a look may set this to show toasts in its own style
   // A look that refreshes itself in place registers here; returns an unsubscribe function
@@ -296,6 +330,8 @@ document.addEventListener("keydown", (e) => {
 </script>
 <script src="editor.bundle.js"></script>
 <script src="nvim.js"></script>
+<script src="mascot.js"></script>
+<script src="loops.js"></script>
 <script>
 const want = new URLSearchParams(location.search).get("look");
 mount(want || LOOKS[0]?.key);
