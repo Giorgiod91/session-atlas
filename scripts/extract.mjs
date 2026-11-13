@@ -25,6 +25,19 @@ function isRealPrompt(t) {
   return s && !s.startsWith("<") && !s.startsWith("[Request interrupted") && !s.startsWith("Caveat:");
 }
 
+// Kurzer Text, woran ein Werkzeug gerade arbeitet (Datei, Befehl, Suchmuster), ohne lange Inhalte
+function toolTarget(b) {
+  const i = b.input || {};
+  const v = i.file_path || i.notebook_path || i.command || i.pattern || i.description || i.url || i.query || i.path || i.prompt || "";
+  return clip(String(v).replace(/\s+/g, " ").trim(), 120);
+}
+// Erste Zeile eines Werkzeug-Ergebnisses, z.B. "24 passed" oder die Fehlermeldung
+function resultLine(c) {
+  const t = typeof c === "string" ? c : Array.isArray(c) ? c.filter((x) => x.type === "text").map((x) => x.text).join("\n") : "";
+  const line = t.split("\n").map((x) => x.trim()).find((x) => x && !x.startsWith("<")) || "";
+  return clip(line, 90);
+}
+
 // Tokens einer Antwort: neu gelesen + neu gecacht + geschrieben (Cache-Lesen zaehlt nicht, sonst explodiert die Zahl)
 const tok = (u) => (u?.input_tokens || 0) + (u?.cache_creation_input_tokens || 0) + (u?.output_tokens || 0);
 const addModel = (map, model, u) => {
@@ -67,20 +80,38 @@ function readSubagents(sdir) {
   return out;
 }
 
+// Cache pro Session-Datei: nur neu parsen, wenn sich die Datei oder ihre Subagents geaendert haben.
+// Sonst liest jede Aktualisierung alle Transkripte (hunderte MB) neu und blockiert die App sekundenlang.
+const CACHE = new Map();
+function signature(file, sdir) {
+  const st = statSync(file); let sig = `${st.mtimeMs}:${st.size}`;
+  const dir = join(sdir, "subagents");
+  if (existsSync(dir)) for (const f of readdirSync(dir)) { const a = statSync(join(dir, f)); sig += `|${f}:${a.mtimeMs}:${a.size}`; }
+  return sig;
+}
+
 // Exported for the desktop app: returns the data instead of (or as well as) writing data.js
 export function extract({ write = true } = {}) {
-const sessions = [];
+const sessions = [], seen = new Set();
 for (const dir of readdirSync(ROOT)) {
   const pdir = join(ROOT, dir);
   if (!statSync(pdir).isDirectory()) continue;
   for (const f of readdirSync(pdir)) {
     if (!f.endsWith(".jsonl")) continue;
     const id = basename(f, ".jsonl");
+    const key = join(pdir, f);
+    let sig; try { sig = signature(key, join(pdir, id)); } catch { continue; }
+    const hit = CACHE.get(key);
+    if (hit?.sig === sig) { seen.add(key); if (hit.s) sessions.push(hit.s); continue; }
     const s = { id, dir, title: null, aiTitle: null, cwd: null, branch: null, start: null, end: null,
       files: new Set(), tools: new Set(), hashtags: new Set(), nodes: [], msgCount: 0,
       models: {}, cost: null, app: null, agentName: null, agents: [] };
     const spawnedBy = new Map(); // tool_use id des Agent-Aufrufs -> uuid der Nachricht
     const byUuid = new Map();
+    // Was gerade passiert: die letzten Werkzeug-Aufrufe und womit die Session zuletzt aufgehoert hat.
+    // Daraus leitet die App ab, ob ein Agent arbeitet, auf dich wartet oder fertig ist.
+    const recent = [], toolById = new Map();
+    let lastKind = null, lastTs = null;
     for (const line of readFileSync(join(pdir, f), "utf8").split("\n")) {
       if (!line) continue;
       let d; try { d = JSON.parse(line); } catch { continue; }
@@ -110,6 +141,21 @@ for (const dir of readdirSync(ROOT)) {
       if (d.type === "assistant") { entry.model = d.message?.model?.startsWith("<") ? null : d.message?.model; addModel(s.models, entry.model, d.message?.usage); }
       byUuid.set(d.uuid, entry);
       if (real) for (const m of text.matchAll(/(?:^|\s)#(\p{L}[\p{L}\p{N}_-]{1,30})/gu)) s.hashtags.add(m[1].toLowerCase());
+      if (d.type === "user" && !d.isMeta) {
+        const results = Array.isArray(d.message?.content) ? d.message.content.filter((b) => b.type === "tool_result") : [];
+        for (const b of results) { const t = toolById.get(b.tool_use_id); if (t) { t.result = resultLine(b.content); t.err = !!b.is_error; } }
+        if (results.length) { lastKind = "result"; lastTs = d.timestamp; }
+        else if (real) { lastKind = "prompt"; lastTs = d.timestamp; }
+      }
+      if (d.type === "assistant" && Array.isArray(d.message?.content)) {
+        const uses = d.message.content.filter((b) => b.type === "tool_use");
+        for (const b of uses) {
+          const t = { tool: b.name, target: toolTarget(b), ts: d.timestamp, result: null, err: false };
+          toolById.set(b.id, t); recent.push(t); if (recent.length > 12) recent.shift();
+        }
+        if (uses.length) { lastKind = "tool"; lastTs = d.timestamp; }
+        else if (d.message.content.some((b) => b.type === "text" && b.text.trim())) { lastKind = "reply"; lastTs = d.timestamp; }
+      }
       if (d.type === "assistant" && Array.isArray(d.message?.content)) {
         for (const b of d.message.content) {
           if (b.type !== "tool_use") continue;
@@ -149,7 +195,8 @@ for (const dir of readdirSync(ROOT)) {
       for (const e of n.edits) if (!owner.edits.includes(e)) owner.edits.push(e);
       if (n.reply && (!owner.replyTs || n.ts > owner.replyTs)) { owner.reply = clip(n.reply, 1600); owner.replyTs = n.ts; }
     }
-    if (!s.nodes.length) continue;
+    seen.add(key);
+    if (!s.nodes.length) { CACHE.set(key, { sig, s: null }); continue; }
     // Subagents einlesen und dem Prompt zuordnen, der sie gestartet hat
     const spawnInfo = new Map();
     for (const n of byUuid.values()) for (const sp of n.spawns || []) spawnInfo.set(sp.toolUseId, sp);
@@ -164,11 +211,15 @@ for (const dir of readdirSync(ROOT)) {
     }
     s.agents.sort((a, b) => a.start.localeCompare(b.start));
     s.fileMtime = statSync(join(pdir, f)).mtimeMs;
+    s.activity = { last: lastKind, lastTs, recent, openAgents: s.agents.filter((a) => !a.finished).length };
     s.nodes.sort((a, b) => a.ts.localeCompare(b.ts));
-    sessions.push({ ...s, files: [...s.files].slice(-12), tools: [...s.tools], hashtags: [...s.hashtags] });
+    const out = { ...s, files: [...s.files].slice(-12), tools: [...s.tools], hashtags: [...s.hashtags] };
+    CACHE.set(key, { sig, s: out });
+    sessions.push(out);
   }
 }
 
+for (const k of CACHE.keys()) if (!seen.has(k)) CACHE.delete(k);
 sessions.sort((a, b) => b.end.localeCompare(a.end));
 const data = { generatedAt: new Date().toISOString(), home: homedir(), sessions };
 if (write) writeFileSync(OUT, "window.SESSION_DATA = " + JSON.stringify(data) + ";\n");

@@ -1,5 +1,5 @@
 // Bridge between the UI and the main process. Only these calls are exposed.
-const { contextBridge, ipcRenderer } = require("electron");
+const { contextBridge, ipcRenderer, webUtils } = require("electron");
 
 contextBridge.exposeInMainWorld("SESSION_DATA", ipcRenderer.sendSync("atlas:data-sync"));
 contextBridge.exposeInMainWorld("atlasApp", {
@@ -11,6 +11,8 @@ contextBridge.exposeInMainWorld("atlasApp", {
   kill: (id) => ipcRenderer.send("pty:kill", id),
   onPty: (cb) => ipcRenderer.on("pty:data", (_e, id, d) => cb(id, d)),
   onExit: (cb) => ipcRenderer.on("pty:exit", (_e, id, code) => cb(id, code)),
+  // Real path of a file dropped from Finder (File.path is gone since Electron 32)
+  pathForFile: (f) => { try { return webUtils.getPathForFile(f) || ""; } catch { return ""; } },
   notes: {
     list: () => ipcRenderer.invoke("notes:list"),
     read: (path) => ipcRenderer.invoke("notes:read", path),
@@ -26,5 +28,21 @@ contextBridge.exposeInMainWorld("atlasApp", {
     check: (opts) => ipcRenderer.invoke("mcp:check", opts),
     add: (opts) => ipcRenderer.invoke("mcp:add", opts),
     remove: (opts) => ipcRenderer.invoke("mcp:remove", opts),
+  },
+  loops: {
+    list: () => ipcRenderer.invoke("loops:list"),
+    recipes: () => ipcRenderer.invoke("loops:recipes"),
+    saveRecipes: (list) => ipcRenderer.invoke("loops:save-recipes", list),
+    detect: (cwd) => ipcRenderer.invoke("loops:detect", cwd),
+    start: (opts) => ipcRenderer.invoke("loops:start", opts),
+    stop: (id) => ipcRenderer.invoke("loops:stop", id),
+    remove: (id) => ipcRenderer.invoke("loops:remove", id),
+    onUpdate: (cb) => ipcRenderer.on("loop:update", (_e, r) => cb(r)),
+    onDone: (cb) => ipcRenderer.on("loop:done", (_e, r) => cb(r)),
+  },
+  limits: {
+    get: () => ipcRenderer.invoke("limits:get"),
+    refresh: (force) => ipcRenderer.invoke("limits:refresh", force),
+    onUpdate: (cb) => ipcRenderer.on("limits:update", (_e, l) => cb(l)),
   },
 });

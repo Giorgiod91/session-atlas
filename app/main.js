@@ -9,8 +9,9 @@ import { watch, existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync,
 import { homedir } from "node:os";
 import { execFile } from "node:child_process";
 import pty from "node-pty";
-import { extract } from "../scripts/extract.mjs";
-import { demoData, demoMcp } from "../scripts/demo-data.mjs";
+import { extract } from "./lib/extract.mjs";
+import { demoData, demoMcp } from "./lib/demo-data.mjs";
+import { createLoops } from "./loops.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const HOME = homedir();
@@ -89,7 +90,8 @@ ipcMain.handle("pty:spawn", (_e, { sessionId, cwd, fork, prompt, cols = 100, row
   terms.set(id, p);
   p.onData((d) => win?.webContents.send("pty:data", id, d));
   p.onExit(({ exitCode }) => { terms.delete(id); win?.webContents.send("pty:exit", id, exitCode); });
-  return { id, cwd: dir };
+  // Demo: show the made-up project path, never the real home folder (screenshots)
+  return { id, cwd: DEMO && typeof cwd === "string" ? cwd : dir };
 });
 ipcMain.on("pty:write", (_e, id, d) => terms.get(id)?.write(d));
 ipcMain.on("pty:resize", (_e, id, cols, rows) => { try { terms.get(id)?.resize(cols, rows); } catch {} });
@@ -263,6 +265,20 @@ ipcMain.handle("mcp:remove", async (_e, { name, scope, project } = {}) => {
   return { ok: r.code === 0, out: scrub((r.stdout + "\n" + r.stderr).trim(), []) };
 });
 
+// ---------- Loops, recipes and plan limits (see loops.mjs) ----------
+const loops = createLoops({ home: HOME, demo: DEMO, send: (ch, d) => win?.webContents.send(ch, d), cli, isProject: (p) => !!projectCwd(p) });
+const guard = (fn) => async (_e, arg) => { try { return { ok: true, value: await fn(arg) }; } catch (e) { return { ok: false, error: e.message }; } };
+ipcMain.handle("loops:list", guard(() => loops.list()));
+ipcMain.handle("loops:recipes", guard(() => loops.recipes()));
+ipcMain.handle("loops:save-recipes", guard((list) => loops.saveRecipes(list)));
+ipcMain.handle("loops:detect", guard((cwd) => loops.detect(cwd)));
+ipcMain.handle("loops:start", guard((o) => loops.start(o)));
+ipcMain.handle("loops:stop", guard((id) => loops.stop(String(id))));
+ipcMain.handle("loops:remove", guard((id) => loops.remove(String(id))));
+ipcMain.handle("limits:get", guard(() => loops.limits()));
+ipcMain.handle("limits:refresh", guard((force) => loops.refreshLimits(!!force)));
+app.on("before-quit", () => loops.killAll());
+
 // ---------- Window ----------
 const ICON = join(HERE, "icon.png");
 function createWindow() {
@@ -275,6 +291,11 @@ function createWindow() {
     webPreferences: { preload: join(HERE, "preload.cjs"), contextIsolation: true, nodeIntegration: false },
   });
   win.loadFile(join(HERE, "renderer", "index.html"));
+  // Remember the app zoom (Cmd + / Cmd -) across restarts
+  // Default 120 %: the UI was designed at small sizes and reads too small next to a normal terminal.
+  const zoomFile = join(HOME, ".session-atlas", "zoom.json");
+  win.webContents.on("did-finish-load", () => { let f = 1.2; try { f = JSON.parse(readFileSync(zoomFile, "utf8")).factor || 1.2; } catch {} win.webContents.setZoomFactor(f); });
+  win.on("close", () => { try { mkdirSync(dirname(zoomFile), { recursive: true }); writeFileSync(zoomFile, JSON.stringify({ factor: win.webContents.getZoomFactor() })); } catch {} });
   win.on("closed", () => { win = null; for (const p of terms.values()) p.kill(); terms.clear(); });
 }
 
