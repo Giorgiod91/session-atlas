@@ -7,11 +7,13 @@
   "type": "module",
   "main": "main.js",
   "scripts": {
-    "build": "esbuild renderer/editor-src.js --bundle --format=iife --minify --outfile=renderer/editor.bundle.js",
+    "build": "mkdir -p lib && cp ../scripts/extract.mjs ../scripts/demo-data.mjs lib/ && esbuild renderer/editor-src.js --bundle --format=iife --minify --outfile=renderer/editor.bundle.js",
     "start": "bun run build && electron .",
     "demo": "bun run build && ATLAS_DEMO=1 electron .",
     "rebuild": "electron-rebuild -f -w node-pty",
-    "postinstall": "electron-rebuild -f -w node-pty && bun run build"
+    "postinstall": "electron-rebuild -f -w node-pty && bun run build",
+    "dist": "bun run build && electron-builder --mac dir --arm64",
+    "install-app": "bun run dist && rm -rf '/Applications/Session Atlas.app' && ditto 'dist/mac-arm64/Session Atlas.app' '/Applications/Session Atlas.app' && rm -rf 'dist/mac-arm64/Session Atlas.app'"
   },
   "dependencies": {
     "@xterm/addon-fit": "0.10.0",
@@ -28,6 +30,34 @@
     "@lezer/highlight": "1.2.5",
     "@replit/codemirror-vim": "6.4.0",
     "electron": "33.2.1",
+    "electron-builder": "25.1.8",
     "esbuild": "0.28.2"
+  },
+  "build": {
+    "appId": "io.github.giorgiod91.session-atlas",
+    "productName": "Session Atlas",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "loops.mjs",
+      "preload.cjs",
+      "icon.png",
+      "lib/**",
+      "renderer/**",
+      "demo/**",
+      "!renderer/editor-src.js"
+    ],
+    "asarUnpack": [
+      "node_modules/node-pty/**"
+    ],
+    "npmRebuild": false,
+    "mac": {
+      "icon": "icon.png",
+      "category": "public.app-category.developer-tools",
+      "identity": null,
+      "target": "dir"
+    }
   }
 }

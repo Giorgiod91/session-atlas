@@ -82,6 +82,120 @@
 .lk-nvim .dh-hint { margin-top:6px; color:var(--bg3); font-size:11px; text-align:center; animation:nvPulse 2.6s ease-in-out infinite; }
 @keyframes nvPulse { 50% { opacity:.45; } }
 
+/* ---------- hub: dashboard widgets, live agents, prompt, graph ---------- */
+.lk-nvim .nv-dash { align-items:stretch; padding:16px 26px 14px; }
+.lk-nvim .dh-head { position:relative; display:flex; align-items:center; justify-content:center; gap:22px; flex:none; }
+.lk-nvim .dh-head .dh-logo { font-size:clamp(5px, .5vw, 8px); }
+.lk-nvim .dh-head .dh-sub { margin:0; text-align:left; }
+.lk-nvim .dh-head .dh-sub b.big { display:block; font-size:13px; color:var(--fg); margin-top:2px; }
+.lk-nvim .dh-wbtn { position:absolute; right:0; top:0; border:1px solid var(--bg1); border-radius:6px; padding:3px 9px; color:var(--fg4); font-size:11px; }
+.lk-nvim .dh-wbtn:hover { color:var(--fg); border-color:var(--bg2); }
+.lk-nvim .dh-wp { position:absolute; right:0; top:28px; z-index:30; width:270px; background:#252728; border:1px solid var(--bg2); border-radius:9px; padding:10px; box-shadow:0 20px 50px rgba(0,0,0,.55); text-align:left; }
+.lk-nvim .dh-wp .pr { display:flex; gap:6px; margin-bottom:8px; }
+.lk-nvim .dh-wp .pr button { flex:1; text-align:center; border:1px solid var(--bg2); border-radius:6px; padding:3px 0; font-size:11px; color:var(--fg3); }
+.lk-nvim .dh-wp .pr button:hover { border-color:var(--ye); color:var(--fg); }
+.lk-nvim .dh-wp label { display:flex; align-items:center; gap:8px; padding:3px 4px; border-radius:4px; color:var(--fg3); cursor:pointer; font-size:11.5px; }
+.lk-nvim .dh-wp label:hover { background:var(--bg0); }
+.lk-nvim .dh-wp input { accent-color:var(--ye); }
+.lk-nvim .dh-wp label small { margin-left:auto; color:var(--gr); }
+.lk-nvim .dh-grid.hub { grid-template-columns:minmax(240px,.8fr) minmax(380px,1.3fr) minmax(300px,1fr); gap:18px 30px; margin:16px auto 0; max-width:1560px; align-items:start; }
+.lk-nvim .dh-col { display:flex; flex-direction:column; gap:16px; min-width:0; }
+.lk-nvim .w { min-width:0; animation:nvUp .5s var(--spring) both; }
+.lk-nvim .dh-keys { display:grid; grid-template-columns:1fr 1fr; gap:1px 8px; }
+.lk-nvim .dh-keys .dh-mi { height:26px; font-size:12px; grid-template-columns:20px 1fr auto; }
+.lk-nvim .dh-keys .dh-mi.on::after { left:30px; }
+.lk-nvim .dh-li { display:flex; align-items:center; gap:8px; height:23px; padding:0 8px; font-size:11.5px; color:var(--fg3); border-radius:5px; }
+.lk-nvim .dh-li .x { margin-left:auto; color:var(--gr); font-size:10.5px; white-space:nowrap; }
+.lk-nvim .dh-li .ell { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; }
+.lk-nvim .dh-none { color:var(--gr); font-size:11.5px; padding:4px 8px; font-style:italic; }
+/* status dots */
+.lk-nvim .hd-dot { width:8px; height:8px; border-radius:50%; flex:none; display:inline-block; background:var(--gr); }
+.lk-nvim .hd-dot.run { background:var(--aq); animation:hubPing 1.6s ease-out infinite; }
+.lk-nvim .hd-dot.wait { background:var(--ye); animation:hubBlink 1.1s steps(2) infinite; }
+.lk-nvim .hd-dot.err { background:var(--rd); }
+.lk-nvim .hd-dot.done { background:var(--bl); opacity:.7; }
+.lk-nvim .hd-dot.new { background:transparent; border:1px dashed var(--fg4); }
+@keyframes hubPing { 0% { box-shadow:0 0 0 0 rgba(142,192,124,.55); } 100% { box-shadow:0 0 0 7px rgba(142,192,124,0); } }
+@keyframes hubBlink { 50% { opacity:.25; } }
+.lk-nvim .sg.wait { color:var(--ye); animation:hubBlink 1.1s steps(2) infinite; } .lk-nvim .sg.err { color:var(--rd); }
+.lk-nvim .tab .ico.run { color:var(--aq); } .lk-nvim .tab .ico.wait { color:var(--ye); } .lk-nvim .tab .ico.err { color:var(--rd); }
+.lk-nvim .tg { font-weight:700; padding:0 5px; border-radius:3px; font-size:10.5px; color:#1d2021; background:var(--tc); flex:none; }
+.lk-nvim .tt { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; color:var(--fg4); }
+.lk-nvim .tt.wt { color:var(--ye); } .lk-nvim .tt.er { color:var(--rd); }
+/* composer */
+.lk-nvim .cmp { display:flex; flex-direction:column; background:#202223; border:1px solid var(--bg1); border-radius:10px; min-height:0; overflow:hidden; transition:border-color .2s, box-shadow .2s; }
+.lk-nvim .cmp:focus-within { border-color:var(--ye); box-shadow:0 0 0 3px rgba(250,189,47,.12); }
+.lk-nvim .cmp-top { display:flex; align-items:center; gap:8px; padding:8px 10px 0; min-width:0; }
+.lk-nvim .chip { display:inline-flex; align-items:center; gap:6px; padding:2px 9px; border-radius:20px; background:#2a2c2d; color:var(--fg3); font-size:11px; white-space:nowrap; max-width:100%; overflow:hidden; }
+.lk-nvim .chip.to { background:#33352a; color:var(--fg); }
+.lk-nvim .chip.to:hover { background:#3d4030; }
+.lk-nvim .cmp-top .in { color:var(--gr); font-size:10.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; }
+.lk-nvim .cmp textarea { flex:1; min-height:64px; padding:9px 12px; color:var(--fg); font:500 13px/1.55 var(--mono); background:none; border:0; outline:0; resize:none; caret-color:var(--ye); }
+.lk-nvim .cmp textarea::placeholder { color:var(--bg3); }
+.lk-nvim .cmp-ft { display:flex; align-items:center; gap:12px; padding:4px 10px 8px; font-size:10.5px; color:var(--gr); flex-wrap:wrap; }
+.lk-nvim .cmp-ft kbd { font-size:9.5px; }
+.lk-nvim .cmp-ft .send { margin-left:auto; background:var(--ye); color:#1d2021; font-weight:800; border-radius:7px; padding:4px 12px; font-size:12px; }
+.lk-nvim .dh-sugg { display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
+.lk-nvim .dh-sugg button { border:1px solid var(--bg1); border-radius:20px; padding:2px 10px; color:var(--fg4); font-size:11px; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.lk-nvim .dh-sugg button:hover { border-color:var(--ye); color:var(--fg); }
+/* needs you */
+.lk-nvim .ask { display:flex; align-items:center; gap:10px; padding:8px 11px; border-radius:8px; background:rgba(250,189,47,.07); border:1px solid rgba(250,189,47,.28); margin-bottom:6px; }
+.lk-nvim .ask.err { background:rgba(251,73,52,.06); border-color:rgba(251,73,52,.28); }
+.lk-nvim .ask .q { flex:1; min-width:0; color:var(--fg); font-size:12px; }
+.lk-nvim .ask .q small { display:block; color:var(--gr); font-size:10.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.lk-nvim .ask button { border:1px solid var(--bg2); border-radius:6px; padding:2px 9px; font-size:11px; color:var(--fg2); flex:none; }
+.lk-nvim .ask button:hover { border-color:var(--fg4); }
+.lk-nvim .ask button.y { background:var(--ye); color:#1d2021; border-color:var(--ye); font-weight:700; }
+/* graph nodes + wires (dashboard widget and graph view) */
+.lk-nvim .mg { position:relative; height:220px; border:1px solid #2a2c2d; border-radius:9px; background:radial-gradient(circle at 1px 1px, #2c2a29 1px, transparent 0) 0 0/18px 18px; overflow:hidden; }
+.lk-nvim .hubw { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; overflow:visible; }
+.lk-nvim .gn { position:absolute; transform:translateY(-50%); display:flex; align-items:center; gap:7px; padding:5px 9px; border-radius:7px; background:#232526; border:1px solid var(--bg1); white-space:nowrap; font-size:11px; box-shadow:0 6px 18px rgba(0,0,0,.35); max-width:31%; cursor:pointer; }
+.lk-nvim .gn.p { color:var(--c); font-weight:700; border-color:color-mix(in srgb, var(--c) 45%, transparent); }
+.lk-nvim .gn.ag { flex-direction:column; align-items:stretch; gap:3px; min-width:150px; }
+.lk-nvim .gn.ag .h { display:flex; align-items:center; gap:6px; color:var(--fg); font-weight:600; min-width:0; }
+.lk-nvim .gn.ag .h .nm { overflow:hidden; text-overflow:ellipsis; min-width:0; }
+.lk-nvim .gn.ag .h .a { margin-left:auto; color:var(--gr); font-weight:500; font-size:10px; }
+.lk-nvim .gn.ag .now { display:flex; gap:6px; align-items:center; font-size:10.5px; min-width:0; }
+.lk-nvim .gn.sub { color:var(--fg3); font-size:10.5px; padding:4px 8px; }
+.lk-nvim .gn.f { color:var(--fg3); font-size:10.5px; padding:3px 8px; }
+.lk-nvim .gn.f.hot { color:var(--ye); border-color:rgba(250,189,47,.45); }
+.lk-nvim .gn.on { border-color:var(--ye); box-shadow:0 0 0 3px rgba(250,189,47,.12), 0 6px 18px rgba(0,0,0,.35); }
+.lk-nvim .gn.done { opacity:.6; }
+.lk-nvim .mg .empty { position:absolute; left:0; right:0; bottom:8px; text-align:center; color:var(--gr); font-size:11px; font-style:italic; }
+/* today lanes */
+.lk-nvim .tdl { display:grid; grid-template-columns:110px 1fr; gap:5px 8px; align-items:center; font-size:11px; }
+.lk-nvim .tdl .n { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.lk-nvim .tdl .trk { position:relative; height:10px; background:#262524; border-radius:3px; }
+.lk-nvim .tdl .trk i { position:absolute; top:0; bottom:0; min-width:3px; border-radius:3px; background:var(--c); opacity:.85; }
+.lk-nvim .tdl .ax { grid-column:2; display:flex; justify-content:space-between; color:var(--bg3); font-size:10px; }
+/* bufferline live chip */
+.lk-nvim .bl-live { display:flex; align-items:center; gap:6px; padding:0 10px; color:var(--fg3); font-size:11px; white-space:nowrap; border-right:1px solid #0a0b0b; }
+.lk-nvim .bl-live:hover { background:#1b1d1e; color:var(--fg); }
+/* graph view */
+.lk-nvim .nv-graph { flex:1; min-height:0; display:flex; flex-direction:column; }
+.lk-nvim .gv-main { flex:1; min-height:0; display:grid; grid-template-columns:minmax(0,1fr) 320px; }
+.lk-nvim .gv-canvas { position:relative; min-height:0; overflow:hidden; background:radial-gradient(circle at 1px 1px, #2a2827 1px, transparent 0) 0 0/22px 22px; }
+.lk-nvim .gv-canvas .gn { font-size:11.5px; padding:7px 11px; max-width:24%; }
+.lk-nvim .gv-canvas .gn.ag { min-width:190px; }
+.lk-nvim .gv-colh { position:absolute; top:10px; font-size:10px; color:var(--gr); text-transform:uppercase; letter-spacing:.1em; }
+.lk-nvim .gv-side { border-left:1px solid #2a2827; background:#191b1c; display:flex; flex-direction:column; gap:8px; padding:12px; min-height:0; overflow:auto; scrollbar-width:none; }
+.lk-nvim .gv-side h4 { display:flex; align-items:center; gap:8px; color:var(--fg); font-size:12.5px; }
+.lk-nvim .gv-side h4 span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.lk-nvim .gv-side .meta { color:var(--gr); font-size:11px; }
+.lk-nvim .gv-side .lbl { color:var(--gr); font-style:italic; font-size:11px; margin-top:6px; }
+.lk-nvim .gv-feed { display:flex; flex-direction:column; gap:2px; font-size:11px; }
+.lk-nvim .gv-feed div { display:flex; gap:6px; align-items:center; min-width:0; }
+.lk-nvim .gv-feed .o { color:var(--gr); padding-left:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:block; }
+.lk-nvim .gv-feed .o.er { color:var(--rd); }
+.lk-nvim .gv-acts { display:flex; gap:6px; flex-wrap:wrap; margin-top:4px; }
+.lk-nvim .gv-acts button { border:1px solid var(--bg2); border-radius:6px; padding:3px 9px; font-size:11px; color:var(--fg2); }
+.lk-nvim .gv-acts button:hover { border-color:var(--ye); color:var(--fg); }
+.lk-nvim .gv-dock { flex:none; height:168px; padding:10px 12px; border-top:1px solid #2a2827; display:flex; }
+.lk-nvim .gv-dock .cmp { flex:1; }
+.lk-nvim .gv-empty { position:absolute; inset:0; display:grid; place-items:center; color:var(--gr); font-style:italic; text-align:center; }
+@media (max-width:1100px) { .lk-nvim .dh-grid.hub { grid-template-columns:minmax(0,1fr) minmax(0,1fr); } .lk-nvim .dh-grid.hub > .dh-col:nth-child(3) { grid-column:1 / -1; } .lk-nvim .gv-main { grid-template-columns:minmax(0,1fr) 260px; } }
+@media (max-width:760px) { .lk-nvim .dh-grid.hub { grid-template-columns:minmax(0,1fr); } .lk-nvim .gv-main { grid-template-columns:minmax(0,1fr); } .lk-nvim .gv-side { display:none; } }
+
 /* ---------- editor: bufferline ---------- */
 .lk-nvim .nv-ed { flex:1; min-height:0; display:flex; flex-direction:column; }
 .lk-nvim .nv-bl { height:30px; display:flex; align-items:stretch; background:#141617; border-bottom:1px solid #0a0b0b; flex:none; }
@@ -479,7 +593,7 @@
     const st = { view: "dash", win: 1, mode: "NORMAL", tree: [], tIdx: 0, open: new Set(), sKey: null, slist: [], sIdx: 0, tlist: [], pIdx: 0,
       bufs: [], buf: null, visual: null, count: "", g: false, z: false, d: false, show: "", dIdx: 0, dTotal: 12, agRows: [], aIdx: 0, tel: null, wk: false, cmd: null, drawer: false,
       notes: { list: null, tree: [], idx: 0, win: 0, closed: new Set(), refocus: false }, mcp: { data: null, rows: [], sel: [], si: 0, status: new Map(), checking: false, frame: 0 },
-      sel: null, form: null, confirm: null };
+      sel: null, form: null, confirm: null, gSel: null, gModel: null };
     if (D.sessions[0]) st.open.add(D.sessions[0].project);
     D.sessions.slice(0, 3).reverse().forEach((s) => st.bufs.push({ id: s.id, pin: true }));
 
@@ -519,6 +633,8 @@
               <div class="ks"><span>Enter</span><span>Notiz öffnen</span><span>:new Name</span><span>neue Notiz</span><span>:Anforderungen Name</span><span>Vorlage fürs gewählte Projekt</span><span>Space a</span><span>Notiz an Claude geben</span></div></div></div>
             <div class="pv-f" id="nvNFoot"></div></section>
         </div>
+        <div class="nv-graph" id="nvGraph" hidden><div class="gv-main"><div class="gv-canvas" id="nvGC"><svg class="hubw" id="nvGW"></svg><div id="nvGN"></div></div><aside class="gv-side" id="nvGS"></aside></div>
+          <div class="gv-dock" id="nvGD"></div></div>
         <div class="nv-mcp" id="nvMcp" hidden>
           <section class="nv-w on" style="--cx:58px"><header class="wb"><span class="n">1</span><span class="f"><b>mcp.servers</b> · Werkzeuge für Claude Code</span><span class="c" id="nvMC"></span></header>
             <div class="wl" id="nvML"><div class="cl"></div><div class="cur"></div><div class="rows mc" id="nvMRows"></div></div>
@@ -545,7 +661,7 @@
     </div>`;
 
     const $ = (id) => root.querySelector("#" + id);
-    const term = $("nvTerm"), dash = $("nvDash"), ed = $("nvEd"), main = $("nvMain");
+    const term = $("nvTerm"), dash = $("nvDash"), ed = $("nvEd"), main = $("nvMain"), graphEl = $("nvGraph");
     const wins = [...root.querySelectorAll(".nv-w[data-w]")].slice(0, 4);
     const lists = [$("nvL0"), $("nvL1"), $("nvL2")];
     const pvEl = $("nvPv"), pfEl = $("nvPf"), agW = $("nvAgW"), agList = $("nvLa"), agRowsEl = $("nvAgRows");
@@ -604,71 +720,329 @@
       return "█".repeat(full) + (rem && full < cells ? EIGHTH[rem] : "") || "▏";
     };
 
-    const DASH_MENU = [["r", "Zuletzt", "clock", "#83a598"], ["f", "Suchen", "search", "#fabd2f"], ["p", "Projekte", "folder", "#8ec07c"], ["n", "Notizen", "note", "#b8bb26"],
-      ["a", "Agents", "bot", "#d3869b"], ["m", "MCP-Server", "plug", "#8ec07c"], ["s", "Statistik", "grid", "#fe8019"], ["q", "Schliessen", "x", "#928374"]];
+    const DASH_MENU = [["r", "Zuletzt", "clock", "#83a598"], ["f", "Suchen", "search", "#fabd2f"], ["g", "Agenten-Graph", "bot", "#8ec07c"], ["l", "Loops bis grün", "play", "#e07a4f"], ["p", "Projekte", "folder", "#8ec07c"], ["n", "Notizen", "note", "#b8bb26"],
+      ["a", "Agents-Bäume", "bot", "#d3869b"], ["m", "MCP-Server", "plug", "#8ec07c"], ["c", "Neue Session", "term", "#83a598"], ["o", "Neues Projekt", "folder", "#fabd2f"], ["s", "Statistik", "grid", "#fe8019"], ["q", "Schliessen", "x", "#928374"]];
+
+    // ================= hub: live agents, prompt, widgets, graph =================
+    const TOOL_C = { Read: "#83a598", Edit: "#fabd2f", MultiEdit: "#fabd2f", Write: "#fe8019", NotebookEdit: "#fe8019", Bash: "#b8bb26", Grep: "#d3869b", Glob: "#d3869b",
+      Agent: "#8ec07c", Task: "#8ec07c", WebFetch: "#83a598", WebSearch: "#83a598", TodoWrite: "#928374" };
+    const ST_C = { run: "#8ec07c", wait: "#fabd2f", err: "#fb4934", done: "#504945" };
+    const ST_RANK = { wait: 0, err: 1, run: 2, done: 3 };
+    const dot = (s) => `<span class="hd-dot ${s}"></span>`;
+    const shortT = (x) => { x = String(x || ""); return x.startsWith("/") ? x.split("/").slice(-2).join("/") : trunc(x, 70); };
+    const lastTool = (s) => { const r = s.activity?.recent || []; return r[r.length - 1]; };
+    const toolTag = (t) => `<span class="tg" style="--tc:${TOOL_C[t.tool] || "#928374"}">${esc(t.tool)}</span><span class="tt">${esc(shortT(t.target))}</span>`;
+    // Sessions that are working, waiting or failed right now; "needs you" first
+    function liveList() {
+      const now = Date.now();
+      return D.sessions.map((s) => ({ s, ...A.agentState(s, now) })).filter((x) => x.st !== "done").sort((a, b) => ST_RANK[a.st] - ST_RANK[b.st] || b.s.end.localeCompare(a.s.end));
+    }
+    function nowLine(x) {
+      const t = lastTool(x.s);
+      if (x.st === "run") return t ? toolTag(t) : `<span class="tt">denkt nach …</span>`;
+      if (x.st === "err") return `<span class="tt er">${esc(x.why)}</span>`;
+      if (x.st === "wait") return `<span class="tt wt">${esc(trunc(A.askOf(x.s) || x.why, 80))}</span>`;
+      return `<span class="tt">${esc(x.why)} · ${A.relShort(x.s.end)}</span>`;
+    }
+    function liveSummary() {
+      const L = liveList(), n = (k) => L.filter((x) => x.st === k).length, run = n("run"), wait = n("wait"), err = n("err");
+      if (!L.length) return "Gerade arbeitet kein Agent";
+      return [run && `${run} ${run === 1 ? "Agent arbeitet" : "Agenten arbeiten"}`, wait && `${wait} ${wait === 1 ? "wartet" : "warten"} auf dich`, err && `${err} mit Fehler`].filter(Boolean).join(", ");
+    }
+    const stateSign = (s) => { const x = A.agentState(s); return x.st === "done" ? "" : `<span class="sg ${x.st === "run" ? "live" : x.st}">●</span>`; };
+
+    // ---- prompt composer (dashboard + graph view share the target and the draft)
+    const hub = { target: null, text: "" };
+    function targets() {
+      const L = liveList().map((x) => ({ kind: "sess", id: x.s.id, label: one(x.s.label), st: x.st, info: `${x.s.projName}${x.s.branch ? " · " + x.s.branch : ""}` }));
+      const t = hub.target;
+      if (t?.kind === "sess" && !L.some((x) => x.id === t.id)) { const s = sById.get(t.id); if (s) L.unshift({ kind: "sess", id: s.id, label: one(s.label), st: "done", info: `${s.projName} · fortsetzen` }); }
+      const P = D.projects.slice().sort((a, b) => b.last.localeCompare(a.last)).slice(0, 6).map((p) => ({ kind: "new", path: p.path, label: `Neue Session · ${p.name}`, st: "new", info: A.short(p.path) }));
+      return [...L, ...P];
+    }
+    const sameT = (a, b) => a && b && a.kind === b.kind && (a.kind === "sess" ? a.id === b.id : a.path === b.path);
+    function curTarget() { const L = targets(); return L.find((x) => sameT(x, hub.target)) || L.find((x) => x.kind === "new") || L[0]; }
+    function cycleTarget(d) { const L = targets(), i = Math.max(0, L.findIndex((x) => sameT(x, curTarget()))); hub.target = L[(i + d + L.length) % L.length]; paintTargets(); }
+    function paintTargets() {
+      const t = curTarget(); if (!t) return;
+      root.querySelectorAll("[data-cmp]").forEach((c) => {
+        c.querySelector(".chip.to").innerHTML = `an ${dot(t.st)} <b>${esc(trunc(t.label, 46))}</b> ▾`;
+        c.querySelector(".in").textContent = t.info || "";
+        c.querySelector(".send").textContent = t.kind === "new" ? "Starten ↵" : t.st === "done" ? "Fortsetzen ↵" : "Senden ↵";
+      });
+    }
+    const composerHTML = (id, ph) => `<div class="cmp" data-cmp="${id}" data-gw="cmp-${id}"><div class="cmp-top"><button class="chip to" data-hub="cycle" title="Ziel wechseln (Tab)"></button><span class="in"></span></div>
+      <textarea data-hubta spellcheck="false" placeholder="${esc(ph)}">${esc(hub.text)}</textarea>
+      <div class="cmp-ft"><span><kbd>⌘↵</kbd> senden</span><span><kbd>Tab</kbd> Ziel wechseln</span><span><kbd>Esc</kbd> zurück</span><button class="send" data-hub="send"></button></div></div>`;
+    function hubSend(ta) {
+      const t = curTarget(), text = ta.value.trim(); if (!t || !text) return;
+      const ok = t.kind === "sess" ? A.sendPrompt({ session: sById.get(t.id), text }) : A.sendPrompt({ cwd: t.path, text, label: text.slice(0, 40) });
+      if (ok) { hub.text = ""; root.querySelectorAll("textarea[data-hubta]").forEach((x) => (x.value = "")); ta.blur(); }
+    }
+    function focusPrompt() { const host = st.view === "graph" ? graphEl : dash; const ta = host.querySelector("textarea[data-hubta]"); if (ta) { ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); } }
+    root.addEventListener("keydown", (e) => {
+      if (!e.target.matches?.("textarea[data-hubta]")) return;
+      if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); hubSend(e.target); }
+      else if (e.key === "Tab") { e.preventDefault(); cycleTarget(e.shiftKey ? -1 : 1); }
+    });
+    root.addEventListener("input", (e) => { if (e.target.matches?.("textarea[data-hubta]")) hub.text = e.target.value; });
+
+    // ---- wires between graph nodes: straight from the data, redrawn when the layout changes
+    function drawWires(host, svgEl, pairs) {
+      if (!host || !svgEl) return;
+      const H = host.getBoundingClientRect(); if (!H.width) return;
+      let out = "";
+      for (const [a, b, col, mode] of pairs) {
+        const ea = host.querySelector(`[data-gw="${a}"]`), eb = host.querySelector(`[data-gw="${b}"]`); if (!ea || !eb) continue;
+        const ra = ea.getBoundingClientRect(), rb = eb.getBoundingClientRect(); if (!ra.width || !rb.width) continue;
+        let x1, y1, x2, y2, d;
+        if (rb.left >= ra.right - 6 || rb.right <= ra.left + 6) {
+          const r = rb.left >= ra.right - 6;
+          x1 = (r ? ra.right : ra.left) - H.left; y1 = ra.top + ra.height / 2 - H.top; x2 = (r ? rb.left : rb.right) - H.left; y2 = rb.top + rb.height / 2 - H.top;
+          const k = Math.max(24, Math.abs(x2 - x1) / 2) * (r ? 1 : -1); d = `M${x1.toFixed(1)},${y1.toFixed(1)} C${(x1 + k).toFixed(1)},${y1.toFixed(1)} ${(x2 - k).toFixed(1)},${y2.toFixed(1)} ${x2.toFixed(1)},${y2.toFixed(1)}`;
+        } else {
+          const down = rb.top > ra.top; x1 = ra.left + Math.min(ra.width / 2, 70) - H.left; x2 = rb.left + Math.min(rb.width / 2, 70) - H.left;
+          y1 = (down ? ra.bottom : ra.top) - H.top; y2 = (down ? rb.top : rb.bottom) - H.top;
+          const k = Math.max(18, Math.abs(y2 - y1) / 2) * (down ? 1 : -1); d = `M${x1.toFixed(1)},${y1.toFixed(1)} C${x1.toFixed(1)},${(y1 + k).toFixed(1)} ${x2.toFixed(1)},${(y2 - k).toFixed(1)} ${x2.toFixed(1)},${y2.toFixed(1)}`;
+        }
+        out += `<path d="${d}" fill="none" stroke="${col}" stroke-opacity="${mode === "done" ? .3 : .5}" stroke-width="1.5"/>`;
+        if (!reduce && mode === "wait") out += `<path d="${d}" fill="none" stroke="${col}" stroke-width="2"><animate attributeName="stroke-opacity" values=".9;.1;.9" dur="1.1s" repeatCount="indefinite"/></path>`;
+        else if (!reduce && mode === "run") out += `<path d="${d}" fill="none" stroke="${col}" stroke-width="1.5" stroke-dasharray="3 9"><animate attributeName="stroke-dashoffset" from="24" to="0" dur=".9s" repeatCount="indefinite"/></path><circle r="2.6" fill="${col}"><animateMotion dur="2.2s" repeatCount="indefinite" path="${d}"/></circle>`;
+        out += `<circle cx="${x1.toFixed(1)}" cy="${y1.toFixed(1)}" r="3" fill="#1d2021" stroke="${col}" stroke-width="1.5"/><circle cx="${x2.toFixed(1)}" cy="${y2.toFixed(1)}" r="3" fill="#1d2021" stroke="${col}" stroke-width="1.5"/>`;
+      }
+      svgEl.innerHTML = out;
+    }
+
+    // ---- graph model: projects -> agents (sessions) -> helpers (subagents) -> files they touch
+    function graphModel(max, withFiles) {
+      let L = liveList().slice(0, max);
+      const idle = !L.length;
+      if (idle) L = D.sessions.slice(0, Math.min(3, max)).map((s) => ({ s, ...A.agentState(s) }));
+      const now = Date.now();
+      const sess = L.map((x) => ({ ...x, subs: x.s.agents.filter((a) => !a.finished || now - Date.parse(a.end) < 10 * 60e3).slice(-2) }));
+      const projs = []; for (const x of sess) { let p = projs.find((q) => q.path === x.s.project); if (!p) projs.push((p = { path: x.s.project, name: x.s.projName, hue: x.s.hue, sess: [] })); p.sess.push(x); }
+      const files = [];
+      if (withFiles) for (const x of sess) {
+        if (x.st === "done") continue;
+        const r = (x.s.activity?.recent || []).filter((t) => t.target && ["Read", "Edit", "MultiEdit", "Write", "NotebookEdit"].includes(t.tool));
+        const seen = new Set();
+        for (const t of r.reverse()) { if (seen.has(t.target) || seen.size >= 2) continue; seen.add(t.target); files.push({ sid: x.s.id, path: t.target, hot: x.st === "run" && t === lastTool(x.s), tool: t.tool }); }
+      }
+      return { sess, projs, files, idle };
+    }
+    // nodes placed in columns; y spreads evenly per column inside [top%, bottom%]
+    function graphHTML(m, o) {
+      const spread = (n, i) => (n <= 1 ? (o.top + o.bot) / 2 : o.top + ((o.bot - o.top) * i) / (n - 1));
+      const ys = new Map(); m.sess.forEach((x, i) => ys.set(x.s.id, spread(m.sess.length, i)));
+      let h = "";
+      m.projs.forEach((p) => {
+        const y = p.sess.reduce((n, x) => n + ys.get(x.s.id), 0) / p.sess.length;
+        h += `<div class="gn p" data-gw="p:${esc(p.path)}" style="--c:${hsl(p.hue)};left:${o.x[0]}%;top:${y}%" title="${esc(A.short(p.path))}">▸ ${esc(p.name)}</div>`;
+      });
+      m.sess.forEach((x) => {
+        h += `<div class="gn ag ${x.st} ${x.s.id === o.sel ? "on" : ""}" data-gw="s:${x.s.id}" data-gsel="${x.s.id}" style="left:${o.x[1]}%;top:${ys.get(x.s.id)}%">
+          <div class="h">${dot(x.st)}<span class="nm">${esc(trunc(one(x.s.label), 34))}</span><span class="a">${A.relShort(x.s.end)}</span></div><div class="now">${nowLine(x)}</div></div>`;
+      });
+      const subs = m.sess.flatMap((x) => x.subs.map((a) => ({ a, x })));
+      subs.forEach(({ a, x }, i) => {
+        h += `<div class="gn sub" data-gw="a:${a.id}" style="max-width:${(o.x[3] ?? 100) - o.x[2] - 3}%;left:${o.x[2]}%;top:${spread(subs.length, i)}%">${dot(a.finished ? "done" : "run")}<span>${esc(A.aName(a.type))}</span><span class="tt">${esc(trunc(a.description || "", 34))}</span></div>`;
+      });
+      if (o.x[3] != null) m.files.forEach((f, i) => {
+        h += `<div class="gn f ${f.hot ? "hot" : ""}" data-gw="f:${esc(f.path)}" style="left:${o.x[3]}%;top:${spread(m.files.length, i)}%" title="${esc(f.path)}">${f.hot ? "● " : ""}${esc(f.path.split("/").pop())}</div>`;
+      });
+      return h;
+    }
+    function graphPairs(m) {
+      const P = [];
+      for (const x of m.sess) {
+        P.push([`p:${x.s.project}`, `s:${x.s.id}`, hsl(x.s.hue), x.st]);
+        for (const a of x.subs) P.push([`s:${x.s.id}`, `a:${a.id}`, "#8ec07c", a.finished ? "done" : "run"]);
+      }
+      for (const f of m.files) P.push([`s:${f.sid}`, `f:${f.path}`, f.hot ? "#fabd2f" : "#504945", f.hot ? "run" : "done"]);
+      return P;
+    }
+
+    // ---- dashboard widgets
+    const WIDGETS = {
+      menu: { col: 0, label: "Menü" }, recent: { col: 0, label: "Zuletzt" }, notes: { col: 0, label: "Notizen" }, mcp: { col: 0, label: "MCP-Server" }, branches: { col: 0, label: "Offene Branches" },
+      prompt: { col: 1, label: "Prompt" }, wait: { col: 1, label: "Braucht dich", live: true }, graph: { col: 1, label: "Agenten live (Graph)", live: true }, today: { col: 1, label: "Heute (Zeitstrahl)", live: true },
+      stats: { col: 2, label: "Zahlen" }, spark: { col: 2, label: "Schritte pro Tag" }, heat: { col: 2, label: "Wochenrhythmus" }, top: { col: 2, label: "Top-Projekte" }, models: { col: 2, label: "Modelle" }, cost: { col: 2, label: "Kosten pro Projekt" },
+    };
+    const PRESETS = { kompakt: ["menu", "recent", "prompt", "wait", "stats"], standard: ["menu", "recent", "prompt", "wait", "graph", "stats", "spark", "top", "models"], voll: Object.keys(WIDGETS) };
+    let dashOn; try { dashOn = JSON.parse(localStorage.getItem("atlas.dash.widgets")); } catch {}
+    if (!Array.isArray(dashOn)) dashOn = PRESETS.standard.slice();
+    const saveDashOn = () => { try { localStorage.setItem("atlas.dash.widgets", JSON.stringify(dashOn)); } catch {} };
+
+    function wHTML(k, c) {
+      const T = D.totals;
+      if (k === "menu") return `<div class="dh-h">-- <b>Menü</b><span class="r"><kbd>j</kbd> <kbd>k</kbd> <kbd>Enter</kbd></span></div><div class="dh-keys">${DASH_MENU.map(([key, l, ic, col]) => `<button class="dh-mi" data-dk="${key}" data-di="${c.di}" style="--i:${c.di++};--c:${col}"><span class="g">${A.ic(ic)}</span><span>${l}</span><span class="k">${key}</span></button>`).join("")}</div>`;
+      if (k === "recent") return `<div class="dh-h">-- <b>Zuletzt</b><span class="r"><kbd>1</kbd>-<kbd>6</kbd></span></div>${D.sessions.slice(0, 6).map((s, i) => `<button class="dh-rc" data-open="${s.id}" data-open-step="${s.last.id}" data-di="${c.di}" style="--i:${c.di++}"><span class="k">${i + 1}</span><span class="t">${A.agentState(s).st === "done" ? "" : dot(A.agentState(s).st) + " "}${esc(one(s.label))}</span>
+        <span class="p" style="color:${hsl(s.hue)}">${esc(s.projName)}</span><span class="a">${A.relShort(s.end)}</span></button>`).join("")}`;
+      if (k === "notes") {
+        if (!st.notes.list) { loadNotes().then(() => alive && st.view === "dash" && refreshWidget("notes")); return `<div class="dh-h">-- <b>Notizen</b></div><div class="dh-none">lädt …</div>`; }
+        const ns = (st.notes.list.notes || []).slice().sort((a, b) => (b.mtime || 0) - (a.mtime || 0)).slice(0, 5);
+        return `<div class="dh-h">-- <b>Notizen</b><span class="r"><kbd>n</kbd></span></div>${ns.map((n) => `<div class="dh-li"><span style="color:var(--gn)">▤</span><span class="ell">${esc(n.name || String(n.path).split("/").pop())}</span><span class="x">${n.mtime ? A.relShort(n.mtime) : ""}</span></div>`).join("") || `<div class="dh-none">Noch keine Notizen</div>`}`;
+      }
+      if (k === "mcp") {
+        if (!st.mcp.data) { loadMcp().then(() => alive && st.view === "dash" && refreshWidget("mcp")).catch(() => {}); return `<div class="dh-h">-- <b>MCP-Server</b></div><div class="dh-none">lädt …</div>`; }
+        const sv = (st.mcp.data.groups || []).flatMap((g) => g.servers.map((x) => ({ ...x, g }))).slice(0, 6);
+        return `<div class="dh-h">-- <b>MCP-Server</b><span class="r"><kbd>m</kbd></span></div>${sv.map((x) => { const sgn = st.mcp.status.get(x.name); return `<div class="dh-li">${dot(sgn?.ok ? "run" : sgn?.failed ? "err" : "done")}<span class="ell">${esc(x.name)}</span><span class="x">${esc(x.g.project ? A.projName(x.g.project) : x.g.scope)}</span></div>`; }).join("") || `<div class="dh-none">Keine MCP-Server eingerichtet</div>`}`;
+      }
+      if (k === "branches") {
+        const seen = new Map(); for (const s of D.sessions) { if (!s.branch || ["main", "master"].includes(s.branch) || Date.now() - Date.parse(s.end) > 14 * 864e5) continue; const key = s.project + "|" + s.branch; if (!seen.has(key)) seen.set(key, s); }
+        const L = [...seen.values()].slice(0, 6);
+        return `<div class="dh-h">-- <b>Offene Branches</b> · 14 Tage</div>${L.map((s) => `<div class="dh-li"><span style="color:${hsl(s.hue)}">⑂</span><span class="ell">${esc(s.branch)}</span><span class="x">${esc(s.projName)} · ${A.relShort(s.end)}</span></div>`).join("") || `<div class="dh-none">Keine Feature-Branches</div>`}`;
+      }
+      if (k === "prompt") {
+        const last = D.sessions[0], err = liveList().find((x) => x.st === "err");
+        return `<div class="dh-h">-- <b>Was soll Claude tun?</b><span class="r"><kbd>i</kbd> schreiben</span></div>${composerHTML("d", "Beschreib einfach, was du willst …  @datei und /befehle wie in Claude Code")}
+          <div class="dh-sugg">${last ? `<button data-hub="resume" data-sid="${last.id}">▶ Weiter bei „${esc(trunc(one(last.label), 34))}“</button>` : ""}${err ? `<button data-hub="open" data-sid="${err.s.id}">⑂ Fehler in „${esc(trunc(one(err.s.label), 28))}“ ansehen</button>` : ""}<button data-hub="graph">◇ Agenten-Graph</button></div>`;
+      }
+      if (k === "wait") {
+        const L = liveList().filter((x) => x.st === "wait" || x.st === "err").slice(0, 4);
+        return `<div class="dh-h">-- <b>Braucht dich</b><span class="r">${L.length || ""}</span></div>${L.map((x) => { const q = A.askOf(x.s);
+          return `<div class="ask ${x.st === "err" ? "err" : ""}">${dot(x.st)}<div class="q">${esc(trunc(q || (x.st === "err" ? x.why : one(x.s.label)), 140))}<small>${esc(one(x.s.label))} · ${esc(x.s.projName)} · ${esc(x.why)} · ${A.relShort(x.s.fileMtime || x.s.end)}</small></div>
+            ${q ? `<button class="y" data-hub="yes" data-sid="${x.s.id}">Ja</button><button data-hub="no" data-sid="${x.s.id}">Nein</button>` : ""}<button data-hub="reply" data-sid="${x.s.id}">Antworten</button><button data-hub="open" data-sid="${x.s.id}" title="im Editor öffnen">⏎</button></div>`; }).join("") || `<div class="dh-none">Niemand wartet auf dich.</div>`}`;
+      }
+      if (k === "graph") {
+        const m = graphModel(4, false);
+        return `<div class="dh-h">-- <b>Agenten live</b> · ${esc(liveSummary())}<span class="r"><kbd>g</kbd> groß</span></div><div class="mg" data-hub="graph" title="Klick öffnet den großen Graph"><svg class="hubw"></svg>${graphHTML(m, { x: [3, 30, 70], top: 18, bot: 82 })}${m.idle ? `<div class="empty">Gerade arbeitet kein Agent, das sind die letzten Sessions.</div>` : ""}</div>`;
+      }
+      if (k === "today") {
+        const t0 = new Date(); t0.setHours(0, 0, 0, 0); const now = Date.now();
+        const lanes = new Map();
+        for (const s of D.sessions) for (const n of s.nodes) { const ts = Date.parse(n.ts); if (ts < t0) continue; if (!lanes.has(s.project)) lanes.set(s.project, { s, ts: [] }); lanes.get(s.project).ts.push(ts); }
+        const all = [...lanes.values()].flatMap((l) => l.ts); if (!all.length) return `<div class="dh-h">-- <b>Heute</b></div><div class="dh-none">Heute noch nichts passiert.</div>`;
+        const a = Math.min(...all) - 15 * 60e3, b = now, span = Math.max(1, b - a), pct = (x) => ((x - a) / span) * 100;
+        const blocks = (ts) => { ts.sort((p, q) => p - q); const out = []; for (const x of ts) { const l = out[out.length - 1]; if (l && x - l[1] < 20 * 60e3) l[1] = x; else out.push([x, x]); } return out; };
+        return `<div class="dh-h">-- <b>Heute</b> · ${A.hhmm(a)} bis jetzt</div><div class="tdl">${[...lanes.values()].slice(0, 6).map((l) => `<span class="n" style="color:${hsl(l.s.hue)}">${esc(l.s.projName)}</span><div class="trk">${blocks(l.ts).map(([x, y]) => `<i style="--c:${hsl(l.s.hue)};left:${pct(x - 4 * 60e3)}%;width:${Math.max(.8, pct(y + 4 * 60e3) - pct(x - 4 * 60e3))}%"></i>`).join("")}</div>`).join("")}
+          <span class="ax"><span>${A.hhmm(a)}</span><span>${A.hhmm(a + span / 2)}</span><span>jetzt</span></span></div>`;
+      }
+      if (k === "stats") return `<div class="dh-tot">${[["Sessions", T.sessions, "#83a598", 0], ["Schritte", T.steps, "#fabd2f", 0], ["Agents", T.agents, "#d3869b", 0], ["Kosten", T.cost, "#8ec07c", 2]].map(([l, v, col, dec], i) =>
+        `<div style="--c:${col};--i:${i}"><b data-cu="${v}" data-dec="${dec}">${dec ? "$0.00" : "0"}</b><small>${l}</small></div>`).join("")}</div>`;
+      if (k === "spark") return `<div class="dh-h">-- <b>Schritte pro Tag</b> · 30 Tage</div>
+        <div class="spk"><div><div class="spk-g">${c.sp.map((row) => `<span>${row.map((ch, j) => `<i style="font-style:normal" title="${esc(dlabel(days30[j * 2].d))}: ${days30[j * 2].v} · ${esc(dlabel(days30[j * 2 + 1].d))}: ${days30[j * 2 + 1].v}">${ch}</i>`).join("")}</span>`).join("")}</div>
+          <div class="spk-ax"><span>-30T</span><span>-15T</span><span>heute</span></div></div><div class="spk-y"><span>${c.mx}</span><span>0</span></div></div>
+        <div class="spk-n">Ø <b>${Math.round(c.sum / 30)}</b>/Tag · Spitze <b>${c.peak.v}</b> am ${esc(dlabel(c.peak.d))} · ${c.active} aktive Tage</div>`;
+      if (k === "heat") return `<div class="dh-h">-- <b>Wochenrhythmus</b> · ${c.WEEKS} Wochen</div>
+        <div class="hm"><div class="hm-d">${["Mo", "", "Mi", "", "Fr", "", "So"].map((x) => `<span>${x}</span>`).join("")}</div>
+          <div class="hm-c">${c.cells.map((row) => row.map((x) => `<span style="color:${c.hcol(x.v)}" title="${esc(dlabel(x.d))}: ${Math.max(0, x.v)} Schritte">${c.glyph(x.v)}</span>`).join(" ")).join("\n")}</div>
+          <div class="hm-l">weniger <span style="color:#3c3836">··</span> <span style="color:#5d7a52">░░</span> <span style="color:#79a067">▒▒</span> <span style="color:#8ec07c">▓▓</span> <span style="color:#b8e08e">██</span> mehr</div></div>`;
+      if (k === "top") return `<div class="dh-h">-- <b>Top-Projekte</b> · nach Schritten</div>
+        <div class="pb">${c.topP.map((p, i) => `<span class="n">${esc(p.name)}</span><span class="b" style="--c:${hsl(p.hue)};--i:${i}">${bar(p.steps / c.pmax, 22)}</span><span class="v">${p.steps}</span>`).join("")}</div>`;
+      if (k === "models") return `<div class="dh-h">-- <b>Modelle</b> · Antworten</div><div class="mb">${c.mbar}</div>
+        <div class="ml">${c.famList.map(([f, v]) => `<span><i style="--c:${FAM[f] || FAM.x}">■</i> ${esc(f === "x" ? "andere" : f[0].toUpperCase() + f.slice(1))} ${Math.round((v / c.famTot) * 100)}%</span>`).join("")}</div>`;
+      if (k === "cost") {
+        const wk = Date.now() - 7 * 864e5, by = new Map();
+        for (const s of D.sessions) { if (Date.parse(s.end) < wk || !s.cost?.usd) continue; const p = by.get(s.project) || { name: s.projName, hue: s.hue, v: 0 }; p.v += s.cost.usd; by.set(s.project, p); }
+        const L = [...by.values()].sort((a, b) => b.v - a.v).slice(0, 6), mx = L[0]?.v || 1;
+        return `<div class="dh-h">-- <b>Kosten</b> · 7 Tage</div>${L.length ? `<div class="pb">${L.map((p, i) => `<span class="n">${esc(p.name)}</span><span class="b" style="--c:${hsl(p.hue)};--i:${i}">${bar(p.v / mx, 22)}</span><span class="v">${A.usd(p.v)}</span>`).join("")}</div>` : `<div class="dh-none">Keine Kosten in den letzten 7 Tagen.</div>`}`;
+      }
+      return "";
+    }
+    let dashCtx = null;
     function renderDash() {
       const word = "SESSION ATLAS";
-      const rows = [0, 1, 2, 3, 4, 5].map((r) => [...word].map((c) => FONT[c][r]).join(""));
+      const rows = [0, 1, 2, 3, 4, 5].map((r) => [...word].map((ch) => FONT[ch][r]).join(""));
       const fg = rows.map((l) => l.replace(/[^█]/g, " ")), sh = rows.map((l) => l.replace(/█/g, " "));
-      const T = D.totals;
-      const sp = braille(days30.map((x) => x.v), 3);
-      const vals = days30.map((x) => x.v), mx = Math.max(...vals), sum = vals.reduce((a, b) => a + b, 0);
-      const peak = days30.reduce((a, b) => (b.v > a.v ? b : a), days30[0]);
-      const active = vals.filter(Boolean).length;
-      // heatmap weekday x week (12 weeks, Monday first)
-      const WEEKS = innerWidth < 1180 ? 9 : 12, start = new Date(today); start.setDate(start.getDate() - ((start.getDay() + 6) % 7) - (WEEKS - 1) * 7);
+      const vals = days30.map((x) => x.v);
+      const WEEKS = 12, start = new Date(today); start.setDate(start.getDate() - ((start.getDay() + 6) % 7) - (WEEKS - 1) * 7);
       const cells = []; let hmax = 1;
       for (let wd = 0; wd < 7; wd++) { cells.push([]); for (let w = 0; w < WEEKS; w++) { const d = new Date(start); d.setDate(d.getDate() + w * 7 + wd); const v = d > today ? -1 : perDay.get(dayKey(d)) || 0; hmax = Math.max(hmax, v); cells[wd].push({ d, v }); } }
-      const glyph = (v) => (v < 0 ? "  " : v === 0 ? "··" : v / hmax <= .2 ? "░░" : v / hmax <= .45 ? "▒▒" : v / hmax <= .75 ? "▓▓" : "██");
-      const hcol = (v) => (v <= 0 ? "#3c3836" : v / hmax <= .2 ? "#5d7a52" : v / hmax <= .45 ? "#79a067" : v / hmax <= .75 ? "#8ec07c" : "#b8e08e");
-      const topP = D.projects.slice().sort((a, b) => b.steps - a.steps).slice(0, 6), pmax = topP[0]?.steps || 1;
+      const topP = D.projects.slice().sort((a, b) => b.steps - a.steps).slice(0, 6);
       const fam = {}; for (const s of D.sessions) for (const [m, v] of Object.entries(s.models || {})) { const f = A.modelInfo(m).fam; fam[f] = (fam[f] || 0) + (v.replies || 0); }
       const famList = Object.entries(fam).sort((a, b) => b[1] - a[1]), famTot = famList.reduce((n, x) => n + x[1], 0) || 1;
       const MB = 44; let used = 0;
       const mbar = famList.map(([f, v], i) => { let n = i === famList.length - 1 ? MB - used : Math.max(1, Math.round((v / famTot) * MB)); n = Math.max(0, Math.min(n, MB - used)); used += n; return `<span style="color:${FAM[f] || FAM.x}">${"█".repeat(n)}</span>`; }).join("");
-      const recent = D.sessions.slice(0, 6);
-      const menu = DASH_MENU;
-      const quote = QUOTES[Math.floor(Date.now() / 864e5) % QUOTES.length];
-      const ms = Math.max(1, Math.round(performance.now() - t0));
+      dashCtx = { di: 0, sp: braille(vals, 3), mx: Math.max(...vals), sum: vals.reduce((a, b) => a + b, 0), active: vals.filter(Boolean).length,
+        peak: days30.reduce((a, b) => (b.v > a.v ? b : a), days30[0]), WEEKS, cells,
+        glyph: (v) => (v < 0 ? "  " : v === 0 ? "··" : v / hmax <= .2 ? "░░" : v / hmax <= .45 ? "▒▒" : v / hmax <= .75 ? "▓▓" : "██"),
+        hcol: (v) => (v <= 0 ? "#3c3836" : v / hmax <= .2 ? "#5d7a52" : v / hmax <= .45 ? "#79a067" : v / hmax <= .75 ? "#8ec07c" : "#b8e08e"),
+        topP, pmax: topP[0]?.steps || 1, famList, famTot, mbar };
+      const cols = [[], [], []];
+      for (const k of Object.keys(WIDGETS)) if (dashOn.includes(k)) cols[WIDGETS[k].col].push(`<div class="w" data-wid="${k}">${wHTML(k, dashCtx)}</div>`);
       dash.innerHTML = `
-        <div class="dh-logo" aria-label="Session Atlas"><div class="lg lg-sh">${sh.map((l, r) => `<span style="--r:${r}">${l}</span>`).join("")}</div>
+        <div class="dh-head"><div class="dh-logo" aria-label="Session Atlas"><div class="lg lg-sh">${sh.map((l, r) => `<span style="--r:${r}">${l}</span>`).join("")}</div>
           <div class="lg lg-fg">${fg.map((l, r) => `<span style="--r:${r}">${l}</span>`).join("")}</div></div>
-        <div class="dh-sub">deine Claude-Code-Sessions als Editor · <b>${D.projects.length}</b> Projekte · <b>${D.totals.sessions}</b> Sessions</div>
-        <div class="dh-grid">
-          <div class="dh-left">
-            <div class="dh-h">-- <b>Menü</b><span class="r"><kbd>j</kbd> <kbd>k</kbd> <kbd>Enter</kbd></span></div>
-            ${menu.map(([k, l, ic, c], i) => `<button class="dh-mi" data-dk="${k}" data-di="${i}" style="--i:${i};--c:${c}"><span class="g">${A.ic(ic)}</span><span>${l}</span><span class="k">${k}</span></button>`).join("")}
-            <div class="dh-h" style="margin-top:14px">-- <b>Zuletzt</b><span class="r">Zahl drücken öffnet</span></div>
-            ${recent.map((s, i) => `<button class="dh-rc" data-open="${s.id}" data-open-step="${s.last.id}" data-di="${i + menu.length}" style="--i:${i + menu.length}"><span class="k">${i + 1}</span><span class="t">${esc(one(s.label))}</span>
-              <span class="p" style="color:${hsl(s.hue)}">${esc(s.projName)}</span><span class="a">${A.relShort(s.end)}</span></button>`).join("")}
-            <div class="dh-lazy">⚡ Atlas geladen · <b>${T.sessions}</b> Sessions · <b>${T.steps}</b> Schritte in <b>${ms}ms</b></div>
-          </div>
-          <div class="dh-right" id="nvStats">
-            <div class="dh-tot">${[["Sessions", T.sessions, "#83a598", 0], ["Schritte", T.steps, "#fabd2f", 0], ["Agents", T.agents, "#d3869b", 0], ["Kosten", T.cost, "#8ec07c", 2]].map(([l, v, c, dec], i) =>
-              `<div style="--c:${c};--i:${i}"><b data-cu="${v}" data-dec="${dec}">${dec ? "$0.00" : "0"}</b><small>${l}</small></div>`).join("")}</div>
-            <div class="dh-two">
-              <div><div class="dh-h">-- <b>Schritte pro Tag</b> · 30 Tage</div>
-                <div class="spk"><div><div class="spk-g">${sp.map((row) => `<span>${row.map((ch, j) => `<i style="font-style:normal" title="${esc(dlabel(days30[j * 2].d))}: ${days30[j * 2].v} · ${esc(dlabel(days30[j * 2 + 1].d))}: ${days30[j * 2 + 1].v}">${ch}</i>`).join("")}</span>`).join("")}</div>
-                  <div class="spk-ax"><span>-30T</span><span>-15T</span><span>heute</span></div></div><div class="spk-y"><span>${mx}</span><span>0</span></div></div>
-                <div class="spk-n">Ø <b>${Math.round(sum / 30)}</b>/Tag · Spitze <b>${peak.v}</b> am ${esc(dlabel(peak.d))} · ${active} aktive Tage</div></div>
-              <div><div class="dh-h">-- <b>Wochenrhythmus</b> · ${WEEKS} Wochen</div>
-                <div class="hm"><div class="hm-d">${["Mo", "", "Mi", "", "Fr", "", "So"].map((x) => `<span>${x}</span>`).join("")}</div>
-                  <div class="hm-c">${cells.map((row) => row.map((c) => `<span style="color:${hcol(c.v)}" title="${esc(dlabel(c.d))}: ${Math.max(0, c.v)} Schritte">${glyph(c.v)}</span>`).join(" ")).join("\n")}</div>
-                  <div class="hm-l">weniger <span style="color:#3c3836">··</span> <span style="color:#5d7a52">░░</span> <span style="color:#79a067">▒▒</span> <span style="color:#8ec07c">▓▓</span> <span style="color:#b8e08e">██</span> mehr</div></div></div>
-            </div>
-            <div><div class="dh-h">-- <b>Top-Projekte</b> · nach Schritten</div>
-              <div class="pb">${topP.map((p, i) => `<span class="n">${esc(p.name)}</span><span class="b" style="--c:${hsl(p.hue)};--i:${i}">${bar(p.steps / pmax, 26)}</span><span class="v">${p.steps}</span>`).join("")}</div></div>
-            <div><div class="dh-h">-- <b>Modelle</b> · Antworten</div>
-              <div class="mb">${mbar}</div>
-              <div class="ml">${famList.map(([f, v]) => `<span><i style="--c:${FAM[f] || FAM.x}">■</i> ${esc(f === "x" ? "andere" : f[0].toUpperCase() + f.slice(1))} ${Math.round((v / famTot) * 100)}%</span>`).join("")}</div></div>
-          </div>
-        </div>
-        <div class="dh-quote">-- "${esc(quote)}"</div>
-        <div class="dh-hint">Taste drücken oder klicken: weiter zum Editor</div>`;
-      st.dTotal = menu.length + recent.length;
-      markDash();
-      countUp();
+          <div class="dh-sub">${esc(new Date().toLocaleDateString("de-DE", { weekday: "long", day: "numeric", month: "long" }))} · <b>${D.projects.length}</b> Projekte · <b>${D.totals.sessions}</b> Sessions<b class="big" id="nvDhLive">${esc(liveSummary())}</b></div>
+          <button class="dh-wbtn" data-hub="widgets">⚙ Widgets (${dashOn.length})</button>
+          <div class="dh-wp" id="nvDhWp" hidden><div class="pr">${Object.keys(PRESETS).map((p) => `<button data-hub="preset" data-p="${p}">${p}</button>`).join("")}</div>
+            ${Object.entries(WIDGETS).map(([k, w]) => `<label><input type="checkbox" data-wtog="${k}" ${dashOn.includes(k) ? "checked" : ""}>${w.label}<small>${["links", "Mitte", "rechts"][w.col]}</small></label>`).join("")}</div></div>
+        <div class="dh-grid hub">${cols.map((c) => `<div class="dh-col">${c.join("")}</div>`).join("")}</div>
+        <div class="dh-quote">-- "${esc(QUOTES[Math.floor(Date.now() / 864e5) % QUOTES.length])}"</div>`;
+      st.dTotal = Math.max(1, dashCtx.di); st.dIdx = Math.min(st.dIdx, st.dTotal - 1);
+      dash.querySelectorAll("[data-wtog]").forEach((cb) => cb.addEventListener("change", () => {
+        dashOn = cb.checked ? [...dashOn, cb.dataset.wtog] : dashOn.filter((x) => x !== cb.dataset.wtog); saveDashOn(); renderDash(); $("nvDhWp").hidden = false;
+      }));
+      paintTargets(); markDash(); countUp(); dashWires();
     }
+    function refreshWidget(k) { const el = dash.querySelector(`[data-wid="${k}"]`); if (!el || !dashCtx) return; const di = dashCtx.di; el.innerHTML = wHTML(k, dashCtx); dashCtx.di = di; if (k === "graph") dashWires(); }
+    function dashWires() { requestAnimationFrame(() => { const mg = dash.querySelector(".mg"); if (mg) drawWires(mg, mg.querySelector(".hubw"), graphPairs(graphModel(4, false))); }); }
+    // live parts of the dashboard: refreshed in place so the draft in the prompt is kept
+    function dashLive() {
+      if (st.view !== "dash" || !dashCtx) return;
+      for (const k of Object.keys(WIDGETS)) if (WIDGETS[k].live && dashOn.includes(k)) refreshWidget(k);
+      const lv = $("nvDhLive"); if (lv) lv.textContent = liveSummary();
+      paintTargets();
+    }
+
+    // ---- graph view
+    function showGraph() {
+      if (st.view === "dash") { dash.hidden = true; ed.hidden = false; }
+      setView("graph");
+    }
+    function renderGraph(enter) {
+      const m = graphModel(7, true);
+      if (!m.sess.some((x) => x.s.id === st.gSel)) st.gSel = m.sess[0]?.s.id || null;
+      if (enter && st.gSel) hub.target = { kind: "sess", id: st.gSel };
+      const keepText = graphEl.querySelector("textarea[data-hubta]") === document.activeElement;
+      $("nvGN").innerHTML = `<span class="gv-colh" style="left:3%">Projekte</span><span class="gv-colh" style="left:24%">Agenten</span><span class="gv-colh" style="left:50%">Helfer</span><span class="gv-colh" style="left:76%">Dateien gerade</span>
+        ${graphHTML(m, { x: [3, 24, 50, 76], top: 14, bot: 88, sel: st.gSel })}${m.idle ? `<div class="gv-empty" style="top:auto;bottom:14px;height:auto">Gerade arbeitet kein Agent. Hier stehen die letzten Sessions.</div>` : ""}`;
+      renderGraphSide();
+      if (!keepText && !graphEl.querySelector("[data-cmp]")) $("nvGD").innerHTML = composerHTML("g", "Frag den gewählten Agenten oder starte einen neuen …");
+      paintTargets();
+      st.gModel = m;
+      requestAnimationFrame(() => drawWires($("nvGC"), $("nvGW"), graphPairs(m)));
+    }
+    function renderGraphSide() {
+      const s = sById.get(st.gSel), el = $("nvGS");
+      if (!s) { el.innerHTML = `<div class="dh-none">Kein Agent gewählt</div>`; return; }
+      const x = A.agentState(s), q = A.askOf(s), R = (s.activity?.recent || []).slice(-9);
+      el.innerHTML = `<h4>${dot(x.st)}<span>${esc(one(s.label))}</span></h4>
+        <div class="meta">${esc(s.projName)}${s.branch ? " · " + esc(s.branch) : ""} · ${esc(x.why)} · ${A.relShort(s.fileMtime || s.end)}</div>
+        ${q ? `<div class="ask" style="margin:4px 0 0">${dot("wait")}<div class="q">${esc(q)}</div><button class="y" data-hub="yes" data-sid="${s.id}">Ja</button><button data-hub="no" data-sid="${s.id}">Nein</button></div>` : ""}
+        <div class="lbl">-- Gerade</div>
+        <div class="gv-feed">${R.map((t) => `<div>${toolTag(t)}</div>${t.result ? `<span class="o ${t.err ? "er" : ""}">⎿ ${esc(t.result)}</span>` : ""}`).join("") || `<span class="dh-none">Keine Werkzeug-Aufrufe gespeichert.</span>`}</div>
+        ${s.files.length ? `<div class="lbl">-- Geändert</div><div class="gv-feed">${s.files.slice(-5).reverse().map((f) => `<div><span style="color:var(--ye)">~</span><span class="tt" title="${esc(f)}">${esc(shortT(f))}</span></div>`).join("")}</div>` : ""}
+        <div class="gv-acts"><button data-hub="open" data-sid="${s.id}"><kbd>Enter</kbd> im Editor</button><button data-hub="term" data-sid="${s.id}"><kbd>o</kbd> Terminal</button><button data-hub="reply" data-sid="${s.id}"><kbd>i</kbd> Prompt</button></div>`;
+    }
+    function graphSelect(id) {
+      st.gSel = id; hub.target = { kind: "sess", id };
+      graphEl.querySelectorAll("[data-gsel]").forEach((n) => n.classList.toggle("on", n.dataset.gsel === id));
+      renderGraphSide(); paintTargets(); status();
+    }
+    function graphMove(d) { const L = st.gModel?.sess || []; if (!L.length) return; const i = L.findIndex((x) => x.s.id === st.gSel); graphSelect(L[(i + d + L.length) % L.length].s.id); }
+    function openInEditor(id) { const s = sById.get(id); if (!s) return; if (st.view === "dash") showEditor(); else if (st.view !== "editor") setView("editor"); gotoSession(s.id, s.last.id, { pin: true }); }
+    function openTerm(id) { const s = sById.get(id); if (!s) return; const T = window.AtlasTerminal; if (T?.hasSession(s.id)) T.show(true); else A.resume(s); }
+    function hubAct(a, d, el) {
+      if (a === "cycle") return cycleTarget(1);
+      if (a === "send") return hubSend(el.closest(".cmp").querySelector("textarea"));
+      if (a === "graph") return showGraph();
+      if (a === "widgets") { const p = $("nvDhWp"); p.hidden = !p.hidden; return; }
+      if (a === "preset") { dashOn = PRESETS[d.p].slice(); saveDashOn(); renderDash(); $("nvDhWp").hidden = false; return; }
+      const s = sById.get(d.sid); if (!s) return;
+      if (a === "reply") { hub.target = { kind: "sess", id: s.id }; paintTargets(); return focusPrompt(); }
+      if (a === "yes" || a === "no") return A.sendPrompt({ session: s, text: a === "yes" ? "Ja" : "Nein" });
+      if (a === "open") return openInEditor(s.id);
+      if (a === "term") return openTerm(s.id);
+      if (a === "resume") return A.resume(s);
+    }
+    const hubT = setInterval(() => {
+      if (!alive || document.hidden || document.body.classList.contains("term-open")) return;
+      if (st.view === "dash") dashLive(); else if (st.view === "graph") renderGraph();
+      paintBlLive();
+    }, 5000);
+
     function countUp() {
       const els = [...dash.querySelectorAll("[data-cu]")];
       const fmt = (el, v) => { const dec = +el.dataset.dec; el.textContent = dec ? "$" + v.toFixed(dec) : Math.round(v).toLocaleString("de-DE"); };
@@ -700,7 +1074,7 @@
         if (r.k === "root") return `<div class="r root" data-i="${i}"><span class="ig"></span><span class="fo o">▾</span><span class="fi" style="--h:40">${A.ic("folder")}</span><span class="tx">Alle Sessions</span><span class="vt"><span class="cnt">${D.sessions.length}</span></span></div>`;
         if (r.k === "proj") { const o = st.open.has(r.p.path);
           return `<div class="r proj" data-i="${i}"><span class="ig">${r.lastP ? "└ " : "├ "}</span><span class="fo ${o ? "o" : ""}">${o ? "▾" : "▸"}</span><span class="fi" style="--h:${r.p.hue}">${A.ic("folder")}</span><span class="tx">${esc(r.p.name)}</span><span class="vt"><span class="cnt">${r.p.sessions.length}</span></span></div>`; }
-        return `<div class="r sess" data-i="${i}"><span class="ig">${r.lastP ? "  " : "│ "}${r.last ? "└ " : "├ "}</span><span class="fo">${r.s.live ? `<span class="sg live">●</span>` : ""}</span><span class="fi" style="--h:${r.s.hue};font-size:10px">◆</span><span class="tx">${esc(one(r.s.label))}</span><span class="vt">${A.relShort(r.s.end)}</span></div>`;
+        return `<div class="r sess" data-i="${i}"><span class="ig">${r.lastP ? "  " : "│ "}${r.last ? "└ " : "├ "}</span><span class="fo">${stateSign(r.s)}</span><span class="fi" style="--h:${r.s.hue};font-size:10px">◆</span><span class="tx">${esc(one(r.s.label))}</span><span class="vt">${A.relShort(r.s.end)}</span></div>`;
       }).join("");
       $("nvC0").textContent = `${D.projects.length} Projekte`;
     }
@@ -710,7 +1084,7 @@
     function renderSessions() {
       const all = st.sKey === "*";
       lists[1].querySelector(".rows").innerHTML = st.slist.map((s, i) => {
-        const sign = s.live ? `<span class="sg live">●</span>` : s.agents.length ? `<span class="sg bot">${A.ic("bot")}</span>` : s.files.length ? `<span class="sg add">+</span>` : `<span class="sg"></span>`;
+        const sign = stateSign(s) || (s.agents.length ? `<span class="sg bot">${A.ic("bot")}</span>` : s.files.length ? `<span class="sg add">+</span>` : `<span class="sg"></span>`);
         const vt = all ? `<span style="color:${hsl(s.hue, 60)}">${esc(trunc(s.projName, 12))}</span> · ${A.relShort(s.end)}` : `${s.nodes.length} Schr.${s.agents.length ? ` · <span class="ag">${s.agents.length} Ag.</span>` : ""} · ${A.relShort(s.end)}`;
         return `<div class="r" data-i="${i}">${sign}<span class="nu"></span><span class="fc"></span><span class="tx">${esc(one(s.label))}</span><span class="vt">${vt}</span><button class="op" data-open="${s.id}" title="Session öffnen">⏎</button></div>`;
       }).join("") || `<div class="empty">Keine Sessions</div>`;
@@ -820,10 +1194,17 @@
         if (b.kind === "note") return `<div class="tab nt ${b.id === curBuf ? "on" : ""}" data-buf="${esc(b.id)}" style="animation-delay:${i * 30}ms" title="${esc(b.path)}"><span class="ico nti">${A.ic("note")}</span><span class="nm">${esc(b.name)}</span>${b.dirty ? `<span class="pl">[+]</span>` : ""}
           <span class="x" data-bx="${esc(b.id)}"><span class="cx show">×</span></span></div>`;
         const s = sById.get(b.id); if (!s) return "";
-        return `<div class="tab ${b.id === curBuf ? "on" : ""} ${b.pin ? "" : "pv"}" data-buf="${b.id}" style="--h:${s.hue};animation-delay:${i * 30}ms" title="${esc(s.label)}"><span class="ico">◆</span><span class="nm">${esc(trunc(one(s.label), 26))}</span>
+        const ls = A.agentState(s).st;
+        return `<div class="tab ${b.id === curBuf ? "on" : ""} ${b.pin ? "" : "pv"}" data-buf="${b.id}" style="--h:${s.hue};animation-delay:${i * 30}ms" title="${esc(s.label)}"><span class="ico ${ls}">${ls === "done" ? "◆" : "●"}</span><span class="nm">${esc(trunc(one(s.label), 26))}</span>
           <span class="x" data-bx="${b.id}">${fresh(s) ? `<span class="md" title="frisch, letzte 24h">●</span>` : ""}<span class="cx ${fresh(s) ? "" : "show"}">×</span></span></div>`;
       }).join("");
-      $("nvBlR").innerHTML = `<b>${Math.max(1, st.bufs.findIndex((b) => b.id === st.buf) + 1)}/${st.bufs.length}</b> Buffer`;
+      paintBlLive();
+    }
+    // live dots in the bufferline, updated without re-rendering (and re-animating) the tabs
+    function paintBlLive() {
+      const L = liveList(), cnt = (k) => L.filter((x) => x.st === k).length;
+      $("nvBlR").innerHTML = `${L.length ? `<button class="bl-live" data-hub="graph" title="Agenten-Graph (Space g)">${["run", "wait", "err"].filter(cnt).map((k) => `${dot(k)} ${cnt(k)}`).join(" ")}</button>` : ""}<b>${Math.max(1, st.bufs.findIndex((b) => b.id === st.buf) + 1)}/${st.bufs.length}</b> Buffer`;
+      $("nvTabs").querySelectorAll(".tab[data-buf]:not(.nt)").forEach((t) => { const s = sById.get(t.dataset.buf), ico = t.querySelector(".ico"); if (!s || !ico) return; const ls = A.agentState(s).st; ico.className = "ico " + ls; ico.textContent = ls === "done" ? "◆" : "●"; });
     }
     // o.force drops unsaved note changes, o.ask asks first (mouse / x), otherwise vim's E37
     function closeBuf(id, o = {}) {
@@ -946,6 +1327,11 @@
         const n = (st.mcp.data?.groups || []).reduce((k, g) => k + g.servers.length, 0);
         br = "mcp"; c = `<span class="fn">mcp<i>/</i><b>servers</b></span>${st.mcp.data?.demo ? `<span class="mo">demo</span>` : ""}`; y = `${n} Server`;
       }
+      else if (st.view === "graph") {
+        const gs = sById.get(st.gSel);
+        c = `<span class="fn">agenten<i>/</i><b>${gs ? esc(trunc(one(gs.label), 60)) : "-"}</b></span>`;
+        y = esc(liveSummary()); br = gs?.branch || "atlas";
+      }
       else if (st.view === "agents") {
         const r = st.agRows[st.aIdx], as = r && sById.get(r.sid);
         c = `<span class="fn">agents<i>/</i><b>${as ? esc(trunc(one(as.label), 60)) : "-"}</b></span>`;
@@ -1012,10 +1398,12 @@
         });
       }
     }
-    let raf = 0, lastTs = 0;
+    // The wire particles used to animate forever (~20 % CPU idle). Now they only run for a few seconds
+    // after something moved, and never while the terminal covers the editor or the window is in the background.
+    let raf = 0, lastTs = 0, liveUntil = 0;
     function tick(ts) {
       raf = 0;
-      if (!alive || st.view !== "editor" || document.hidden) { lastTs = 0; return; }
+      if (!alive || st.view !== "editor" || document.hidden || document.body.classList.contains("term-open")) { lastTs = 0; return; }
       const dt = Math.min(1 / 30, lastTs ? (ts - lastTs) / 1000 : 1 / 60); lastTs = ts;
       let moving = false;
       for (const w of W) for (const s of [w.y1, w.y2]) {
@@ -1024,9 +1412,9 @@
         if (Math.abs(s.x - s.t) > .15 || Math.abs(s.v) > .15) moving = true; else { s.x = s.t; s.v = 0; }
       }
       draw(ts);
-      if (moving || !reduce) raf = requestAnimationFrame(tick);
+      if (moving || (!reduce && ts < liveUntil)) raf = requestAnimationFrame(tick);
     }
-    function kick() { measure(); if (reduce) { draw(0); return; } if (!raf) raf = requestAnimationFrame(tick); }
+    function kick() { measure(); if (reduce) { draw(0); return; } liveUntil = performance.now() + 4000; if (!raf) raf = requestAnimationFrame(tick); }
     const onVis = () => { if (!document.hidden) kick(); };
     document.addEventListener("visibilitychange", onVis);
 
@@ -1099,15 +1487,16 @@
     // ================= views =================
     function setView(v) {
       st.view = v;
-      const ag = v === "agents", nt = v === "notes", mc = v === "mcp";
-      main.hidden = nt || mc; notesEl.hidden = !nt; mcpEl.hidden = !mc;
+      const ag = v === "agents", nt = v === "notes", mc = v === "mcp", gr = v === "graph";
+      main.hidden = nt || mc || gr; notesEl.hidden = !nt; mcpEl.hidden = !mc; graphEl.hidden = !gr;
       if (!nt) blurEditor();
       root.querySelectorAll(".ed-only").forEach((el) => (el.hidden = ag));
       agW.hidden = !ag;
-      $("nvBlOff").innerHTML = nt ? `${A.ic("note")} Notizen` : mc ? `${A.ic("plug")} MCP` : `${A.ic("folder")} Explorer`;
+      $("nvBlOff").innerHTML = nt ? `${A.ic("note")} Notizen` : mc ? `${A.ic("plug")} MCP` : gr ? `${A.ic("bot")} Agenten` : `${A.ic("folder")} Explorer`;
       if (st.visual) exitVisual();
       if (v === "editor" && curS() && st.buf !== curS().id) touchBuf(curS().id, true);
-      if (nt || mc) { setMode("NORMAL"); renderTabs(); }
+      if (gr) { setMode("NORMAL"); renderTabs(); renderGraph(true); cmdMsg(":Graph · j k Agent wählen · Enter Editor · o Terminal · i Prompt · Esc zurück", ""); }
+      else if (nt || mc) { setMode("NORMAL"); renderTabs(); }
       else if (ag) { renderAgents(); setWin(1); cmdMsg(":Agents", ""); }
       else { setWin(st.win > 3 ? 1 : st.win); requestAnimationFrame(() => { [0, 1, 2].forEach((w) => placeCursor(w, true)); sbarAll(); kick(); }); }
       status(); kick();
@@ -1119,7 +1508,7 @@
     }
     function showDash() {
       closeTel(); closeWk(); closeCmd(); closeSel(); closeForm(); blurEditor();
-      main.hidden = false; notesEl.hidden = true; mcpEl.hidden = true;
+      main.hidden = false; notesEl.hidden = true; mcpEl.hidden = true; graphEl.hidden = true;
       st.view = "dash"; ed.hidden = true; dash.hidden = false; st.dIdx = 0;
       renderDash(); setMode("NORMAL"); cmdMsg(""); kick();
     }
@@ -1128,8 +1517,12 @@
       else if (k === "f") { showEditor(); openTel(""); }
       else if (k === "p") { showEditor(); setWin(0); }
       else if (k === "a") { showEditor("agents"); }
+      else if (k === "g") showGraph();
+      else if (k === "l") runCmd("Loops");
       else if (k === "n") showNotes();
       else if (k === "m") showMcp();
+      else if (k === "c") newSession(true);
+      else if (k === "o") openCmd("NewProject ");
       else if (k === "s") {
         const el = $("nvStats"); el?.classList.add("pulse"); later(() => el?.classList.remove("pulse"), 1400);
         const peak = days30.reduce((a, b) => (b.v > a.v ? b : a), days30[0]);
@@ -1138,11 +1531,11 @@
     }
 
     // ================= cmdline + wildmenu =================
-    const CMDS = [["Dashboard", "Startbildschirm mit Statistik"], ["Projects", "Projektbaum fokussieren"], ["Agents", "Agent-Bäume aller Sessions"], ["Recent", "Neueste Sessions, alle Projekte"],
+    const CMDS = [["Dashboard", "Startbildschirm mit Statistik"], ["Projects", "Projektbaum fokussieren"], ["Agents", "Agent-Bäume aller Sessions"], ["Graph", "Agenten live als Graph, mit Prompt"], ["Recent", "Neueste Sessions, alle Projekte"],
       ["Find", "Telescope öffnen, z.B. :Find login"], ["Notes", "Notizen: Baum und Editor"], ["new", "Neue Notiz, z.B. :new Ideen"], ["Anforderungen", "Vorlage fürs gewählte Projekt, z.B. :Anforderungen Suche"],
       ["Agent", "Notiz an Claude geben"], ["w", "Notiz speichern"], ["wq", "Notiz speichern und schliessen"], ["Mcp", "MCP-Server anzeigen"], ["McpCheck", "MCP-Status prüfen (claude mcp list)"],
-      ["McpAdd", "MCP-Server hinzufügen"], ["Terminal", "Terminal ein / aus (Ctrl+`)"], ["Resume", "Weitermachen-Befehl kopieren"], ["q", "Buffer schliessen"]];
-    const ARGS = new Set(["Find", "new", "Anforderungen"]);
+      ["McpAdd", "MCP-Server hinzufügen"], ["NewSession", "Neue Claude-Session im gewählten Projekt starten"], ["NewProject", "Neues Projekt anlegen (Ort wählbar), startet Claude dort, z.B. :NewProject shop"], ["Terminal", "Terminal ↔ Atlas (⌘ Esc)"], ["Loops", "Loops: Claude arbeitet, bis alle Prüfungen grün sind"], ["Loop", "Neuen Loop starten, z.B. :Loop Suche soll Tippfehler verzeihen"], ["Rezepte", "Eigene Abläufe (Plan, Loop, Review) bearbeiten"], ["Limits", "Plan-Limits: 5-Stunden-Fenster und Woche"], ["Begleiter", "Kleinen Claude ein- oder ausblenden"], ["Resume", "Weitermachen-Befehl kopieren"], ["q", "Buffer schliessen"]];
+    const ARGS = new Set(["Find", "new", "Anforderungen", "NewProject", "Loop"]);
     const cin = $("nvCmdIn"), wild = $("nvWild");
     function openCmd(pre = "") {
       closeWk(); st.cmd = { i: -1 };
@@ -1160,6 +1553,39 @@
       wild.hidden = !m.length || /\s/.test(cin.value.trim());
       wild.innerHTML = m.map(([c, d], i) => `<button data-cmd="${c}" class="${i === st.cmd?.i ? "on" : ""}"><i>:</i><b>${c}</b><span>${d}</span></button>`).join("");
     }
+    // New project: create ~/gitroot/<name> (git init + README) and start a fresh Claude session there.
+    // It shows up in the tree as soon as Claude has written its first transcript line.
+    async function newProject(name) {
+      const api = window.atlasApp?.projects;
+      if (!api) return cmdMsg("Neue Projekte gibt es nur in der Desktop-App", "err");
+      if (!name) return openCmd("NewProject ");
+      const home = window.atlasApp?.info?.home || "";
+      openSelect(`Neues Projekt: ${name}`, [
+        { label: "Eigene Projekte", desc: "~/projects · private Projekte, z.B. für GitHub", hint: "~/projects" },
+        { label: "Firma", desc: "~/gitroot · Firmen-Repos (Azure DevOps)", hint: "~/gitroot" },
+        { label: "Anderer Ordner …", desc: "Ordner im Mac-Dialog auswählen", hint: "Finder" },
+      ], async (i) => {
+        const parent = i === 0 ? home + "/projects" : i === 1 ? home + "/gitroot" : await api.pickParent();
+        if (!parent) return cmdMsg("Abgebrochen", "");
+        try {
+          const r = await api.create(name, parent);
+          notify(`${r.existed ? "Ordner gab es schon" : "Angelegt"}: ${A.short(r.path)}. Claude startet dort im Terminal.`, { title: ":NewProject", icon: "folder" });
+          window.AtlasTerminal?.open(null, false, { cwd: r.path, label: r.path.split("/").pop() });
+        } catch (e) { cmdMsg("E: " + String(e.message || e).replace(/^Error invoking remote method '[^']+': (Error: )?/, ""), "err"); }
+      });
+    }
+    // New session: fresh `claude` (no --resume) in the project under the cursor; from the dashboard pick one.
+    function newSession(pick) {
+      const T = window.AtlasTerminal;
+      if (!T) return cmdMsg("Das Terminal gibt es nur in der Desktop-App", "err");
+      const start = (dir) => { T.open(null, false, { cwd: dir || undefined, label: `claude · ${dir ? A.projName(dir) : "~"}` }); notify(`Neue Session in ${dir ? A.short(dir) : "~"}`, { title: ":NewSession", icon: "term" }); };
+      const r = st.view === "editor" ? st.tree[st.tIdx] : null;
+      const here = r?.k === "proj" ? r.p.path : st.view === "editor" || st.view === "agents" ? curS()?.project : null;
+      if (here && !pick) return start(here);
+      const recent = [...new Set(D.sessions.map((x) => x.project).filter(Boolean))].slice(0, 8);
+      openSelect("Neue Session: in welchem Projekt?", [...recent.map((d) => ({ label: A.projName(d), desc: A.short(d), hint: d === here ? "gewählt" : "" })), { label: "Home", desc: "~ ohne Projekt", hint: "~" }],
+        (i) => start(recent[i] || null));
+    }
     function runCmd(text) {
       closeCmd();
       const t = text.trim(); if (!t) return;
@@ -1172,6 +1598,7 @@
       if (!c) { cmdMsg(`E492: Kein Editor-Befehl: ${t}`, "err"); return; }
       if (c === "Dashboard") showDash();
       else if (c === "Projects") { if (st.view === "dash") showEditor(); else if (st.view === "agents") setView("editor"); setWin(0); cmdMsg(":Projects", ""); }
+      else if (c === "Graph") showGraph();
       else if (c === "Agents") { if (st.view === "dash") showEditor("agents"); else setView("agents"); }
       else if (c === "Recent") { if (st.view !== "editor") showEditor(); setTree(0, { sessId: D.sessions[0]?.id, force: true }); setWin(1); cmdMsg(":Recent", ""); }
       else if (c === "Find") { if (st.view === "dash") showEditor(); openTel(arg); }
@@ -1182,8 +1609,17 @@
       else if (c === "Agent") agentHandoff();
       else if (c === "w" || c === "wq") { const b = curNote(); if (b) noteEx(b, c, {}); else cmdMsg("E32: Keine Notiz offen", "err"); }
       else if (c === "Mcp") showMcp();
+      else if (c === "NewProject") newProject(arg);
+      else if (c === "NewSession") newSession(st.view === "dash");
       else if (c === "McpCheck") { (st.view === "mcp" ? Promise.resolve() : showMcp()).then(mcpCheck); }
       else if (c === "McpAdd") { (st.view === "mcp" ? Promise.resolve() : showMcp()).then(openMcpForm); }
+      else if (c === "Loops" || c === "Loop" || c === "Rezepte") {
+        const L = window.AtlasLoops; if (!L) return cmdMsg("Loops gibt es nur in der Desktop-App", "err");
+        const s = st.view === "agents" ? sById.get(st.agRows[st.aIdx]?.sid) : curS();
+        L.open(c === "Rezepte" ? { recipes: true } : c === "Loop" ? { new: true, task: arg, cwd: s?.cwd } : {});
+      }
+      else if (c === "Limits") { if (window.AtlasMascot) { if (!window.AtlasMascot.isOn()) window.AtlasMascot.setOn(true); setTimeout(() => window.AtlasMascot.panel(true), 30); } }
+      else if (c === "Begleiter") window.AtlasMascot?.toggle();
       else if (c === "Terminal") { if (window.AtlasTerminal) window.AtlasTerminal.toggle(); else cmdMsg("Das Terminal gibt es nur in der Desktop-App", "err"); }
       else if (c === "q") {
         if (st.view === "notes") { const b = curNote(); if (b) closeBuf(b.id); else showEditor(); }
@@ -1301,8 +1737,8 @@
 
     // ================= which-key =================
     const wk = $("nvWk");
-    const wkList = () => [["f", "Suchen (Telescope)", "f"], st.view === "notes" ? ["a", "Notiz an Claude geben", "a"] : ["a", "Agents-Bäume", "a"], ["n", "Notizen", "n"], ["m", "MCP-Server", "m"],
-      ["t", "Terminal ein / aus", "t"], ["d", "Dashboard", "d"], ["p", "Projektbaum", "p"], ["r", "Neueste Sessions", "r"], ["y", "Weitermachen-Befehl kopieren", "y"],
+    const wkList = () => [["f", "Suchen (Telescope)", "f"], st.view === "notes" ? ["a", "Notiz an Claude geben", "a"] : ["a", "Agents-Bäume", "a"], ["n", "Notizen", "n"], ["m", "MCP-Server", "m"], ["c", "Neue Claude-Session", "c"], ["N", "Neues Projekt", "N"],
+      ["t", "Terminal (⌘ Esc wechselt zurück)", "t"], ["l", "Loops und Rezepte", "l"], ["u", "Limits (kleiner Claude)", "u"], ["d", "Dashboard", "d"], ["g", "Agenten-Graph", "g"], ["e", "Editor", "e"], ["p", "Projektbaum", "p"], ["r", "Neueste Sessions", "r"], ["y", "Weitermachen-Befehl kopieren", "y"],
       ["b", "Buffer schliessen", "b"], ["o", "Session im Detail öffnen", "o"], ...(st.view === "notes" ? [["w", "Notiz speichern", "w"]] : [])];
     const KEYS_NOTES = [["j / k", "Notiz wählen"], ["Enter / l", "öffnen, in den Editor"], ["h", "Ordner zu / hoch"], ["Ctrl-w h", "Editor zurück zum Baum"], ["i a o", "schreiben (INSERT)"],
       ["Esc", "zurück zu NORMAL"], ["v / V", "markieren (VISUAL)"], ["u / Ctrl-r", "rückgängig / wieder"], [":w :q :wq", "speichern / schliessen"], [":new Name", "neue Notiz"],
@@ -1330,10 +1766,16 @@
       if (k === "f") { if (st.view === "dash") showEditor(); openTel(""); }
       else if (k === "a") { if (st.view === "notes") agentHandoff(); else runCmd("Agents"); }
       else if (k === "n") runCmd("Notes");
+      else if (k === "N") openCmd("NewProject ");
+      else if (k === "c") runCmd("NewSession");
       else if (k === "m") runCmd("Mcp");
       else if (k === "t") runCmd("Terminal");
+      else if (k === "l") runCmd("Loops");
+      else if (k === "u") runCmd("Limits");
       else if (k === "w") { if (st.view === "notes") runCmd("w"); }
       else if (k === "d") showDash();
+      else if (k === "g") showGraph();
+      else if (k === "e") { if (st.view === "dash") showEditor(); else setView("editor"); }
       else if (k === "p") runCmd("Projects");
       else if (k === "r") runCmd("Recent");
       else if (k === "y") yank(false);
@@ -1851,7 +2293,8 @@
       remember(); renderTabs();
       if (st.view === "editor") { [0, 1, 2].forEach((w) => { placeCursor(w, true); nums(w); }); sbarAll(); kick(); }
       else if (st.view === "agents") renderAgents();
-      else if (st.view === "dash") { const sub = dash.querySelector(".dh-sub"); if (sub) sub.innerHTML = `deine Claude-Code-Sessions als Editor · <b>${D.projects.length}</b> Projekte · <b>${D.totals.sessions}</b> Sessions`; }
+      else if (st.view === "dash") dashLive();
+      else if (st.view === "graph") renderGraph();
       status();
     }
     const unsubData = A.onDataChanged?.(refreshData);
@@ -1884,10 +2327,26 @@
         else if (k === "Enter") { e.preventDefault(); dash.querySelector(`[data-di="${st.dIdx}"]`)?.click(); }
         else if (/^[1-6]$/.test(k)) { const s = D.sessions[+k - 1]; if (s) { showEditor(); gotoSession(s.id, s.last.id, { pin: true }); setWin(2); A.open(s.id, s.last.id); } }
         else if (k.length === 1 && DASH_MENU.some((m) => m[0] === k)) { e.preventDefault(); dashAct(k); }
+        else if (k === "i") { e.preventDefault(); focusPrompt(); }
         else if (k === ":") { e.preventDefault(); openCmd(); }
         else if (k === "/") { e.preventDefault(); dashAct("f"); }
         else if (k === " ") { e.preventDefault(); openWk(); }
         else if (isPrintable(e)) { showEditor(); }
+        return;
+      }
+
+      if (st.view === "graph") {
+        if (k === "j" || k === "ArrowDown") { e.preventDefault(); graphMove(1); }
+        else if (k === "k" || k === "ArrowUp") { e.preventDefault(); graphMove(-1); }
+        else if (k === "Enter") { e.preventDefault(); if (st.gSel) openInEditor(st.gSel); }
+        else if (k === "o") { if (st.gSel) openTerm(st.gSel); }
+        else if (k === "i") { e.preventDefault(); focusPrompt(); }
+        else if (k === "Escape") setView("editor");
+        else if (k === ":") { e.preventDefault(); openCmd(); }
+        else if (k === "/") { e.preventDefault(); openTel(""); }
+        else if (k === " ") { e.preventDefault(); openWk(); }
+        else if (k === "H") cycleBuf(-1);
+        else if (k === "L") cycleBuf(1);
         return;
       }
 
@@ -1958,11 +2417,15 @@
       if (t.closest("#nvDim")) { closeSel(); closeForm(); return; }
       const bx = t.closest("[data-bx]"); if (bx) { e.stopPropagation(); return closeBuf(bx.dataset.bx, { ask: true }); }
       const tab = t.closest("[data-buf]"); if (tab) return activateBuf(st.bufs.find((b) => b.id === tab.dataset.buf));
+      const hb = t.closest("[data-hub]"); if (hb) { e.preventDefault(); return hubAct(hb.dataset.hub, hb.dataset, hb); }
+      const gn = t.closest("[data-gsel]"); if (gn) return graphSelect(gn.dataset.gsel);
+      if (t.closest("#nvDhWp")) return;
       const dk = t.closest("[data-dk]"); if (dk) { st.dIdx = +dk.dataset.di; markDash(); return dashAct(dk.dataset.dk); }
       const cm = t.closest("[data-cmd]"); if (cm) { e.preventDefault(); return ARGS.has(cm.dataset.cmd) && cm.dataset.cmd !== "Find" ? openCmd(cm.dataset.cmd + " ") : runCmd(cm.dataset.cmd + (cm.dataset.cmd === "Find" ? " " : "")); }
       const wkb = t.closest("[data-wk]"); if (wkb) return leader(wkb.dataset.wk);
       if (st.wk && !t.closest("#nvWk")) closeWk();
-      if (st.view === "dash") { if (!t.closest("button,.dh-two,.pb,.mb")) showEditor(); return; }
+      if (st.view === "dash") { if (!$("nvDhWp")?.hidden) $("nvDhWp").hidden = true; return; }
+      if (st.view === "graph") return;
       const na = t.closest("[data-nact]");
       if (na) { const b = curNote(); if (na.dataset.nact === "save" && b) saveNote(b); else if (na.dataset.nact === "agent") agentHandoff(b); return; }
       const ma = t.closest("[data-mact]");
@@ -1989,7 +2452,9 @@
       else if (w === 2) setStep(i);
     });
     root.addEventListener("dblclick", (e) => {
-      if (!alive || st.view === "dash" || st.view === "notes" || st.view === "mcp") return;
+      if (!alive) return;
+      if (st.view === "graph") { const gn = e.target.closest("[data-gsel]"); if (gn) openInEditor(gn.dataset.gsel); return; }
+      if (st.view === "dash" || st.view === "notes" || st.view === "mcp") return;
       const r = e.target.closest(".r"), sec = e.target.closest(".nv-w"); if (!r || !sec) return;
       if (sec === agW) return openAg();
       const w = +sec.dataset.w;
@@ -2003,6 +2468,8 @@
       if (!alive) return;
       if (st.view === "editor") { [0, 1, 2].forEach((w) => placeCursor(w, true)); sbarAll(); kick(); }
       else if (st.view === "agents") renderAgents();
+      else if (st.view === "graph") renderGraph();
+      else if (st.view === "dash") dashWires();
       else if (st.view === "notes") cursorIn(nList, st.notes.idx, true);
       else if (st.view === "mcp") cursorIn(mList, st.mcp.sel[st.mcp.si], true);
     }); };
@@ -2016,7 +2483,7 @@
       document.removeEventListener("keydown", onKey);
       document.removeEventListener("visibilitychange", onVis);
       removeEventListener("resize", onResize);
-      clearInterval(clkT); timers.forEach(clearTimeout); timers.clear();
+      clearInterval(clkT); clearInterval(hubT); timers.forEach(clearTimeout); timers.clear();
       cancelAnimationFrame(raf); api = null; ro.disconnect(); unsubData?.();
       if (A.notifier) A.notifier = null;
       for (const b of st.bufs) if (b.kind === "note") b.ed?.destroy();
@@ -2040,6 +2507,7 @@
     const hook = new URLSearchParams(location.search).get("nv");
     if (hook) {
       if (hook === "agents") showEditor("agents");
+      else if (hook === "graph") showGraph();
       else if (hook !== "dash") showEditor();
       if (hook === "tel") openTel("look");
       if (hook === "wk") openWk();

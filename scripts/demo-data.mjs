@@ -82,6 +82,25 @@ export function demoData(now = Date.now()) {
         added: Math.floor(rnd() * 400), removed: Math.floor(rnd() * 90), byModel: { [model]: steps * 0.4 } }, app: "cli", agentName: null, agents, fileMtime: i === 0 ? now - 30e3 : end });
     ago += i < 5 ? 1 + rnd() * 3 : 6 + rnd() * 30;
   }
+  // Live activity for the first sessions: two agents working, one waiting for an answer, one with a failing test
+  const LIVE = [
+    { last: "tool", age: 15e3, tools: [["Read", "src/search.ts", "84 Zeilen"], ["Edit", "src/search.ts", "+12 -3"], ["Bash", "bun test search", "23 passed, 1 failed"], ["Edit", "tests/search.test.ts", "+4 -1"], ["Bash", "bun test search", null]] },
+    { last: "reply", age: 4 * 60e3, tools: [["Read", "src/audio.ts", "40 Zeilen"], ["Edit", "src/audio.ts", "+6 -2"]], ask: "Soll ich die alten Sounds in assets/old löschen?" },
+    { last: "result", age: 25e3, tools: [["Bash", "brew bundle --file Brewfile", "Ghostty installiert"], ["Edit", "Brewfile", "+2"], ["Read", "setup.sh", "120 Zeilen"]] },
+    { last: "reply", age: 9 * 60e3, tools: [["Bash", "npm test", "3 failed"]], err: true },
+  ];
+  sessions.forEach((s, i) => {
+    const L = LIVE[i];
+    if (!L) { s.activity = { last: "reply", lastTs: s.end, recent: [], openAgents: 0 }; return; }
+    s.fileMtime = now - L.age;
+    const t0 = now - L.age - L.tools.length * 20e3;
+    s.activity = { last: L.last, lastTs: new Date(now - L.age).toISOString(), openAgents: i === 0 ? 1 : 0,
+      recent: L.tools.map(([tool, target, result], k) => ({ tool, target, ts: new Date(t0 + k * 20e3).toISOString(), result, err: !!L.err && k === L.tools.length - 1 })) };
+    if (L.ask) { const n = s.nodes[s.nodes.length - 1]; n.reply = `Die neuen Sounds sind eingebaut und leiser gemischt. ${L.ask}`; }
+    if (i === 0) s.agents.push({ id: "demolive0000000a1", type: "general-purpose", description: "Tests für die Tippfehler-Suche schreiben", toolUseId: null, background: true, finished: false, depth: 1,
+      models: { "claude-sonnet-5-5": { replies: 3, tokens: 12000 } }, tools: { Write: 1, Bash: 2 }, task: "Schreib Tests für die Tippfehler-Suche.", result: null,
+      start: new Date(now - 4 * 60e3).toISOString(), end: new Date(now - 10e3).toISOString(), tokens: 12000, steps: 4, mtime: now - 10e3, node: s.nodes[s.nodes.length - 1].id, requestedModel: null });
+  });
   sessions.sort((a, b) => b.end.localeCompare(a.end));
   return { generatedAt: new Date(now).toISOString(), home: HOME, sessions };
 }
