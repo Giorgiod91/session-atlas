@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>App Entwürfe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg0:#1d2021; --bg:#282828; --bg1:#32302f; --bg2:#3c3836; --bg3:#504945; --bg4:#665c54;
+  --fg:#ebdbb2; --fg2:#d5c4a1; --fg3:#bdae93; --fg4:#a89984; --gr:#928374;
+  --re:#fb4934; --gn:#b8bb26; --ye:#fabd2f; --bl:#83a598; --pu:#d3869b; --aq:#8ec07c; --or:#fe8019;
+  --mono:"JetBrains Mono", Menlo, monospace; --sans:Inter, system-ui, sans-serif;
+  /* terminal (Catppuccin Macchiato, wie im Ghostty) */
+  --tbg:#24273a; --tfg:#cad3f5; --tdim:#6e738d; --tbl:#8aadf4; --tgn:#a6da95; --tye:#eed49f;
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+html, body { height:100%; }
+body { background:#111213; color:var(--fg2); font:500 12.5px/1.45 var(--mono); display:flex; flex-direction:column; }
+button { font:inherit; color:inherit; background:none; border:0; cursor:pointer; text-align:left; }
+kbd { font:700 10px var(--mono); color:var(--fg4); background:rgba(235,219,178,.06); border:1px solid rgba(235,219,178,.16); border-bottom-width:2px; border-radius:4px; padding:0 5px; }
+.sw { display:flex; gap:6px; align-items:center; padding:10px 16px; flex-wrap:wrap; }
+.sw .lbl { color:var(--gr); margin-right:6px; }
+.sw button { padding:5px 11px; border-radius:6px; color:var(--fg4); border:1px solid #2a2c2d; }
+.sw button.on { color:var(--bg0); background:var(--ye); border-color:var(--ye); font-weight:700; }
+.sw button:hover:not(.on) { color:var(--fg); }
+.note { padding:0 16px 10px; color:var(--gr); font-style:italic; max-width:1150px; }
+.note b { color:var(--fg3); font-style:normal; }
+.win { flex:1; min-height:520px; margin:0 16px 16px; border-radius:12px; overflow:hidden; box-shadow:0 0 0 1px #000, 0 30px 80px rgba(0,0,0,.5); display:flex; flex-direction:column; background:var(--bg0); }
+.win > div { flex:1; min-height:0; display:flex; flex-direction:column; }
+.dim { color:var(--gr); }
+.ell { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; }
+
+/* shared bits */
+.sl { height:22px; display:flex; background:var(--bg); font-size:11px; flex:none; }
+.sl span { display:flex; align-items:center; padding:0 12px; white-space:nowrap; }
+.sl .m { background:var(--ye); color:var(--bg0); font-weight:800; }
+.sl .m.t { background:var(--tgn); color:#181926; }
+.sl .b { background:var(--bg2); }
+.sl .c { flex:1; color:var(--fg3); min-width:0; overflow:hidden; }
+.sl .y { background:var(--bg2); }
+.term { background:var(--tbg); color:var(--tfg); font-size:12px; line-height:1.5; padding:8px 14px; white-space:pre; overflow:hidden; }
+.term .u { color:var(--tbl); } .term .ok { color:var(--tgn); } .term .g { color:var(--tdim); }
+.cur { display:inline-block; width:7px; height:13px; background:#f4dbd6; vertical-align:-2px; animation:blink 1s steps(2) infinite; }
+@keyframes blink { 50% { opacity:.15; } }
+.dot { width:7px; height:7px; border-radius:50%; background:var(--tgn); flex:none; display:inline-block; }
+.dot.w { background:var(--tye); animation:blink 1.2s steps(2) infinite; } .dot.i { background:#5b6078; }
+
+/* ===== 1 Neovim, aufgeräumt ===== */
+.n-tabs { height:28px; display:flex; background:var(--bg0); border-bottom:1px solid #141516; font-size:11.5px; flex:none; }
+.n-tabs span { display:flex; align-items:center; gap:7px; padding:0 12px; color:var(--gr); }
+.n-tabs span.on { color:var(--fg); background:var(--bg); }
+.n-tabs .sp { flex:1; }
+.n-main { flex:1; min-height:0; display:grid; grid-template-columns:230px 1fr 1.15fr; }
+.n-pane { min-width:0; display:flex; flex-direction:column; border-right:1px solid #141516; }
+.n-pane:last-child { border-right:0; }
+.n-ph { height:24px; display:flex; align-items:center; gap:8px; padding:0 10px; font-size:11px; color:var(--gr); flex:none; }
+.n-ph b { color:var(--fg3); font-weight:600; }
+.n-ph .r { margin-left:auto; }
+.n-r { display:flex; align-items:center; gap:8px; height:24px; padding:0 10px; font-size:12px; color:var(--fg3); }
+.n-r.on { background:var(--bg1); color:var(--fg); }
+.n-r .t { color:var(--gr); font-size:11px; margin-left:auto; flex:none; }
+.n-r .n { color:var(--bg4); width:18px; text-align:right; flex:none; }
+.n-r.on .n { color:var(--ye); }
+.n-pv { padding:10px 16px; overflow:auto; }
+.n-pv h3 { color:var(--or); font-size:13px; }
+.n-pv .m { color:var(--gr); font-size:11px; margin:2px 0 12px; }
+.n-pv .h { color:var(--ye); font-size:11.5px; margin:12px 0 4px; }
+.n-pv .h.a { color:var(--aq); }
+.n-pv p { color:var(--fg2); }
+.n-split { height:38%; border-top:1px solid var(--bg2); display:flex; flex-direction:column; flex:none; }
+.n-split .bar { height:22px; display:flex; align-items:center; gap:10px; padding:0 10px; background:#1b1d2b; color:#8087a2; font-size:11px; flex:none; }
+.n-split .bar .on { color:var(--tfg); }
+.n-split .term { flex:1; }
+
+/* ===== 2 Zwei Spalten (lesbar) ===== */
+.m-wrap { flex:1; min-height:0; display:grid; grid-template-columns:300px 1fr; font-family:var(--sans); background:#1f2122; }
+.m-side { background:#1a1c1d; border-right:1px solid #111; display:flex; flex-direction:column; min-height:0; }
+.m-search { margin:14px 12px 8px; padding:8px 11px; border-radius:8px; background:#26292a; color:var(--gr); font-size:13px; display:flex; gap:8px; }
+.m-grp { padding:12px 16px 4px; font-size:11px; color:var(--gr); text-transform:uppercase; letter-spacing:.07em; font-weight:600; }
+.m-it { margin:1px 8px; padding:8px 10px; border-radius:8px; display:grid; gap:2px; }
+.m-it.on { background:#2e3132; }
+.m-it .t { color:var(--fg); font-size:13.5px; font-weight:600; }
+.m-it .s { display:flex; gap:8px; font-size:12px; color:var(--gr); align-items:center; }
+.m-it .s .p { font-weight:500; }
+.m-main { display:flex; flex-direction:column; min-height:0; }
+.m-head { padding:18px 28px 12px; display:flex; align-items:flex-end; gap:16px; border-bottom:1px solid #2a2c2d; }
+.m-head h2 { font-size:19px; color:var(--fg); font-weight:700; }
+.m-head .s { color:var(--gr); font-size:12.5px; margin-top:3px; }
+.m-head .acts { margin-left:auto; display:flex; gap:8px; }
+.m-btn { padding:7px 13px; border-radius:8px; font:600 13px var(--sans); background:#2e3132; color:var(--fg2); }
+.m-btn.pri { background:var(--ye); color:var(--bg0); }
+.m-chat { flex:1; overflow:auto; padding:18px 28px; display:flex; flex-direction:column; gap:14px; }
+.m-step { display:grid; grid-template-columns:34px 1fr; gap:12px; }
+.m-step .no { font:700 11px var(--mono); color:var(--bg4); padding-top:9px; text-align:right; }
+.m-step.on .no { color:var(--ye); }
+.m-q { background:#2b2a24; color:var(--fg); padding:9px 13px; border-radius:10px 10px 10px 3px; font-size:14px; width:fit-content; max-width:80%; }
+.m-a { color:var(--fg3); font-size:13.5px; margin-top:6px; line-height:1.55; }
+.m-files { margin-top:6px; display:flex; gap:6px; flex-wrap:wrap; }
+.m-files span { font:500 11px var(--mono); color:var(--fg4); background:#262829; border-radius:5px; padding:2px 7px; }
+.m-term { height:150px; border-top:1px solid #111; display:flex; flex-direction:column; flex:none; }
+.m-term .bar { height:26px; display:flex; align-items:center; gap:10px; padding:0 14px; background:#1b1d2b; color:#8087a2; font:500 11.5px var(--sans); flex:none; }
+.m-term .term { flex:1; }
+
+/* ===== 3 Terminal im Zentrum ===== */
+.t-wrap { flex:1; min-height:0; display:grid; grid-template-columns:250px 1fr; background:var(--tbg); }
+.t-rail { background:#1e2030; border-right:1px solid #181926; display:flex; flex-direction:column; min-height:0; color:#a5adcb; font-size:12px; }
+.t-h { padding:10px 12px 4px; font-size:10.5px; color:#8087a2; text-transform:uppercase; letter-spacing:.08em; display:flex; }
+.t-h .r { margin-left:auto; text-transform:none; letter-spacing:0; }
+.t-s { display:flex; align-items:center; gap:8px; padding:5px 12px; }
+.t-s.on { background:#2a2d40; color:var(--tfg); }
+.t-s .a { margin-left:auto; color:#6e738d; font-size:11px; flex:none; }
+.t-steps { margin-top:6px; border-top:1px solid #181926; flex:1; overflow:auto; }
+.t-step { display:flex; gap:8px; padding:3px 12px; }
+.t-step b { color:var(--tye); width:18px; flex:none; text-align:right; font-weight:600; }
+.t-step.on { color:var(--tfg); }
+.t-main { display:flex; flex-direction:column; min-width:0; min-height:0; }
+.t-tabs { height:30px; display:flex; background:#1b1d2b; font-size:11.5px; flex:none; }
+.t-tabs span { display:flex; align-items:center; gap:7px; padding:0 12px; color:#8087a2; white-space:nowrap; }
+.t-tabs span.on { background:var(--tbg); color:var(--tfg); }
+.t-tabs .sp { flex:1; }
+.t-main .term { flex:1; padding:12px 18px; font-size:13px; }
+.t-peek { position:absolute; right:22px; top:46px; width:300px; background:#1e2030; border:1px solid #363a4f; border-radius:8px; padding:10px 12px; font-size:11.5px; color:#a5adcb; box-shadow:0 14px 40px rgba(0,0,0,.4); }
+.t-peek h5 { color:var(--tye); font-size:11.5px; margin-bottom:4px; }
+
+/* ===== 4 Lazygit-Kacheln ===== */
+.l-wrap { flex:1; min-height:0; display:grid; grid-template-columns:minmax(220px,.8fr) 1.4fr; grid-template-rows:1fr 1fr 1fr; gap:4px; padding:6px; background:var(--bg0); }
+.l-box { border:1px solid var(--bg3); border-radius:4px; position:relative; padding:12px 8px 6px; min-height:0; overflow:hidden; }
+.l-box.on { border-color:var(--gn); }
+.l-box > .tt { position:absolute; top:-8px; left:8px; padding:0 5px; background:var(--bg0); font-size:11px; color:var(--fg3); }
+.l-box.on > .tt { color:var(--gn); font-weight:700; }
+.l-box > .tt i { font-style:normal; color:var(--gr); margin-right:4px; }
+.l-box > .ft { position:absolute; bottom:-8px; right:8px; padding:0 5px; background:var(--bg0); font-size:10.5px; color:var(--gr); }
+.l-r { display:flex; gap:8px; height:20px; align-items:center; font-size:12px; padding:0 4px; }
+.l-r.on { background:#3c4a2c; color:var(--fg); }
+.l-r .x { margin-left:auto; color:var(--gr); font-size:11px; flex:none; }
+.l-big { grid-column:2; grid-row:1 / 3; }
+.l-tr { grid-column:2; grid-row:3; padding:0; }
+.l-tr .term { height:100%; padding:12px 12px 6px; }
+.l-help { height:20px; display:flex; gap:14px; align-items:center; padding:0 10px; font-size:11px; color:var(--gr); flex:none; background:var(--bg0); }
+.l-help b { color:var(--bl); font-weight:600; }
+
+/* ===== 5 Fokus ===== */
+.z-wrap { flex:1; min-height:0; display:flex; flex-direction:column; align-items:center; background:var(--bg0); overflow:auto; position:relative; }
+.z-top { width:min(760px,100%); display:flex; align-items:center; gap:12px; padding:22px 24px 6px; color:var(--gr); font-size:11.5px; }
+.z-top .crumb b { color:var(--fg3); font-weight:600; }
+.z-top .sp { flex:1; }
+.z-doc { width:min(760px,100%); padding:8px 24px 120px; }
+.z-doc h1 { font:700 22px var(--sans); color:var(--fg); margin:6px 0 4px; }
+.z-doc .meta { color:var(--gr); font-size:11.5px; margin-bottom:20px; }
+.z-step { display:grid; grid-template-columns:30px 1fr; gap:10px; padding:10px 0; border-top:1px dashed #2a2c2d; }
+.z-step .no { color:var(--bg4); font-weight:700; text-align:right; }
+.z-step.on .no { color:var(--ye); }
+.z-step .q { color:var(--fg); font:600 14px var(--sans); }
+.z-step .a { color:var(--fg4); font:400 13.5px/1.55 var(--sans); margin-top:3px; }
+.z-dock { position:absolute; left:50%; bottom:18px; transform:translateX(-50%); display:flex; gap:4px; padding:5px; border-radius:10px; background:#282a2b; box-shadow:0 0 0 1px #000, 0 14px 40px rgba(0,0,0,.5); font-size:11.5px; }
+.z-dock span { padding:5px 10px; border-radius:6px; color:var(--fg4); display:flex; gap:6px; align-items:center; }
+.z-dock span.on { background:var(--ye); color:var(--bg0); font-weight:700; }
+
+@media (max-width:820px) {
+  .n-main { grid-template-columns:1fr; } .n-main > .n-pane:not(:nth-child(2)) { display:none; }
+  .m-wrap, .t-wrap { grid-template-columns:1fr; } .m-side, .t-rail { display:none; }
+  .l-wrap { grid-template-columns:1fr; grid-template-rows:auto; } .l-big, .l-tr { grid-column:1; grid-row:auto; min-height:180px; }
+}
+</style>
+</head>
+<body>
+<div class="sw" id="sw"><span class="lbl">Entwurf</span></div>
+<div class="note" id="note"></div>
+<div class="win" id="win"></div>
+
+<script>
+const PROJ = { "rezept-app":"#fabd2f", "dotfiles":"#fe8019", "game-jam-2026":"#d3869b", "haushaltsbuch":"#b8bb26", "portfolio-site":"#b16286", "ki-notizen":"#d79921", "fahrrad-tracker":"#8ec07c", "wetterstation":"#83a598" };
+const S = [
+  ["Volltextsuche für Rezepte","rezept-app","12m",14,1],["Soundeffekte einbauen","game-jam-2026","3h",9,2],["Setup-Skript für neuen Mac","dotfiles","7h",22,0],
+  ["Monatsbericht als PDF","haushaltsbuch","10h",11,0],["Neovim-Config aufräumen","dotfiles","14h",19,0],["Zutatenliste als Einkaufszettel","rezept-app","17h",8,0],
+  ["Bilder-Upload mit Vorschau","rezept-app","2d",12,0],["CSV-Import von Kontoauszügen","haushaltsbuch","3d",7,0],["GPX-Dateien einlesen","fahrrad-tracker","6d",6,0],
+];
+const STEPS = [
+  ["Warum schlägt der Test fehl?","Der Mock für die Suche gab ein leeres Array zurück. Ich habe ihn auf die echten Fixtures umgestellt.",["search.test.ts"]],
+  ["Schreib einen Commit","Commit „Fuzzy-Suche mit Trigrammen“ angelegt.",[]],
+  ["Das sieht noch nicht gut aus","Abstände vereinheitlicht und die Trefferliste auf 8 Einträge begrenzt.",["Results.tsx","search.css"]],
+  ["Zeig mir zwei Varianten für das Layout","Zwei Varianten angelegt und in der README verlinkt: Liste und Kacheln.",["Layout.tsx","README.md"]],
+];
+const c = (p) => PROJ[p] || "#a89984";
+const esc = (s) => String(s).replace(/[&<>"]/g, (m) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[m]));
+const dot = (st) => `<span class="dot ${st === 1 ? "" : st === 2 ? "w" : "i"}"></span>`;
+const TERM = `<span class="u">&gt; Zeig mir zwei Varianten für das Layout</span>
+
+⏺ Ich lege zwei Varianten an und verlinke sie in der README.
+<span class="g">  ⎿ Read src/search/Layout.tsx (84 lines)</span>
+<span class="ok">  ⎿ Updated README.md with 12 additions</span>
+
+⏺ Zwei Varianten angelegt und in der README verlinkt: Liste und Kacheln.
+
+<span class="g">&gt;</span> <span class="cur"></span>
+<span class="g">  ? for shortcuts · esc to interrupt</span>`;
+
+const V = [
+{ name:"Neovim, aufgeräumt", note:"<b>Der heutige Look, aber entschlackt.</b> Drei statt vier Spalten (Projekte und Sessions in einem Baum, Schritte, Vorschau), keine Verbindungslinien, dünnere Leisten. Das Terminal ist kein Vollbild mehr, sondern ein Split unten wie <b>:terminal</b> in Neovim: Atlas und Claude gleichzeitig sichtbar, <kbd>Ctrl-w j/k</kbd> springt hin und her.",
+  html:() => `<div class="n-tabs"><span class="on">◆ Volltextsuche für Rezepte</span><span>◆ Soundeffekte einbauen</span><span>Anforderungen.md</span><span class="sp"></span><span>Space Hilfe</span></div>
+  <div class="n-main">
+    <div class="n-pane"><div class="n-ph"><b>Projekte</b><span class="r">8</span></div>
+      ${Object.keys(PROJ).slice(0,6).map((p,i)=>`<div class="n-r ${i?"":""}"><span style="color:${c(p)}">${i===0?"▾":"▸"}</span><span class="ell" style="color:${c(p)}">${p}</span></div>`+(i===0?S.filter(s=>s[1]===p).map((s,j)=>`<div class="n-r ${j?"":"on"}" style="padding-left:28px">${dot(s[4])}<span class="ell">${esc(s[0])}</span></div>`).join(""):"")).join("")}</div>
+    <div class="n-pane"><div class="n-ph"><b>Schritte</b> · Volltextsuche für Rezepte<span class="r">14/14</span></div>
+      ${STEPS.map((s,i)=>`<div class="n-r ${i===3?"on":""}"><span class="n">${11+i}</span><span class="ell">${esc(s[0])}</span><span class="t">13:${16+i*7}</span></div>`).join("")}</div>
+    <div class="n-pane"><div class="n-ph"><b>Vorschau</b> · Schritt 14<span class="r"><kbd>Enter</kbd> weitermachen</span></div>
+      <div class="n-pv"><h3># ${esc(STEPS[3][0])}</h3><div class="m">rezept-app · feat/suche · 13:38</div>
+        <div class="h">## Du hast gefragt</div><p>${esc(STEPS[3][0])}</p><div class="h a">## Claude hat geantwortet</div><p>${esc(STEPS[3][1])}</p>
+        <div class="h">## Dateien</div><p class="dim">~ Layout.tsx · ~ README.md</p></div></div>
+  </div>
+  <div class="n-split"><div class="bar"><span class="on">${dot(1)} term://claude --resume 4f2a91c0</span><span>${dot(2)} Soundeffekte</span><span style="margin-left:auto">Ctrl-w k: hoch · Ctrl-w _: maximieren</span></div><div class="term">${TERM}</div></div>
+  <div class="sl"><span class="m">NORMAL</span><span class="b">feat/suche</span><span class="c">rezept-app / Volltextsuche für Rezepte</span><span class="y">Opus 5.5 · $5.88</span></div>` },
+
+{ name:"Zwei Spalten", note:"<b>Lesbar statt Editor.</b> Links eine Liste wie in einer Mail-App (Suche, nach Tagen gruppiert, Status-Punkt), rechts die Session als Gesprächsverlauf: deine Frage als Blase, Claudes Antwort darunter, geänderte Dateien als Chips. Das Terminal ist unten angedockt. Normale Schrift statt nur Monospace. Am einfachsten für Leute ohne Vim-Erfahrung, Tastatur geht trotzdem.",
+  html:() => `<div class="m-wrap">
+    <div class="m-side"><div class="m-search">⌕ <span>Sessions durchsuchen</span><span style="margin-left:auto"><kbd>/</kbd></span></div>
+      <div class="m-grp">Heute</div>${S.slice(0,4).map((s,i)=>`<div class="m-it ${i?"":"on"}"><span class="t ell">${esc(s[0])}</span><span class="s">${dot(s[4])}<span class="p" style="color:${c(s[1])}">${s[1]}</span><span>· ${s[2]}</span><span style="margin-left:auto">${s[3]} Schritte</span></span></div>`).join("")}
+      <div class="m-grp">Diese Woche</div>${S.slice(4,8).map((s)=>`<div class="m-it"><span class="t ell">${esc(s[0])}</span><span class="s"><span class="p" style="color:${c(s[1])}">${s[1]}</span><span>· ${s[2]}</span></span></div>`).join("")}</div>
+    <div class="m-main">
+      <div class="m-head"><div><h2>Volltextsuche für Rezepte</h2><div class="s"><span style="color:${c("rezept-app")}">rezept-app</span> · feat/suche · 14 Schritte · $5.88</div></div>
+        <div class="acts"><button class="m-btn">⑂ Abzweigen</button><button class="m-btn pri">▶ Weitermachen</button></div></div>
+      <div class="m-chat">${STEPS.map((s,i)=>`<div class="m-step ${i===3?"on":""}"><span class="no">${11+i}</span><div><div class="m-q">${esc(s[0])}</div><div class="m-a">${esc(s[1])}</div>${s[2].length?`<div class="m-files">${s[2].map(f=>`<span>~ ${f}</span>`).join("")}</div>`:""}</div></div>`).join("")}</div>
+      <div class="m-term"><div class="bar">${dot(1)} Terminal · claude läuft<span style="margin-left:auto"><kbd>⌘J</kbd> ein/aus</span></div><div class="term">${TERM.split("\n").slice(-4).join("\n")}</div></div>
+    </div></div>` },
+
+{ name:"Terminal im Zentrum", note:"<b>Claude ist die Hauptsache, der Atlas die Seitenleiste.</b> Das Terminal füllt das Fenster. Links eine schmale Leiste mit laufenden Sessions (Status-Punkt) und den Schritten der aktiven Session; Hover zeigt die Antwort als kleines Fenster. Die große Atlas-Ansicht gibt es weiter, aber nur auf <kbd>⌘Esc</kbd>. Passt, wenn du sowieso den ganzen Tag im Terminal bist.",
+  html:() => `<div class="t-wrap">
+    <div class="t-rail"><div class="t-h">Läuft<span class="r">⌘1-9</span></div>
+      ${S.slice(0,3).map((s,i)=>`<div class="t-s ${i?"":"on"}">${dot(s[4] || 3)}<span class="ell">${esc(s[0])}</span><span class="a">${s[2]}</span></div>`).join("")}
+      <div class="t-h" style="margin-top:6px">Zuletzt</div>
+      ${S.slice(3,7).map((s)=>`<div class="t-s"><span style="color:${c(s[1])}">●</span><span class="ell">${esc(s[0])}</span><span class="a">${s[2]}</span></div>`).join("")}
+      <div class="t-steps"><div class="t-h">Schritte · aktive Session</div>${STEPS.map((s,i)=>`<div class="t-step ${i===3?"on":""}"><b>${11+i}</b><span class="ell">${esc(s[0])}</span></div>`).join("")}</div>
+    </div>
+    <div class="t-main" style="position:relative"><div class="t-tabs"><span class="on">${dot(1)} Volltextsuche für Rezepte</span><span>${dot(2)} Soundeffekte</span><span class="sp"></span><span>+ ⌘T</span><span>Atlas ⌘Esc</span></div>
+      <div class="term">${TERM}</div>
+      <div class="t-peek"><h5>Schritt 13 · Das sieht noch nicht gut aus</h5>${esc(STEPS[2][1])}<div style="margin-top:6px;color:#6e738d">~ Results.tsx · ~ search.css</div></div></div>
+  </div>
+  <div class="sl"><span class="m t">TERMINAL</span><span class="b">~/projects/rezept-app</span><span class="c">claude --resume 4f2a91c0</span><span class="y">1/3 · läuft</span></div>` },
+
+{ name:"Lazygit-Kacheln", note:"<b>Ein echtes Terminal-Tool-Gefühl.</b> Alles in gerahmten Kästen wie lazygit oder btop: links Projekte, Sessions und Dateien gestapelt, rechts Vorschau und Terminal. Mit <kbd>Tab</kbd> oder <kbd>1-5</kbd> durch die Kästen, der aktive leuchtet grün. Sehr dicht, alles auf einem Bildschirm, kein Ein- und Ausblenden.",
+  html:() => `<div class="l-wrap">
+    <div class="l-box"><span class="tt"><i>[1]</i>Projekte</span>${Object.keys(PROJ).slice(0,6).map((p,i)=>`<div class="l-r ${i?"":"on"}"><span style="color:${c(p)}">${p}</span><span class="x">${[10,5,3,3,2,1][i]}</span></div>`).join("")}<span class="ft">1 von 8</span></div>
+    <div class="l-box l-big"><span class="tt"><i>[4]</i>Vorschau · Schritt 14/14</span>
+      <div style="padding:4px 6px"><div style="color:var(--or);font-weight:700">Volltextsuche für Rezepte</div><div class="dim" style="font-size:11px;margin-bottom:10px">rezept-app · feat/suche · Opus 5.5 · $5.88</div>
+      ${STEPS.map((s,i)=>`<div style="margin-bottom:9px"><div style="color:${i===3?"var(--ye)":"var(--fg3)"}">${11+i} ▸ ${esc(s[0])}</div><div class="dim" style="padding-left:28px">${esc(s[1])}</div></div>`).join("")}</div>
+      <span class="ft">Enter weitermachen · f abzweigen</span></div>
+    <div class="l-box on"><span class="tt"><i>[2]</i>Sessions</span>${S.filter(s=>s[1]==="rezept-app").map((s,i)=>`<div class="l-r ${i?"":"on"}">${dot(s[4]||3)}<span class="ell">${esc(s[0])}</span><span class="x">${s[2]}</span></div>`).join("")}<span class="ft">1 von 3</span></div>
+    <div class="l-box"><span class="tt"><i>[3]</i>Dateien</span>${["Layout.tsx","README.md","Results.tsx","search.css","search.test.ts"].map((f,i)=>`<div class="l-r"><span style="color:${i<2?"var(--ye)":"var(--gn)"}">${i<2?"M":"A"}</span><span>${f}</span><span class="x">+${12-i*2} -${i}</span></div>`).join("")}</div>
+    <div class="l-box l-tr"><span class="tt"><i>[5]</i>Terminal</span><div class="term">${TERM.split("\n").slice(-6).join("\n")}</div></div>
+  </div>
+  <div class="l-help"><span><b>Tab</b> nächster Kasten</span><span><b>j/k</b> bewegen</span><span><b>Enter</b> öffnen</span><span><b>/</b> suchen</span><span><b>n</b> Notizen</span><span><b>?</b> Hilfe</span></div>` },
+
+{ name:"Fokus", note:"<b>So wenig wie möglich.</b> Eine einzige Spalte in der Mitte, die die Session wie ein Dokument zeigt. Alles andere (Sessions wechseln, Projekte, Notizen, Terminal) liegt in einem kleinen Dock unten oder hinter <kbd>⌘K</kbd>. Ruhigster Entwurf, aber man sieht nur eine Session auf einmal.",
+  html:() => `<div class="z-wrap">
+    <div class="z-top"><span class="crumb"><span style="color:${c("rezept-app")}">rezept-app</span> / <b>Volltextsuche für Rezepte</b></span><span class="sp"></span><span><kbd>⌘K</kbd> springen</span><span><kbd>[</kbd> <kbd>]</kbd> Session</span></div>
+    <div class="z-doc"><h1>Volltextsuche für Rezepte</h1><div class="meta">vor 12 Minuten · 14 Schritte · 5 Dateien geändert · Opus 5.5</div>
+      ${STEPS.map((s,i)=>`<div class="z-step ${i===3?"on":""}"><span class="no">${11+i}</span><div><div class="q">${esc(s[0])}</div><div class="a">${esc(s[1])}</div></div></div>`).join("")}</div>
+    <div class="z-dock"><span class="on">Session</span><span>Projekte</span><span>Notizen</span><span>Agents</span><span>${dot(1)} Terminal <kbd>⌘J</kbd></span></div>
+  </div>` },
+];
+
+const sw = document.getElementById("sw"), win = document.getElementById("win"), note = document.getElementById("note");
+V.forEach((v, i) => sw.insertAdjacentHTML("beforeend", `<button data-i="${i}">${i + 1} · ${v.name}</button>`));
+function show(i) {
+  sw.querySelectorAll("button").forEach((b) => b.classList.toggle("on", +b.dataset.i === i));
+  note.innerHTML = V[i].note; win.innerHTML = `<div>${V[i].html()}</div>`;
+  try { localStorage.setItem("app.variant", i); } catch {}
+}
+sw.addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) show(+b.dataset.i); });
+addEventListener("keydown", (e) => { const n = +e.key; if (n >= 1 && n <= V.length) show(n - 1); });
+let start = 0; try { start = +localStorage.getItem("app.variant") || 0; } catch {}
+show(Math.min(start, V.length - 1));
+</script>
+</body>
+</html>

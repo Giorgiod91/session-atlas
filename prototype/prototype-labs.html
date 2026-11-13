@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Atlas Labs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0e0f10; --p0:#151718; --p1:#1b1d1f; --p2:#24272a; --p3:#33373b; --line:#26292c;
+  --fg:#f0e6d2; --fg2:#d5c8b0; --fg3:#b0a48e; --gr:#978e7f;
+  --cl:#e07a4f; --cl2:#f3a27c; --aq:#8ec07c; --ye:#fabd2f; --re:#fb4934; --bl:#83a598; --pu:#d3869b; --or:#fe8019;
+  --mono:"JetBrains Mono", Menlo, monospace;
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+html { scroll-behavior:smooth; }
+body { background:var(--bg); color:var(--fg2); font:500 12.5px/1.55 var(--mono); min-height:100vh; overflow-x:hidden;
+  background-image:radial-gradient(900px 500px at 85% -10%, rgba(224,122,79,.13), transparent 60%), radial-gradient(700px 400px at -10% 30%, rgba(142,192,124,.07), transparent 60%),
+  linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+  background-size:auto, auto, 32px 32px, 32px 32px; }
+button { font:inherit; color:inherit; background:none; border:0; cursor:pointer; }
+kbd { font:700 10px var(--mono); color:var(--fg3); background:rgba(240,230,210,.06); border:1px solid rgba(240,230,210,.18); border-bottom-width:2px; border-radius:4px; padding:0 4px; }
+.wrap { max-width:1320px; margin:0 auto; padding:28px 16px 140px; }
+
+/* hero */
+.hero { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.25fr); gap:28px; align-items:center; margin-bottom:26px; }
+.eyebrow { display:inline-flex; gap:8px; align-items:center; color:var(--cl2); font-weight:700; font-size:11px; letter-spacing:.12em; text-transform:uppercase; border:1px solid rgba(224,122,79,.35); border-radius:20px; padding:3px 10px; background:rgba(224,122,79,.08); }
+.hero h1 { color:var(--fg); font-size:clamp(28px, 4vw, 46px); line-height:1.05; letter-spacing:-.02em; margin:14px 0 12px; font-weight:800; }
+.hero h1 em { font-style:normal; color:var(--cl); }
+.hero p { color:var(--fg3); max-width:520px; }
+.keys { display:flex; gap:12px; flex-wrap:wrap; color:var(--gr); margin-top:16px; font-size:11.5px; }
+.stage { background:linear-gradient(180deg, rgba(27,29,31,.92), rgba(21,23,24,.92)); border:1px solid var(--line); border-radius:18px; padding:16px; position:relative; box-shadow:0 30px 80px rgba(0,0,0,.45); }
+.stage-h { display:flex; align-items:center; gap:10px; margin-bottom:6px; }
+.stage-h b { color:var(--fg); } .stage-h .it { margin-left:auto; color:var(--gr); }
+.stage-h .it b { color:var(--ye); font-size:15px; }
+.loopwrap { display:grid; grid-template-columns:minmax(0,1.5fr) minmax(0,1fr); gap:12px; }
+#loop { width:100%; height:auto; display:block; }
+.node rect { fill:var(--p2); stroke:var(--p3); stroke-width:1.5; transition:stroke .3s, fill .3s; }
+.node text { fill:var(--fg2); font:700 12px var(--mono); text-anchor:middle; }
+.node .sub { fill:var(--gr); font:500 10px var(--mono); }
+.node.on rect { stroke:var(--cl); fill:#2c2420; }
+.node.red rect { stroke:var(--re); fill:#2c1d1b; } .node.green rect { stroke:var(--aq); fill:#1f2a1d; }
+.wire { fill:none; stroke:var(--p3); stroke-width:2; }
+.wire.back { stroke-dasharray:5 5; animation:dash 1s linear infinite; }
+@keyframes dash { to { stroke-dashoffset:-20; } }
+.log { background:#0f1112; border:1px solid var(--line); border-radius:10px; padding:10px; font-size:11px; display:flex; flex-direction:column; gap:4px; min-height:200px; }
+.log .h { color:var(--gr); font-style:italic; margin-bottom:2px; }
+.log .l { display:flex; gap:7px; align-items:center; animation:in .35s ease-out; }
+.log .l span:last-child { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+@keyframes in { from { opacity:0; transform:translateY(4px); } }
+.verify { margin-top:10px; display:flex; gap:8px; flex-wrap:wrap; align-items:center; font-size:11px; }
+.chip { border:1px solid var(--p3); border-radius:20px; padding:1px 9px; color:var(--fg3); background:var(--p1); display:inline-flex; gap:6px; align-items:center; }
+.chip.ok { border-color:rgba(142,192,124,.5); color:var(--aq); } .chip.bad { border-color:rgba(251,73,52,.5); color:#f08a7c; }
+
+/* usage strip */
+.usage { display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:12px; margin-bottom:26px; }
+.u { background:rgba(21,23,24,.85); border:1px solid var(--line); border-radius:14px; padding:12px 14px; }
+.u small { color:var(--gr); display:block; } .u b { color:var(--fg); font-size:20px; letter-spacing:-.01em; }
+.u .bar { margin-top:8px; }
+.bar { height:6px; border-radius:3px; background:var(--p2); overflow:hidden; } .bar i { display:block; height:100%; background:var(--c, var(--aq)); border-radius:3px; }
+
+/* filters + grid */
+.sec { display:flex; align-items:end; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:12px; }
+.sec h2 { color:var(--fg); font-size:18px; }
+.filters { display:flex; gap:6px; flex-wrap:wrap; }
+.filters button { padding:4px 11px; border-radius:20px; border:1px solid var(--line); color:var(--fg3); background:rgba(21,23,24,.8); }
+.filters button.on { background:var(--cl); color:#1a0f0a; border-color:var(--cl); font-weight:800; }
+.filters button.on kbd { color:#1a0f0a; border-color:rgba(0,0,0,.3); }
+.grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(min(100%, 380px), 1fr)); gap:14px; }
+.card { background:rgba(21,23,24,.92); border:1px solid var(--line); border-radius:16px; overflow:hidden; display:flex; flex-direction:column; transition:transform .2s, border-color .2s, box-shadow .2s; }
+.card:hover { transform:translateY(-3px); border-color:var(--p3); box-shadow:0 18px 40px rgba(0,0,0,.4); }
+.card.kf { outline:2px solid var(--aq); outline-offset:2px; }
+.card.pick { border-color:var(--cl); box-shadow:0 0 0 3px rgba(224,122,79,.15); }
+.card.big { grid-column:span 2; } @media (max-width:860px) { .card.big { grid-column:auto; } .hero, .loopwrap { grid-template-columns:1fr; } .usage { grid-template-columns:1fr 1fr; } }
+.mock { height:200px; background:#111314; border-bottom:1px solid var(--line); position:relative; overflow:hidden; padding:14px; font-size:11.5px; }
+.body { padding:12px 14px 14px; display:flex; flex-direction:column; gap:6px; flex:1; }
+.body h3 { color:var(--fg); font-size:14px; display:flex; align-items:center; gap:8px; }
+.body h3 .n { color:#1a0f0a; background:var(--cl); border-radius:5px; padding:0 6px; font-size:11px; }
+.body p { color:var(--fg3); }
+.tags { display:flex; gap:6px; flex-wrap:wrap; margin-top:auto; padding-top:6px; align-items:center; }
+.tag { font-size:10.5px; padding:1px 8px; border-radius:20px; background:var(--p1); color:var(--fg3); }
+.tag.e1 { color:var(--aq); } .tag.e2 { color:var(--ye); } .tag.e3 { color:var(--or); } .tag.d { color:var(--bl); }
+.want { margin-left:auto; border:1px solid var(--p3); border-radius:7px; padding:2px 10px; font-size:11px; color:var(--fg2); }
+.card.pick .want { background:var(--cl); color:#1a0f0a; border-color:var(--cl); font-weight:800; }
+.summary { position:fixed; left:50%; transform:translateX(-50%); bottom:14px; width:min(1288px, calc(100% - 32px)); background:rgba(30,32,34,.96); border:1px solid var(--p3); border-radius:12px; padding:10px 14px; display:flex; gap:10px; align-items:center; flex-wrap:wrap; box-shadow:0 18px 50px rgba(0,0,0,.5); z-index:15; }
+.summary[hidden] { display:none; }
+.summary b { color:var(--fg); } .summary .list { color:var(--fg3); flex:1; min-width:200px; }
+.summary button { background:var(--cl); color:#1a0f0a; font-weight:800; border-radius:7px; padding:5px 12px; }
+.hint { position:absolute; z-index:30; background:var(--ye); color:#111; font-weight:800; font-size:11px; padding:0 5px; border-radius:3px; box-shadow:0 2px 8px rgba(0,0,0,.5); }
+
+/* mock bits */
+.dot { width:8px; height:8px; border-radius:50%; display:inline-block; flex:none; background:var(--c, var(--gr)); }
+.run { --c:var(--aq); } .wait { --c:var(--ye); } .err { --c:var(--re); } .cl { --c:var(--cl); }
+.row { display:flex; align-items:center; gap:8px; min-height:22px; }
+.dim { color:var(--gr); } .ell { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; }
+.mh { color:var(--gr); font-style:italic; margin-bottom:6px; } .mh b { color:var(--fg3); font-style:normal; }
+.btn { border:1px solid var(--p3); border-radius:6px; padding:1px 8px; font-size:10.5px; color:var(--fg2); white-space:nowrap; }
+.btn.y { background:var(--cl); color:#1a0f0a; border-color:var(--cl); font-weight:800; }
+.win { background:var(--p0); border:1px solid var(--p2); border-radius:8px; padding:8px 10px; }
+.code div { white-space:pre; font-size:11px; color:var(--fg3); } .code .k { color:var(--pu); } .code .s { color:var(--aq); } .code .c { color:var(--gr); }
+.pips { display:flex; gap:4px; } .pips i { width:16px; height:16px; border-radius:4px; background:var(--c); opacity:.9; display:grid; place-items:center; font-style:normal; font-size:9px; color:#111; font-weight:800; }
+.blocks { display:flex; flex-wrap:wrap; gap:6px; }
+.blk { border:1px solid var(--p3); border-radius:8px; padding:5px 8px; background:var(--p1); font-size:10.5px; display:flex; gap:6px; align-items:center; }
+.blk b { color:var(--fg); }
+.flow { display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+.flow .arr { color:var(--gr); }
+.shot { display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; height:118px; }
+.shot > div { border-radius:6px; border:1px solid var(--p2); background:#1a1c1e; position:relative; overflow:hidden; padding:6px; }
+.shot .sk { height:6px; border-radius:3px; background:var(--p3); margin-bottom:5px; }
+.shot .hl { position:absolute; border:2px solid var(--re); border-radius:4px; background:rgba(251,73,52,.12); }
+.wave { display:flex; gap:3px; align-items:center; height:40px; }
+.wave i { width:4px; border-radius:2px; background:var(--cl); animation:wv 1s ease-in-out infinite; }
+@keyframes wv { 50% { transform:scaleY(.3); } }
+.spark { width:100%; height:60px; }
+.vs { display:grid; grid-template-columns:1fr auto 1fr; gap:8px; align-items:center; }
+.cal { display:grid; grid-template-columns:repeat(7,1fr); gap:3px; }
+.cal i { height:18px; border-radius:3px; background:var(--p2); font-style:normal; font-size:9px; color:var(--gr); display:grid; place-items:center; }
+.cal i.on { background:rgba(224,122,79,.35); color:var(--fg); }
+
+/* mascot */
+#mascot { position:fixed; bottom:62px; left:40px; z-index:25; cursor:pointer; transition:left 3.2s cubic-bezier(.45,.05,.4,1); }
+#mascot .sprite { width:56px; height:40px; display:block; animation:bob .5s ease-in-out infinite; }
+#mascot.idle .sprite { animation:bob 1.6s ease-in-out infinite; }
+#mascot.flip .sprite { transform:scaleX(-1); }
+#mascot .shadow { width:40px; height:6px; border-radius:50%; background:rgba(0,0,0,.45); margin:2px auto 0; filter:blur(1px); }
+@keyframes bob { 50% { translate:0 -3px; } }
+.bubble { position:absolute; bottom:56px; left:50%; transform:translateX(-50%) scale(.6); transform-origin:bottom center; opacity:0; pointer-events:none; transition:transform .25s cubic-bezier(.3,1.6,.6,1), opacity .2s;
+  width:max-content; max-width:260px; background:var(--fg); color:#1b1410; border-radius:12px; padding:8px 11px; font-size:11.5px; font-weight:600; box-shadow:0 12px 30px rgba(0,0,0,.45); }
+.bubble::after { content:""; position:absolute; left:50%; bottom:-6px; width:12px; height:12px; background:var(--fg); transform:translateX(-50%) rotate(45deg); border-radius:2px; }
+.bubble.show { opacity:1; transform:translateX(-50%) scale(1); }
+.bubble b { color:var(--cl); }
+.bubble .bar { background:rgba(0,0,0,.12); margin-top:5px; }
+#upanel { position:fixed; right:16px; bottom:120px; width:300px; z-index:26; background:rgba(27,29,31,.98); border:1px solid var(--p3); border-radius:14px; padding:14px; box-shadow:0 24px 60px rgba(0,0,0,.55); }
+#upanel[hidden] { display:none; }
+#upanel h4 { color:var(--fg); display:flex; align-items:center; gap:8px; margin-bottom:10px; }
+#upanel .r { margin-bottom:10px; } #upanel .r div:first-child { display:flex; justify-content:space-between; }
+#upanel .r b { color:var(--fg); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section class="hero">
+    <div>
+      <span class="eyebrow">● Atlas Labs</span>
+      <h1>Agenten, die so lange arbeiten, <em>bis es wirklich passt.</em></h1>
+      <p>Neue Ideen für Session Atlas: Loops mit eigener Prüf-Funktion, Auslöser, Nachtschichten, Gegenprüfung durch ein zweites Modell und ein kleiner Begleiter, der dir sagt, wie viel von deinem Limit noch übrig ist. Rechts läuft ein Loop als Vorschau.</p>
+      <div class="keys"><span><kbd>h</kbd><kbd>j</kbd><kbd>k</kbd><kbd>l</kbd> bewegen</span><span><kbd>Space</kbd> will ich</span><span><kbd>f</kbd> springen</span><span><kbd>1</kbd>-<kbd>5</kbd> Filter</span><span><kbd>u</kbd> Limits</span><span><kbd>y</kbd> kopieren</span></div>
+    </div>
+    <div class="stage">
+      <div class="stage-h"><span class="dot cl"></span><b>Loop</b><span class="dim">rezept-app · „Tippfehler-Suche fertig bauen“</span><span class="it">Lauf <b id="itn">1</b> / 8</span></div>
+      <div class="loopwrap">
+        <svg id="loop" viewBox="0 0 420 230">
+          <path class="wire" id="w1" d="M70,70 L170,70"/>
+          <path class="wire" id="w2" d="M250,70 L320,70 L320,140"/>
+          <path class="wire" id="w3" d="M320,180 L320,205"/>
+          <path class="wire back" id="wb" d="M280,160 C200,160 210,110 210,90"/>
+          <g class="node" id="nGoal"><rect x="10" y="48" width="64" height="44" rx="10"/><text x="42" y="68">Ziel</text><text class="sub" x="42" y="82">Prompt</text></g>
+          <g class="node" id="nAgent"><rect x="170" y="48" width="84" height="44" rx="10"/><text x="212" y="68">Agent</text><text class="sub" x="212" y="82" id="agSub">baut</text></g>
+          <g class="node" id="nVer"><rect x="280" y="140" width="84" height="40" rx="10"/><text x="322" y="158">Verify</text><text class="sub" x="322" y="172" id="vSub">prüft</text></g>
+          <g class="node" id="nDone"><rect x="280" y="202" width="84" height="26" rx="8"/><text x="322" y="219" style="font-size:11px">✓ fertig</text></g>
+          <text x="196" y="130" style="fill:#f08a7c;font:600 10px var(--mono)" id="backLbl">rot: Fehler zurück</text>
+          <circle id="ball" r="5" fill="#e07a4f"/>
+        </svg>
+        <div class="log" id="log"><div class="h">-- Protokoll</div></div>
+      </div>
+      <div class="verify"><span class="dim">verify():</span><span class="chip" id="c1">bun test</span><span class="chip" id="c2">tsc --noEmit</span><span class="chip" id="c3">eslint</span><span class="chip" id="c4">Screenshot ≈ Vorlage</span><span class="dim" style="margin-left:auto">max $2.00 · max 8 Läufe</span></div>
+    </div>
+  </section>
+
+  <section class="usage">
+    <div class="u"><small>5-Stunden-Fenster</small><b>62 %</b> <span class="dim">· Reset in 1 h 38 min</span><div class="bar" style="--c:var(--ye)"><i style="width:62%"></i></div></div>
+    <div class="u"><small>Diese Woche</small><b>41 %</b> <span class="dim">· Reset Montag</span><div class="bar" style="--c:var(--aq)"><i style="width:41%"></i></div></div>
+    <div class="u"><small>Heute</small><b>$6.12</b> <span class="dim">· 1,8 Mio Tokens</span><div class="bar" style="--c:var(--cl)"><i style="width:48%"></i></div></div>
+    <div class="u"><small>Laufen gerade</small><b>3 Agenten</b> <span class="dim">· 2 Loops</span><div class="bar" style="--c:var(--bl)"><i style="width:75%"></i></div></div>
+  </section>
+
+  <div class="sec"><h2>Neue Ideen</h2><div class="filters" id="filters"></div></div>
+  <div class="grid" id="grid"></div>
+</div>
+
+<div id="mascot" class="idle" title="Klick für Limits (u)"><div class="bubble" id="bubble"></div><svg class="sprite" id="sprite" viewBox="0 0 14 10" shape-rendering="crispEdges"></svg><div class="shadow"></div></div>
+<div id="upanel" hidden><h4><svg viewBox="0 0 14 10" width="28" height="20" shape-rendering="crispEdges" id="miniSprite"></svg>Deine Limits</h4>
+  <div class="r"><div><span>5-Stunden-Fenster</span><b>62 %</b></div><div class="bar" style="--c:var(--ye)"><i style="width:62%"></i></div><small class="dim">Reset 14:20 · bei dem Tempo voll um 13:55</small></div>
+  <div class="r"><div><span>Woche (alle Modelle)</span><b>41 %</b></div><div class="bar" style="--c:var(--aq)"><i style="width:41%"></i></div><small class="dim">Reset Montag 09:00</small></div>
+  <div class="r"><div><span>Woche (Opus)</span><b>58 %</b></div><div class="bar" style="--c:var(--pu)"><i style="width:58%"></i></div><small class="dim">Tipp: Helfer auf Sonnet spart ca. 20 %</small></div>
+  <div class="row"><span class="dim">Teuerster Agent heute</span><b style="margin-left:auto;color:var(--fg)">Tippfehler $2.40</b></div>
+  <div class="dim" style="margin-top:8px"><kbd>u</kbd> oder <kbd>Esc</kbd> schließen</div></div>
+<div class="summary" id="summary" hidden><b id="cnt"></b><span class="list" id="list"></span><button id="copy">Liste kopieren <kbd>y</kbd></button></div>
+
+<script>
+/* ---------- ideas ---------- */
+const P = (cs) => `<div class="pips">${cs.map((c, i) => `<i style="--c:var(--${c})">${i + 1}</i>`).join("")}</div>`;
+const IDEAS = [
+{ cat:"Loops", big:1, t:"Loop mit eigener Verify-Funktion", p:"Du gibst ein Ziel und eine Prüfung vor, z. B. Tests, Typecheck, Lint oder ein eigenes Skript. Der Agent arbeitet, die Prüfung läuft, und bei Rot geht die Fehlermeldung automatisch zurück an den Agenten. Das wiederholt sich, bis alles grün ist oder ein Limit (Läufe, Dollar, Zeit) erreicht ist. Oben auf der Seite läuft das als Animation.", e:2, d:"neu bauen",
+  mock:`<div class="vs"><div class="code"><div class="c">// verify.atlas.js</div><div><span class="k">export default async</span> ({ sh, shot }) =&gt; {</div><div>  <span class="k">await</span> sh(<span class="s">"bun test"</span>);</div><div>  <span class="k">await</span> sh(<span class="s">"tsc --noEmit"</span>);</div><div>  <span class="k">await</span> shot(<span class="s">"/suche"</span>, { gleich: <span class="s">"vorlage.png"</span> });</div><div>}</div></div><span class="dim">→</span>
+  <div><div class="mh">-- <b>Läufe</b></div>${P(["re","re","re","aq"])}<div class="dim" style="margin-top:8px">4 Läufe · 11 min · $1.30</div><div style="color:var(--aq);margin-top:4px">✓ alles grün, bereit zum Review</div></div></div>` },
+{ cat:"Loops", t:"Verify-Bausteine", p:"Fertige Prüf-Bausteine zum Zusammenklicken oder per Taste: Tests, Typecheck, Lint, Build, Lighthouse ab 95, Screenshot-Vergleich, „keine neuen TODOs“, eigener Befehl. Einmal pro Projekt festlegen, überall nutzen.", e:1, d:"neu bauen",
+  mock:`<div class="mh">-- <b>verify</b> · rezept-app</div><div class="blocks">${[["✓","Tests","bun test"],["✓","Typen","tsc"],["✓","Lint","eslint"],["✓","Build","bun run build"],["○","Lighthouse","≥ 95"],["○","Screenshot","≈ vorlage.png"],["○","Eigenes","./check.sh"],["+","Baustein",""]].map(([s,b,x])=>`<span class="blk" style="${s==="✓"?"border-color:rgba(142,192,124,.5)":""}"><span style="color:${s==="✓"?"var(--aq)":"var(--gr)"}">${s}</span><b>${b}</b><span class="dim">${x}</span></span>`).join("")}</div>` },
+{ cat:"Loops", t:"Kreisel-Wächter", p:"Erkennt, wenn ein Agent sich im Kreis dreht: dieselbe Datei fünfmal hin und her, derselbe Fehler dreimal. Dann hält er den Loop an und fragt dich, statt Geld zu verbrennen.", e:1, d:"Daten da",
+  mock:`<div class="win" style="border-color:rgba(250,189,47,.5)"><div class="row"><span class="dot wait"></span><b style="color:var(--fg)">Loop angehalten</b><span class="dim" style="margin-left:auto">Lauf 6</span></div><div class="dim" style="margin:6px 0">Gleicher Fehler 3× hintereinander:</div><div style="color:#f08a7c">TypeError: trigrams is not a function</div><div class="dim" style="margin-top:6px">src/search.ts 5× geändert, wieder zurückgesetzt</div></div>
+  <div class="row" style="margin-top:10px"><button class="btn y">Tipp geben</button><button class="btn">anderes Modell</button><button class="btn">abbrechen</button></div>` },
+{ cat:"Loops", t:"Gegenprüfung durch zweites Modell", p:"Ist der Loop grün, liest ein zweites Modell den Diff wie ein Reviewer und sucht, was die Tests nicht finden. Erst wenn beide zufrieden sind, landet es bei dir.", e:2, d:"neu bauen",
+  mock:`<div class="flow"><span class="blk"><span class="dot run"></span><b>Sonnet</b> baut</span><span class="arr">→</span><span class="blk"><span style="color:var(--aq)">✓</span><b>verify</b></span><span class="arr">→</span><span class="blk"><span class="dot cl"></span><b>Opus</b> prüft</span><span class="arr">→</span><span class="blk"><b>du</b></span></div>
+  <div class="win" style="margin-top:12px"><div class="mh">-- <b>Review von Opus</b></div><div class="row"><span style="color:var(--ye)">!</span><span class="ell">Leere Suche gibt alle 2.000 Rezepte zurück</span></div><div class="row"><span style="color:var(--aq)">✓</span><span class="ell dim">Tests decken Umlaute ab</span></div></div>` },
+{ cat:"Loops", t:"Screenshot-Verify", p:"Für UI-Arbeit: Die App macht nach jedem Lauf einen Screenshot und vergleicht ihn mit einer Vorlage oder dem letzten Stand. Abweichungen werden rot markiert und gehen als Bild zurück an den Agenten.", e:2, d:"neu bauen",
+  mock:`<div class="shot"><div><div class="dim" style="font-size:9.5px;margin-bottom:4px">Vorlage</div><div class="sk" style="width:70%"></div><div class="sk"></div><div class="sk" style="width:50%"></div></div><div><div class="dim" style="font-size:9.5px;margin-bottom:4px">Lauf 3</div><div class="sk" style="width:70%"></div><div class="sk" style="width:85%;background:#5a4a3a"></div><div class="sk" style="width:50%"></div><span class="hl" style="left:4px;top:30px;width:80px;height:14px"></span></div><div><div class="dim" style="font-size:9.5px;margin-bottom:4px">Lauf 4</div><div class="sk" style="width:70%"></div><div class="sk"></div><div class="sk" style="width:50%"></div><div style="position:absolute;right:6px;bottom:4px;color:var(--aq);font-size:10px">✓ 99,6 %</div></div></div>
+  <div class="dim" style="margin-top:8px">Lauf 3: Abstand im Suchfeld 4 px zu groß → zurück an den Agenten</div>` },
+{ cat:"Automatik", t:"Auslöser", p:"Wenn etwas passiert, startet ein Agent: CI ist rot → Fix-Loop. Neues Issue mit Label „claude“ → Agent baut einen Entwurf. Datei in docs/ geändert → README aktualisieren.", e:2, d:"neu bauen",
+  mock:`<div class="mh">-- <b>Auslöser</b></div>${[["CI rot auf main","Fix-Loop mit bun test","run"],["Issue mit Label claude","Entwurf + PR","run"],["docs/** geändert","README nachziehen",""],["jeden Freitag 16:00","Wochenbericht",""]].map(([w,d,s])=>`<div class="row"><span class="dot ${s}"></span><span style="color:var(--ye);width:170px" class="ell">wenn ${w}</span><span class="dim">→</span><span class="ell">${d}</span></div>`).join("")}` },
+{ cat:"Automatik", t:"Nachtschicht", p:"Abends Aufträge einplanen, die App startet sie nachts, wenn dein Limit sich zurückgesetzt hat. Morgens wartet eine Liste: was grün ist, was hängen blieb, was es gekostet hat.", e:2, d:"neu bauen",
+  mock:`<div class="row"><span style="font-size:18px">☾</span><b style="color:var(--fg)">Heute Nacht</b><span class="dim" style="margin-left:auto">startet 01:20 nach Reset</span></div>
+  ${[["Bilder-Upload mit Vorschau","aq","grün · $0.80"],["Frost-Alarm per Push","aq","grün · $0.55"],["Monatsbericht als PDF","re","hängt bei Lauf 8"],["Strava-Export","gr","geplant"]].map(([t,c,s])=>`<div class="row"><span class="dot" style="--c:var(--${c})"></span><span class="ell">${t}</span><span class="dim" style="margin-left:auto">${s}</span></div>`).join("")}
+  <div class="row" style="margin-top:6px"><button class="btn y">Morgenbericht öffnen</button></div>` },
+{ cat:"Automatik", t:"Limit-Planer", p:"Rechnet aus, wann du bei deinem Tempo ans Limit kommst, und schiebt Aufträge aus der Warteschlange hinter den nächsten Reset. Große Aufgaben landen dort, wo das Fenster frisch ist.", e:2, d:"Schätzung",
+  mock:`<div class="mh">-- <b>5-Stunden-Fenster</b> · heute</div><svg class="spark" viewBox="0 0 300 60" preserveAspectRatio="none"><path d="M0,58 L40,50 L80,44 L120,30 L150,24" fill="none" stroke="#e07a4f" stroke-width="2"/><path d="M150,24 L190,8" fill="none" stroke="#e07a4f" stroke-width="2" stroke-dasharray="4 4"/><line x1="0" y1="6" x2="300" y2="6" stroke="#fb4934" stroke-dasharray="2 3"/><line x1="230" y1="0" x2="230" y2="60" stroke="#8ec07c"/></svg>
+  <div class="row"><span class="dim">voll um</span><b style="color:var(--ye)">13:55</b><span class="dim">Reset</span><b style="color:var(--aq)">14:20</b></div><div class="row"><span class="dim">→ 2 große Aufträge nach 14:20 verschoben</span></div>` },
+{ cat:"Automatik", t:"Selbstheilende Übergabe", p:"Kurz bevor der Kontext voll ist, schreibt der Agent selbst eine Übergabe-Notiz (Ziel, Stand, nächste Schritte) und eine frische Session macht nahtlos weiter. Der Loop merkt davon nichts.", e:2, d:"Daten da",
+  mock:`<div class="row"><span class="dim" style="width:90px">Session 1</span><div class="bar" style="--c:var(--ye);flex:1"><i style="width:92%"></i></div><span style="color:var(--ye)">92 %</span></div>
+  <div class="win" style="margin:8px 0"><div class="mh">-- <b>Übergabe.md</b></div><div class="dim">Ziel: Tippfehler-Suche · Stand: Trigramme fertig, 2 Tests rot · Weiter: Umlaute normalisieren</div></div>
+  <div class="row"><span class="dim" style="width:90px">Session 2</span><div class="bar" style="--c:var(--aq);flex:1"><i style="width:8%"></i></div><span style="color:var(--aq)">8 %</span></div>` },
+{ cat:"Begleiter", big:1, t:"Kleiner Claude, der rumläuft", p:"Ein kleiner Pixel-Begleiter läuft unten durch die App. Ab und zu bleibt er stehen und sagt dir etwas: wie viel vom 5-Stunden-Fenster übrig ist, wann es zurückgesetzt wird, welcher Agent auf dich wartet, wenn ein Loop grün wurde. Klick auf ihn (oder u) öffnet alle Limits. Er läuft gerade auf dieser Seite herum.", e:1, d:"Schätzung",
+  mock:`<div style="display:flex;gap:26px;align-items:flex-end;height:100%;padding:0 10px 6px">${["Noch <b>38 %</b> im Fenster, Reset in 1 h 38 min","<b>Dark Mode</b> wartet seit 4 min auf dich","Loop <b>Tippfehler</b> ist grün ✓"].map((m,i)=>`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:8px"><div class="bubble show" style="position:relative;bottom:auto;left:auto;transform:none;max-width:200px">${m}</div><svg class="mini" viewBox="0 0 14 10" width="42" height="30" shape-rendering="crispEdges" style="${i===1?"transform:scaleX(-1)":""}"></svg></div>`).join("")}</div>` },
+{ cat:"Begleiter", t:"Stimmung nach Lage", p:"Der Begleiter zeigt die Lage auf einen Blick: läuft alles, hüpft er. Wartet ein Agent, winkt er. Ist das Limit fast voll, schwitzt er. Nachts schläft er. So merkst du es aus dem Augenwinkel.", e:1, d:"Daten da",
+  mock:`<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;height:100%;align-items:center;text-align:center">${[["läuft","aq",""],["wartet","ye","!"],["Limit knapp","re","💧"],["Nacht","bl","z"]].map(([t,c,s],i)=>`<div><div style="height:22px;color:var(--${c});font-weight:800">${s}</div><svg class="mini" viewBox="0 0 14 10" width="42" height="30" shape-rendering="crispEdges" style="${i===0?"animation:bob .5s infinite":""}${i===3?";opacity:.6":""}"></svg><div style="color:var(--${c});margin-top:6px">${t}</div></div>`).join("")}</div>` },
+{ cat:"Begleiter", t:"Nutzungs-Kalender", p:"Wie GitHub-Kästchen, nur für Claude: jeder Tag mit Tokens, Kosten und wie oft du ans Limit kamst. Dazu deine Streak und die Tageszeit, in der du am meisten schaffst.", e:1, d:"Daten da",
+  mock:`<div class="mh">-- <b>November</b> · 9 Tage Streak</div><div class="cal">${Array.from({length:28},(_,i)=>`<i class="${[2,3,5,6,8,9,10,12,13].includes(i%14)?"on":""}" style="${i===12?"outline:1px solid var(--cl)":""}">${i+1}</i>`).join("")}</div><div class="row" style="margin-top:8px"><span class="dim">2× ans Limit</span><span class="dim" style="margin-left:auto">beste Zeit 09 bis 12 Uhr</span></div>` },
+{ cat:"Neu", t:"Sprach-Prompt", p:"Leertaste gedrückt halten und sprechen, loslassen schickt ab. Praktisch, wenn du einem Agenten im Vorbeigehen etwas sagen willst. Läuft lokal auf dem Mac.", e:2, d:"neu bauen",
+  mock:`<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:10px"><div class="wave">${Array.from({length:22},(_,i)=>`<i style="height:${10+Math.abs(Math.sin(i*1.3))*28}px;animation-delay:${i*0.05}s"></i>`).join("")}</div><div style="color:var(--fg)">„mach die Suche auch ohne Umlaute“</div><div class="dim">an <b style="color:var(--aq)">Tippfehler-Suche</b> · <kbd>Space</kbd> halten</div></div>` },
+{ cat:"Neu", t:"Rezepte: eigene Abläufe", p:"Deine Lieblings-Abläufe als Rezept speichern: „Feature“ = planen, bauen im Loop mit Tests, Gegenprüfung, PR schreiben. Ein Befehl startet das Ganze für einen neuen Auftrag.", e:3, d:"neu bauen",
+  mock:`<div class="mh">-- <b>Rezept</b> · feature</div><div class="flow">${["Plan","Loop: bauen + verify","Review Opus","PR"].map((s,i)=>`<span class="blk"><span style="color:var(--cl)">${i+1}</span><b>${s}</b></span>${i<3?'<span class="arr">→</span>':""}`).join("")}</div>
+  <div class="win" style="margin-top:12px"><span class="dim">:Rezept feature</span> <span style="color:var(--fg)">„CSV-Export für Rezepte“</span><span class="dim" style="margin-left:6px">↵</span></div>` },
+{ cat:"Neu", t:"Session als Film", p:"Eine Session als kurzes Video oder GIF: Prompts, Änderungen und Testläufe im Zeitraffer. Zum Zeigen im Team oder für dich, um zu sehen, wie es gelaufen ist. Kundendaten werden vorher ausgeblendet.", e:2, d:"Daten da",
+  mock:`<div class="win" style="height:120px;position:relative;overflow:hidden"><div class="dim">00:42 / 01:30</div><div style="color:var(--fg);margin-top:8px">● Edit src/search.ts <span style="color:var(--aq)">+12</span> <span style="color:#f08a7c">-3</span></div><div class="dim">● Bash bun test search</div><div style="color:var(--aq)">  24 passed</div><div style="position:absolute;left:10px;right:10px;bottom:10px" class="bar"><i style="width:46%;--c:var(--cl)"></i></div></div><div class="row" style="margin-top:8px"><button class="btn y">▶ abspielen</button><button class="btn">als GIF</button><span class="dim" style="margin-left:auto">Kundendaten ausgeblendet</span></div>` },
+];
+const EFF = { 1:["klein","e1"], 2:["mittel","e2"], 3:["groß","e3"] };
+const KEY = "labs.picks";
+let cat = "Alle", picks = new Set(), kf = 0, hinting = false;
+try { picks = new Set(JSON.parse(localStorage.getItem(KEY) || "[]")); } catch {}
+const cats = ["Alle", ...new Set(IDEAS.map((i) => i.cat))];
+const cards = () => [...document.querySelectorAll(".card")];
+function render() {
+  document.getElementById("filters").innerHTML = cats.map((c, n) => `<button class="${c === cat ? "on" : ""}" data-c="${c}"><kbd>${n + 1}</kbd> ${c}${c === "Alle" ? "" : " · " + IDEAS.filter((i) => i.cat === c).length}</button>`).join("");
+  document.getElementById("grid").innerHTML = IDEAS.map((x, i) => ({ x, i })).filter(({ x }) => cat === "Alle" || x.cat === cat).map(({ x, i }) => `
+    <div class="card ${x.big ? "big" : ""} ${picks.has(i) ? "pick" : ""}" data-i="${i}"><div class="mock">${x.mock}</div><div class="body"><h3><span class="n">${i + 1}</span>${x.t}</h3><p>${x.p}</p>
+      <div class="tags"><span class="tag">${x.cat}</span><span class="tag ${EFF[x.e][1]}">Aufwand: ${EFF[x.e][0]}</span><span class="tag d">${x.d}</span><button class="want" data-i="${i}">${picks.has(i) ? "✓ will ich" : "will ich"}</button></div></div></div>`).join("");
+  document.querySelectorAll("svg.mini").forEach((s) => drawSprite(s, 0, true));
+  const s = document.getElementById("summary"); s.hidden = !picks.size;
+  document.getElementById("cnt").textContent = `${picks.size} gewählt:`;
+  document.getElementById("list").textContent = [...picks].sort((a, b) => a - b).map((i) => `${i + 1}. ${IDEAS[i].t}`).join(" · ");
+  try { localStorage.setItem(KEY, JSON.stringify([...picks])); } catch {}
+  focusCard(Math.min(kf, cards().length - 1), false);
+}
+function focusCard(n, scroll = true) { const cs = cards(); if (!cs.length) return; kf = Math.max(0, n); cs.forEach((c, k) => c.classList.toggle("kf", k === kf)); if (scroll) cs[kf].scrollIntoView({ block: "nearest", behavior: "smooth" }); }
+function move(dx, dy) {
+  const cs = cards(), a = cs[kf].getBoundingClientRect(), ax = a.left + a.width / 2, ay = a.top + a.height / 2; let best = -1, bd = Infinity;
+  cs.forEach((c, k) => { if (k === kf) return; const r = c.getBoundingClientRect(), x = r.left + r.width / 2 - ax, y = r.top + r.height / 2 - ay;
+    if (dx && Math.sign(x) !== dx) return; if (dy && Math.sign(y) !== dy) return; if (dx && Math.abs(r.top - a.top) > 20) return;
+    const d = dx ? Math.abs(x) : Math.abs(y) * 10 + Math.abs(x); if (d < bd) { bd = d; best = k; } });
+  if (best >= 0) focusCard(best);
+}
+function toggle(i) { picks.has(i) ? picks.delete(i) : picks.add(i); render(); }
+function copy() { navigator.clipboard?.writeText(document.getElementById("list").textContent); say("Liste kopiert ✓", 2500); }
+const LET = "asdfghjklqwertzuiopxcvbnm";
+function showHints() { hinting = true; cards().forEach((c, k) => { const h = document.createElement("span"); h.className = "hint"; h.textContent = LET[k]; const r = c.getBoundingClientRect(); h.style.left = r.left + scrollX + 8 + "px"; h.style.top = r.top + scrollY + 8 + "px"; document.body.appendChild(h); }); }
+function clearHints() { hinting = false; document.querySelectorAll(".hint").forEach((h) => h.remove()); }
+
+/* ---------- mascot ---------- */
+const BODY = ["...########...", "..##########..", ".####e##e####.", ".############.", "##############", ".############.", "..##########.."];
+const LEGS = [["..#.#....#.#..", ".............."], ["...#.#..#.#...", ".............."]];
+function drawSprite(svg, frame, open) {
+  const rows = [...BODY.map((r) => open ? r : r.replace(/e/g, "#")), ...LEGS[frame]], out = [];
+  rows.forEach((r, y) => [...r].forEach((c, x) => { if (c === ".") return; out.push(`<rect x="${x}" y="${y + 1}" width="1.02" height="1.02" fill="${c === "e" ? "#1b1410" : y === 0 ? "#f3a27c" : "#e07a4f"}"/>`); }));
+  out.push(`<rect x="6.5" y="0" width="1" height="1" fill="#fabd2f"/>`);
+  svg.innerHTML = out.join("");
+}
+const M = document.getElementById("mascot"), SP = document.getElementById("sprite"), BUB = document.getElementById("bubble");
+drawSprite(document.getElementById("miniSprite"), 0, true);
+let frame = 0, walking = false, eyes = true, x = 40;
+setInterval(() => { if (walking) { frame ^= 1; } drawSprite(SP, walking ? frame : 0, eyes); }, 180);
+setInterval(() => { eyes = false; setTimeout(() => (eyes = true), 140); }, 3200);
+const TIPS = [
+  () => `Noch <b>38 %</b> im 5-Stunden-Fenster. Reset in 1 h 38 min.<div class="bar" style="--c:var(--ye)"><i style="width:62%"></i></div>`,
+  () => `Diese Woche erst <b>41 %</b> genutzt. Du hast Luft.`,
+  () => `<b>Dark Mode</b> wartet seit 4 min auf dich.`,
+  () => `Loop <b>Tippfehler</b>: Lauf ${loop.it} von 8.`,
+  () => `Heute <b>$6.12</b>. Teuerster Agent: Tippfehler.`,
+  () => `Bei dem Tempo ist das Fenster um <b>13:55</b> voll. Soll ich große Aufträge nach 14:20 schieben?`,
+  () => `Tipp: <kbd>u</kbd> zeigt alle Limits.`,
+];
+let tipN = 0, sayT;
+function say(html, ms = 5200) { BUB.innerHTML = html; BUB.classList.add("show"); clearTimeout(sayT); sayT = setTimeout(() => BUB.classList.remove("show"), ms); }
+function wander() {
+  const max = innerWidth - 100, nx = 30 + Math.random() * max;
+  M.classList.toggle("flip", nx < x); M.classList.remove("idle"); walking = true; BUB.classList.remove("show");
+  M.style.left = nx + "px"; x = nx;
+  setTimeout(() => { walking = false; M.classList.add("idle"); say(TIPS[tipN++ % TIPS.length]()); setTimeout(wander, 7500 + Math.random() * 4000); }, 3300);
+}
+setTimeout(() => say(`Hi! Ich pass auf dein <b>Limit</b> auf.`), 900);
+setTimeout(wander, 4500);
+const UP = document.getElementById("upanel");
+M.addEventListener("click", (e) => { e.stopPropagation(); UP.hidden = !UP.hidden; });
+
+/* ---------- loop animation ---------- */
+const loop = { it: 1 };
+const $ = (id) => document.getElementById(id), ball = $("ball"), LOG = $("log");
+const FAILS = ["3 Tests rot: Umlaute", "1 Test rot, tsc: 2 Fehler", "eslint: unused import", null];
+function lg(c, t) { const d = document.createElement("div"); d.className = "l"; d.innerHTML = `<span class="dot" style="--c:var(--${c})"></span><span>${t}</span>`; LOG.appendChild(d); while (LOG.children.length > 9) LOG.children[1].remove(); }
+function along(path, ms) { return new Promise((res) => { const p = $(path), L = p.getTotalLength(), t0 = performance.now();
+  (function f(t) { const k = Math.min(1, (t - t0) / ms), e = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2, pt = p.getPointAtLength(e * L); ball.setAttribute("cx", pt.x); ball.setAttribute("cy", pt.y); k < 1 ? requestAnimationFrame(f) : res(); })(t0); }); }
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+const setN = (id, c) => { ["nGoal", "nAgent", "nVer", "nDone"].forEach((n) => $(n).classList.remove("on", "red", "green")); if (id) $(id).classList.add(c); };
+async function runLoop() {
+  while (true) {
+    loop.it = 1; $("itn").textContent = 1; [...LOG.querySelectorAll(".l")].forEach((l) => l.remove()); ["c1", "c2", "c3", "c4"].forEach((c) => $(c).className = "chip");
+    setN("nGoal", "on"); lg("cl", "Ziel: Tippfehler-Suche fertig bauen"); await wait(700);
+    await along("w1", 900);
+    for (let i = 0; i < FAILS.length; i++) {
+      loop.it = i + 1; $("itn").textContent = i + 1;
+      setN("nAgent", "on"); $("agSub").textContent = ["baut", "repariert", "repariert", "räumt auf"][i]; await wait(1100);
+      await along("w2", 900); setN("nVer", "on"); $("vSub").textContent = "prüft"; await wait(700);
+      const f = FAILS[i];
+      const st = [["bad", "bad", "ok", "ok"], ["ok", "bad", "ok", "ok"], ["ok", "ok", "bad", "ok"], ["ok", "ok", "ok", "ok"]][i];
+      st.forEach((s, k) => $("c" + (k + 1)).className = "chip " + s);
+      if (f) { setN("nVer", "red"); $("vSub").textContent = "rot"; lg("re", `Lauf ${i + 1}: ${f}`); await wait(700); await along("wb", 1000); }
+      else { setN("nVer", "green"); $("vSub").textContent = "grün"; lg("aq", `Lauf ${i + 1}: alles grün`); await wait(600); await along("w3", 500); setN("nDone", "green"); lg("cl", "fertig · 4 Läufe · $1.30"); if (!walking) say(`Loop <b>Tippfehler</b> ist grün ✓`, 3500); await wait(4200); }
+    }
+  }
+}
+runLoop();
+
+/* ---------- keys ---------- */
+document.addEventListener("keydown", (e) => {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  if (e.key === "Escape") { UP.hidden = true; clearHints(); return; }
+  if (hinting) { const k = LET.indexOf(e.key); clearHints(); if (k >= 0 && k < cards().length) focusCard(k); e.preventDefault(); return; }
+  const m = { h: [-1, 0], l: [1, 0], j: [0, 1], k: [0, -1], ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowDown: [0, 1], ArrowUp: [0, -1] }[e.key];
+  if (m) { e.preventDefault(); move(...m); return; }
+  if (e.key === " ") { e.preventDefault(); const c = cards()[kf]; if (c) toggle(+c.dataset.i); return; }
+  if (e.key === "f") return showHints();
+  if (e.key === "y") return copy();
+  if (e.key === "u") { UP.hidden = !UP.hidden; return; }
+  if (/^[1-9]$/.test(e.key) && cats[+e.key - 1]) { cat = cats[+e.key - 1]; kf = 0; render(); }
+});
+document.addEventListener("click", (e) => {
+  clearHints(); if (!e.target.closest("#upanel")) UP.hidden = true;
+  const f = e.target.closest("[data-c]"); if (f) { cat = f.dataset.c; kf = 0; render(); return; }
+  const w = e.target.closest(".want"); if (w) { toggle(+w.dataset.i); return; }
+  const c = e.target.closest(".card"); if (c) focusCard(cards().indexOf(c), false);
+});
+document.getElementById("copy").onclick = copy;
+render();
+</script>
+</body>
+</html>

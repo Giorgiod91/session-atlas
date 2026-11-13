@@ -1,0 +1,476 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agenten Entwürfe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg0:#1d2021; --bg:#282828; --bg1:#32302f; --bg2:#3c3836; --bg3:#504945; --bg4:#665c54;
+  --fg:#ebdbb2; --fg2:#d5c4a1; --fg3:#bdae93; --fg4:#a89984; --gr:#928374;
+  --re:#fb4934; --gn:#b8bb26; --ye:#fabd2f; --bl:#83a598; --pu:#d3869b; --aq:#8ec07c; --or:#fe8019;
+  --run:#8ec07c; --wait:#fabd2f; --done:#83a598; --err:#fb4934;
+  --mono:"JetBrains Mono", Menlo, monospace; --sans:Inter, system-ui, sans-serif;
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+html, body { height:100%; }
+body { background:#0e0f10; color:var(--fg2); font:500 12px/1.45 var(--mono); display:flex; flex-direction:column; }
+button { font:inherit; color:inherit; background:none; border:0; cursor:pointer; text-align:left; }
+textarea { font:inherit; color:inherit; background:none; border:0; outline:0; resize:none; }
+kbd { font:700 10px var(--mono); color:var(--fg4); background:rgba(235,219,178,.06); border:1px solid rgba(235,219,178,.16); border-bottom-width:2px; border-radius:4px; padding:0 4px; }
+.sw { display:flex; gap:5px; align-items:center; padding:10px 16px 8px; flex-wrap:wrap; }
+.sw .lbl { color:var(--gr); margin-right:6px; }
+.sw button { padding:4px 10px; border-radius:6px; color:var(--fg4); border:1px solid #26282a; }
+.sw button.on { color:var(--bg0); background:var(--ye); border-color:var(--ye); font-weight:700; }
+.sw button:hover:not(.on) { color:var(--fg); }
+.note { padding:0 16px 10px; color:var(--gr); font-style:italic; max-width:1200px; }
+.note b { color:var(--fg3); font-style:normal; }
+.win { position:relative; flex:1; min-height:600px; margin:0 16px 16px; border-radius:12px; overflow:hidden; background:var(--bg0); box-shadow:0 0 0 1px #000, 0 30px 80px rgba(0,0,0,.55); display:flex; flex-direction:column; }
+.win > .v { flex:1; min-height:0; display:flex; flex-direction:column; }
+#wires { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:20; overflow:visible; }
+.dim { color:var(--gr); } .ell { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; }
+.sp { flex:1; }
+
+/* status dot */
+.st { width:8px; height:8px; border-radius:50%; flex:none; display:inline-block; background:var(--c); }
+.st.run { --c:var(--run); box-shadow:0 0 0 0 var(--run); animation:ping 1.6s ease-out infinite; }
+.st.wait { --c:var(--wait); animation:blink 1s steps(2) infinite; }
+.st.done { --c:var(--done); } .st.err { --c:var(--err); }
+@keyframes ping { 0% { box-shadow:0 0 0 0 rgba(142,192,124,.6); } 100% { box-shadow:0 0 0 7px rgba(142,192,124,0); } }
+@keyframes blink { 50% { opacity:.25; } }
+.tool { font-weight:700; padding:0 5px; border-radius:3px; font-size:10.5px; color:var(--bg0); background:var(--tc); flex:none; }
+.bar { height:3px; border-radius:2px; background:var(--bg2); overflow:hidden; }
+.bar i { display:block; height:100%; background:var(--c, var(--run)); transition:width 1.4s ease; }
+
+/* statusline */
+.sl { height:22px; display:flex; background:var(--bg); font-size:11px; flex:none; }
+.sl span { display:flex; align-items:center; padding:0 12px; white-space:nowrap; }
+.sl .m { background:var(--ye); color:var(--bg0); font-weight:800; }
+.sl .b { background:var(--bg2); }
+.sl .c { flex:1; color:var(--fg3); min-width:0; overflow:hidden; }
+.sl .y { background:var(--bg2); }
+.sl .z { background:var(--aq); color:var(--bg0); font-weight:800; }
+.ph { height:26px; display:flex; align-items:center; gap:8px; padding:0 10px; font-size:11px; color:var(--gr); flex:none; border-bottom:1px solid #161718; }
+.ph .n { background:var(--bg2); color:var(--fg3); border-radius:3px; padding:0 5px; font-weight:700; }
+.ph.on .n { background:var(--ye); color:var(--bg0); }
+.ph b { color:var(--fg3); font-weight:600; }
+
+/* composer */
+.cmp { display:flex; flex-direction:column; background:#202223; border:1px solid var(--bg2); border-radius:10px; min-height:0; overflow:hidden; transition:border-color .2s, box-shadow .2s; }
+.cmp:focus-within { border-color:var(--ye); box-shadow:0 0 0 3px rgba(250,189,47,.12), 0 0 40px rgba(250,189,47,.06); }
+.cmp-top { display:flex; align-items:center; gap:6px; padding:8px 10px 0; flex-wrap:wrap; }
+.chip { display:inline-flex; align-items:center; gap:6px; padding:2px 8px; border-radius:20px; background:#2a2c2d; color:var(--fg3); font-size:11px; white-space:nowrap; }
+.chip.to { background:#33352a; color:var(--fg); }
+.chip.off { opacity:.45; }
+.ctx { font-size:10.5px; color:var(--gr); display:flex; align-items:center; gap:6px; }
+.ctx .bar { width:60px; }
+.cmp textarea { flex:1; min-height:70px; padding:10px 12px; color:var(--fg); font:500 14px/1.55 var(--mono); }
+.cmp textarea::placeholder { color:var(--bg4); }
+.cmp-ft { display:flex; align-items:center; gap:12px; padding:6px 10px 8px; font-size:10.5px; color:var(--gr); flex-wrap:wrap; }
+.send { background:var(--ye); color:var(--bg0); font-weight:800; border-radius:7px; padding:5px 12px; font-size:12px; }
+
+/* ===== 1 Mission Control ===== */
+.mc { flex:1; min-height:0; display:grid; grid-template-columns:220px minmax(0,1fr) 340px; }
+.mc-tree { border-right:1px solid #161718; overflow:auto; }
+.tr { display:flex; align-items:center; gap:7px; height:23px; padding:0 10px; font-size:12px; color:var(--fg3); }
+.tr.p { color:var(--c); font-weight:600; margin-top:4px; }
+.tr.a { padding-left:24px; }
+.tr.on { background:var(--bg1); color:var(--fg); }
+.tr .x { margin-left:auto; color:var(--gr); font-size:10.5px; }
+.mc-mid { display:flex; flex-direction:column; min-height:0; padding:12px 16px 14px; gap:10px; }
+.mc-h { display:flex; align-items:baseline; gap:10px; color:var(--gr); font-style:italic; font-size:11.5px; }
+.mc-h b { color:var(--fg); font-style:normal; font-size:13px; }
+.ask { display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:8px; background:rgba(250,189,47,.08); border:1px solid rgba(250,189,47,.35); }
+.ask .q { color:var(--fg); flex:1; min-width:0; }
+.ask .q small { display:block; color:var(--gr); font-size:11px; }
+.ask button { border:1px solid var(--bg3); border-radius:6px; padding:3px 9px; color:var(--fg2); font-size:11.5px; }
+.ask button.y { background:var(--ye); color:var(--bg0); border-color:var(--ye); font-weight:700; }
+.lane { display:grid; grid-template-columns:14px 170px minmax(0,1fr) 90px 54px; gap:10px; align-items:center; padding:7px 10px; border-radius:7px; background:#222425; border:1px solid #2a2c2d; }
+.lane.on { border-color:var(--bg4); background:#26282a; }
+.lane .nm { color:var(--fg); font-weight:600; }
+.lane .nm small { display:block; color:var(--c); font-weight:500; font-size:10.5px; }
+.lane .now { display:flex; gap:7px; align-items:center; color:var(--fg3); }
+.lane .t { color:var(--gr); text-align:right; font-size:11px; }
+.mc .cmp { flex:1; min-height:230px; }
+.mc-feed { border-left:1px solid #161718; display:flex; flex-direction:column; min-height:0; background:#1a1c1d; }
+.feed { flex:1; overflow:hidden; padding:10px 12px; display:flex; flex-direction:column; justify-content:flex-end; gap:3px; font-size:11.5px; }
+.feed div { flex:none; animation:fin .35s ease both; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.feed .o { color:var(--gr); padding-left:14px; }
+.feed .s { color:var(--fg2); }
+@keyframes fin { from { opacity:0; transform:translateY(6px); } }
+.files { padding:8px 12px 12px; border-top:1px solid #161718; font-size:11.5px; }
+.files div { display:flex; gap:6px; } .files .m { color:var(--ye); } .files .a { color:var(--gn); }
+
+/* ===== 2 Agent-Graph ===== */
+.gr { flex:1; min-height:0; position:relative; background:radial-gradient(circle at 1px 1px, #2a2c2d 1px, transparent 0) 0 0/22px 22px, var(--bg0); }
+.gr .colh { position:absolute; top:12px; font-size:10.5px; color:var(--gr); text-transform:uppercase; letter-spacing:.1em; }
+.nd { position:absolute; transform:translate(-50%,-50%); display:flex; align-items:center; gap:8px; padding:7px 11px; border-radius:8px; background:#232526; border:1px solid var(--bg2); white-space:nowrap; box-shadow:0 6px 20px rgba(0,0,0,.35); font-size:11.5px; }
+.nd.p { border-color:color-mix(in srgb, var(--c) 55%, transparent); color:var(--c); font-weight:700; }
+.nd.ag { flex-direction:column; align-items:stretch; gap:4px; min-width:190px; }
+.nd.ag .h { display:flex; align-items:center; gap:7px; color:var(--fg); font-weight:600; }
+.nd.ag .now { display:flex; gap:6px; align-items:center; color:var(--fg4); font-size:11px; }
+.nd.on { border-color:var(--ye); box-shadow:0 0 0 3px rgba(250,189,47,.12), 0 6px 20px rgba(0,0,0,.35); }
+.nd.f { font-size:11px; color:var(--fg3); padding:4px 9px; }
+.nd.f.hot { color:var(--ye); border-color:rgba(250,189,47,.5); }
+.gr-dock { position:absolute; left:50%; bottom:14px; transform:translateX(-50%); width:min(820px, calc(100% - 28px)); height:170px; z-index:25; }
+.gr-dock .cmp { height:100%; background:rgba(32,34,35,.96); backdrop-filter:blur(8px); box-shadow:0 20px 60px rgba(0,0,0,.6); }
+.legend { position:absolute; left:14px; bottom:196px; display:flex; gap:12px; font-size:10.5px; color:var(--gr); }
+.legend > span { display:flex; gap:5px; align-items:center; }
+
+/* ===== 3 Neovim klassisch ===== */
+.bl { height:28px; display:flex; background:var(--bg0); border-bottom:1px solid #121314; font-size:11.5px; flex:none; }
+.bl > span { display:flex; align-items:center; gap:7px; padding:0 12px; color:var(--gr); border-right:1px solid #121314; white-space:nowrap; }
+.bl > span.on { background:var(--bg); color:var(--fg); }
+.bl .r { margin-left:auto; border:0; }
+.nv { flex:1; min-height:0; display:grid; grid-template-columns:200px minmax(0,1fr) minmax(0,1fr) minmax(0,1.25fr); }
+.nv > div { border-right:1px solid #121314; min-width:0; min-height:0; display:flex; flex-direction:column; }
+.nv > div:last-child { border-right:0; }
+.rw { display:flex; align-items:center; gap:7px; height:22px; padding:0 10px; color:var(--fg3); font-size:11.5px; }
+.rw.on { background:var(--bg1); color:var(--fg); }
+.rw .ln { color:var(--bg4); width:16px; text-align:right; flex:none; }
+.rw.on .ln { color:var(--ye); }
+.rw .x { margin-left:auto; color:var(--gr); font-size:10.5px; flex:none; }
+.pv { padding:10px 14px; overflow:hidden; flex:1; }
+.pv h3 { color:var(--or); font-size:12.5px; }
+.pv .h { color:var(--ye); margin:8px 0 2px; font-size:11px; } .pv .h.a { color:var(--aq); }
+.pv p { color:var(--fg2); font-size:11.5px; }
+.buf { flex:none; height:52%; border-top:1px solid var(--bg2); display:flex; flex-direction:column; background:#1a1c1d; }
+.buf .body { flex:1; display:flex; min-height:0; }
+.buf .gut { width:34px; padding:8px 6px 0 0; text-align:right; color:var(--bg4); font-size:12px; line-height:1.55; flex:none; }
+.buf textarea { flex:1; padding:8px 10px 0 4px; font:500 13px/1.55 var(--mono); color:var(--fg); }
+.buf .ft { display:flex; gap:12px; align-items:center; padding:4px 10px; font-size:10.5px; color:var(--gr); }
+.buf .ft .ins { color:var(--gn); font-weight:800; }
+
+/* ===== 4 Board ===== */
+.bd { flex:1; min-height:0; display:grid; grid-template-columns:minmax(0,1fr) 360px; }
+.bd-cols { display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:10px; padding:12px; min-height:0; overflow:auto; }
+.bd-col h4 { display:flex; align-items:center; gap:7px; font-size:11px; color:var(--fg3); text-transform:uppercase; letter-spacing:.08em; margin:2px 4px 8px; font-weight:700; }
+.bd-col h4 .n { margin-left:auto; color:var(--gr); }
+.card { background:#232526; border:1px solid #2c2e2f; border-radius:9px; padding:10px 11px; margin-bottom:8px; display:flex; flex-direction:column; gap:6px; }
+.card.on { border-color:var(--ye); box-shadow:0 0 0 3px rgba(250,189,47,.1); }
+.card .h { display:flex; align-items:center; gap:7px; color:var(--fg); font-weight:600; }
+.card .meta { display:flex; gap:8px; color:var(--gr); font-size:10.5px; flex-wrap:wrap; }
+.card .meta .p { color:var(--c); }
+.card .now { display:flex; gap:6px; align-items:center; color:var(--fg4); font-size:11px; min-width:0; }
+.card .q { color:var(--fg); background:rgba(250,189,47,.08); border-radius:6px; padding:6px 8px; font-size:11.5px; }
+.card .sub { margin-left:12px; }
+.bd-side { border-left:1px solid #161718; display:flex; flex-direction:column; padding:12px; gap:10px; background:#1a1c1d; min-height:0; }
+.bd-side .cmp { flex:1; }
+.bd-side h3 { color:var(--fg); font-size:13px; display:flex; gap:8px; align-items:center; }
+.mini { display:flex; gap:2px; } .mini i { flex:1; height:4px; border-radius:1px; background:var(--bg3); } .mini i.d { background:var(--run); opacity:.7; } .mini i.c { background:var(--ye); }
+
+/* ===== 5 Aurora Dashboard ===== */
+.au { flex:1; min-height:0; overflow:auto; position:relative; background:
+  radial-gradient(600px 300px at 18% 0%, rgba(142,192,124,.10), transparent 70%),
+  radial-gradient(500px 300px at 85% 10%, rgba(211,134,155,.09), transparent 70%),
+  radial-gradient(700px 400px at 50% 110%, rgba(250,189,47,.07), transparent 70%), var(--bg0); }
+.au-in { max-width:1180px; margin:0 auto; padding:28px 28px 20px; display:grid; grid-template-columns:minmax(0,1.25fr) minmax(300px,.9fr); gap:26px 34px; }
+.au-logo { grid-column:1 / -1; display:flex; align-items:center; gap:14px; }
+.au-logo .mark { font:800 15px var(--mono); color:var(--ye); padding:6px 12px; border:1px solid rgba(250,189,47,.35); border-radius:8px; }
+.au-logo .t { color:var(--gr); font-style:italic; }
+.au-logo .t b { color:var(--fg); font-style:normal; display:block; font-size:16px; }
+.au-ask { display:flex; flex-direction:column; gap:10px; }
+.au-ask .cmp { min-height:210px; background:rgba(32,34,35,.8); }
+.sugg { display:flex; gap:8px; flex-wrap:wrap; }
+.sugg button { border:1px solid var(--bg2); border-radius:20px; padding:4px 11px; color:var(--fg3); font-size:11.5px; background:rgba(40,40,40,.5); }
+.sugg button:hover { border-color:var(--ye); color:var(--fg); }
+.orbit { position:relative; aspect-ratio:1; max-width:340px; width:100%; margin:0 auto; }
+.orbit .ring { position:absolute; border:1px dashed #3a3c3d; border-radius:50%; }
+.orbit .core { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:74px; height:74px; border-radius:50%; display:grid; place-items:center; text-align:center; background:radial-gradient(circle, #3a3524, #1d2021 70%); box-shadow:0 0 40px rgba(250,189,47,.2); color:var(--ye); font-weight:800; font-size:11px; }
+.orbit .core small { display:block; color:var(--gr); font-weight:500; font-size:9.5px; }
+.orb { position:absolute; inset:0; animation:spin var(--t) linear infinite; animation-delay:var(--d); }
+.orb > span { position:absolute; left:50%; top:var(--r); transform:translate(-50%,-50%); }
+.orb > span > em { display:flex; align-items:center; gap:5px; font-style:normal; font-size:10.5px; white-space:nowrap; padding:2px 7px; border-radius:20px; background:#232526; border:1px solid var(--bg2); color:var(--fg2); animation:spin var(--t) linear infinite reverse; animation-delay:var(--d); }
+@keyframes spin { to { transform:rotate(360deg); } }
+.au-stats { grid-column:1 / -1; display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+.tile { padding:12px 14px; border-radius:10px; background:rgba(40,40,40,.55); border:1px solid #2c2e2f; }
+.tile b { display:block; font-size:22px; color:var(--c); font-weight:800; }
+.tile small { color:var(--gr); text-transform:uppercase; letter-spacing:.08em; font-size:10px; }
+.tile .spark { display:flex; align-items:flex-end; gap:2px; height:18px; margin-top:6px; }
+.tile .spark i { flex:1; background:var(--c); opacity:.5; border-radius:1px; }
+.au-rec { display:flex; flex-direction:column; gap:2px; }
+.au-rec h4, .au-act h4 { color:var(--gr); font-style:italic; font-weight:500; font-size:11.5px; margin-bottom:4px; }
+.rc { display:grid; grid-template-columns:20px minmax(0,1fr) auto 36px; gap:8px; align-items:center; height:26px; padding:0 8px; border-radius:6px; }
+.rc:hover { background:rgba(235,219,178,.04); }
+.rc .k { color:var(--bl); font-weight:800; } .rc .t { color:var(--fg2); } .rc .a { color:var(--bg4); font-size:10.5px; text-align:right; }
+
+/* ===== 6 Chat + Werkstatt ===== */
+.ch { flex:1; min-height:0; display:grid; grid-template-columns:minmax(0,1.2fr) minmax(0,1fr); }
+.ch-l { display:flex; flex-direction:column; min-height:0; border-right:1px solid #161718; }
+.ch-log { flex:1; overflow:hidden; padding:14px 18px; display:flex; flex-direction:column; gap:10px; justify-content:flex-end; font-family:var(--sans); }
+.msg-u { align-self:flex-end; max-width:80%; background:#33302a; color:var(--fg); border-radius:12px 12px 3px 12px; padding:8px 12px; font-size:13.5px; }
+.msg-c { color:var(--fg2); font-size:13.5px; line-height:1.55; max-width:92%; }
+.tc { display:flex; align-items:center; gap:8px; font:500 11.5px var(--mono); color:var(--fg4); padding:5px 9px; border-radius:6px; background:#222425; width:fit-content; max-width:100%; }
+.tc .r { color:var(--gr); }
+.typing::after { content:"▍"; color:var(--ye); animation:blink 1s steps(2) infinite; }
+.ch-l .cmp { margin:0 14px 14px; min-height:190px; }
+.ch-r { display:grid; grid-template-rows:auto minmax(0,1fr); min-height:0; background:#1a1c1d; }
+.ws-tree { padding:8px 0; border-bottom:1px solid #161718; }
+.ws-tree .rw.hot { color:var(--ye); background:rgba(250,189,47,.06); }
+.ws-tree .rw.hot::after { content:"● bearbeitet"; margin-left:auto; font-size:10px; color:var(--ye); animation:blink 1.2s steps(2) infinite; }
+.diff { padding:10px 0; font-size:11.5px; overflow:hidden; }
+.diff div { padding:0 12px; white-space:pre; }
+.diff .ad { background:rgba(184,187,38,.09); color:#c7c96a; } .diff .de { background:rgba(251,73,52,.08); color:#e3887d; } .diff .hh { color:var(--bl); }
+
+/* ===== 7 Zeitachse ===== */
+.tl { flex:1; min-height:0; display:grid; grid-template-rows:minmax(0,1fr) 220px; }
+.tl-top { padding:12px 16px 8px; display:flex; flex-direction:column; gap:4px; overflow:hidden; position:relative; }
+.tl-ax { display:grid; grid-template-columns:200px 1fr; font-size:10px; color:var(--gr); margin-bottom:4px; }
+.tl-ax div { display:flex; justify-content:space-between; }
+.tln { display:grid; grid-template-columns:200px 1fr; align-items:center; height:44px; }
+.tln .nm { display:flex; gap:7px; align-items:center; color:var(--fg2); font-size:11.5px; }
+.tln.sub .nm { padding-left:18px; color:var(--fg3); }
+.tln .trk { position:relative; height:20px; background:repeating-linear-gradient(90deg, transparent 0 calc(10% - 1px), #262829 calc(10% - 1px) 10%); border-radius:3px; }
+.tln .tk { position:absolute; top:2px; bottom:2px; width:5px; border-radius:2px; background:var(--tc); }
+.tln .wt { position:absolute; top:0; bottom:0; border-radius:3px; background:repeating-linear-gradient(45deg, rgba(250,189,47,.35) 0 4px, rgba(250,189,47,.12) 4px 8px); }
+.tln .life { position:absolute; top:7px; height:2px; background:#3a3c3d; }
+.nowl { position:absolute; top:28px; bottom:6px; width:2px; background:var(--re); box-shadow:0 0 10px var(--re); }
+.tl-bot { display:grid; grid-template-columns:minmax(0,1fr) 320px; gap:12px; padding:0 14px 12px; }
+.tl-bot .cmp { min-height:0; }
+.tkey { display:flex; gap:10px; flex-wrap:wrap; font-size:10.5px; color:var(--gr); padding:6px 16px 0; }
+.tkey span { display:flex; gap:5px; align-items:center; } .tkey i { width:8px; height:8px; border-radius:2px; background:var(--tc); }
+
+/* ===== 8 tmux-Wand ===== */
+.tm { flex:1; min-height:0; display:grid; grid-template-rows:minmax(0,1fr) auto; gap:8px; padding:8px; background:#141516; }
+.tm-grid { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); grid-template-rows:repeat(2, minmax(0,1fr)); gap:6px; min-height:0; }
+.pane { background:#24273a; border-radius:6px; display:flex; flex-direction:column; min-height:0; overflow:hidden; border:1px solid #1b1d2b; transition:border-color .2s, box-shadow .2s; }
+.pane.big { grid-column:span 2; grid-row:span 2; }
+.pane.tg { border-color:var(--ye); box-shadow:0 0 0 2px rgba(250,189,47,.18); }
+.pane .hd { height:24px; display:flex; align-items:center; gap:7px; padding:0 9px; background:#1e2030; font-size:11px; color:#a5adcb; flex:none; }
+.pane .hd b { color:#cad3f5; font-weight:600; }
+.pane .hd .x { margin-left:auto; color:#6e738d; }
+.pane .feed { color:#cad3f5; font-size:11.5px; }
+.pane .feed .o { color:#6e738d; }
+.tm .cmp { min-height:150px; }
+.tm .chip { cursor:pointer; }
+
+@media (max-width:900px) {
+  .mc, .bd, .ch, .tl-bot { grid-template-columns:1fr; } .mc-tree, .mc-feed, .bd-side, .ch-r, .tl-bot > :last-child { display:none; }
+  .nv { grid-template-columns:1fr; } .nv > div:not(:last-child) { display:none; }
+  .au-in { grid-template-columns:1fr; } .au-stats { grid-template-columns:repeat(2,1fr); }
+  .bd-cols { grid-template-columns:repeat(2, minmax(0,1fr)); }
+  .tm-grid { grid-template-columns:1fr; grid-template-rows:none; } .pane.big { grid-column:auto; grid-row:auto; } .pane { min-height:160px; }
+  .lane { grid-template-columns:14px 1fr 54px; } .lane .now, .lane .bar { display:none; }
+}
+</style>
+</head>
+<body>
+<div class="sw" id="sw"><span class="lbl">Entwurf</span></div>
+<div class="note" id="note"></div>
+<div class="win" id="win"><svg id="wires"></svg><div class="v" id="v"></div></div>
+
+<script>
+const PROJ = { "rezept-app":"#fabd2f", "dotfiles":"#fe8019", "game-jam-2026":"#d3869b", "haushaltsbuch":"#b8bb26", "wetterstation":"#83a598", "portfolio-site":"#b16286" };
+const TC = { Read:"#83a598", Edit:"#fabd2f", Bash:"#b8bb26", Write:"#fe8019", Grep:"#d3869b", Task:"#8ec07c", Denkt:"#928374" };
+const A = [
+  { id:"a1", name:"Suche-Refactor", proj:"rezept-app", br:"feat/suche", st:"run", prog:62, steps:14, t:"12m", cost:"$5.88",
+    tools:[["Read","src/search/trigram.ts","84 Zeilen"],["Edit","src/search/index.ts","+12 -3"],["Bash","bun test search","23 bestanden, 1 fehlgeschlagen"],["Denkt","Der Mock liefert ein leeres Array",""],["Edit","tests/fixtures.ts","+4 -1"],["Bash","bun test search","24 bestanden"]] },
+  { id:"a1s", parent:"a1", name:"Tests schreiben", proj:"rezept-app", br:"feat/suche", st:"run", prog:30, steps:4, t:"4m", cost:"$0.41",
+    tools:[["Write","tests/search.test.ts","neu, 42 Zeilen"],["Bash","bun test","läuft …"],["Grep","\"describe(\"","6 Treffer"]] },
+  { id:"a2", name:"Soundeffekte", proj:"game-jam-2026", br:"main", st:"wait", prog:80, steps:9, t:"3h", cost:"$1.20", ask:"Soll ich die alten Sounds in /assets/old löschen?",
+    tools:[["Denkt","wartet auf deine Antwort",""]] },
+  { id:"a3", name:"Setup-Skript", proj:"dotfiles", br:"main", st:"run", prog:45, steps:22, t:"7m", cost:"$2.10",
+    tools:[["Bash","brew bundle --file Brewfile","Ghostty installiert"],["Edit","Brewfile","+2"],["Read","setup.sh","120 Zeilen"],["Bash","shellcheck setup.sh","ok"]] },
+  { id:"a4", name:"Monatsbericht PDF", proj:"haushaltsbuch", br:"main", st:"done", prog:100, steps:11, t:"1h", cost:"$0.88", tools:[["Write","report.pdf","fertig"]] },
+  { id:"a5", name:"MQTT Sensoren", proj:"wetterstation", br:"feat/mqtt", st:"err", prog:55, steps:5, t:"20m", cost:"$0.64", tools:[["Bash","npm test","3 fehlgeschlagen"]] },
+];
+const ST_LABEL = { run:"arbeitet", wait:"wartet auf dich", done:"fertig", err:"Fehler" };
+const c = (p) => PROJ[p] || "#a89984";
+const esc = (s) => String(s).replace(/[&<>"]/g, (m) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[m]));
+const st = (s) => `<span class="st ${s}"></span>`;
+const tool = (a, i = 0) => { const t = a.tools[i % a.tools.length]; return `<span class="tool" style="--tc:${TC[t[0]]}">${t[0]}</span><span class="ell">${esc(t[1])}</span>`; };
+const nowEl = (a, cls = "now") => `<span class="${cls}" data-tool="${a.id}">${tool(a)}</span>`;
+const bar = (a) => `<div class="bar" style="--c:var(--${a.st})"><i data-prog="${a.id}" style="width:${a.prog}%"></i></div>`;
+const composer = (o = {}) => `<div class="cmp">
+  <div class="cmp-top">${o.targets || `<span class="chip to">an ${st("run")} ${o.to || "Suche-Refactor"} ▾</span>`}<span class="chip">Plan-Modus</span><span class="chip">Opus 5.5</span><span class="chip">+ Notiz</span><span class="chip">@ Datei</span><span class="sp"></span><span class="ctx">Kontext <span class="bar"><i style="width:38%;background:var(--aq)"></i></span> 38%</span></div>
+  <textarea placeholder="${o.ph || "Was soll der Agent als Nächstes tun?  @datei  /befehl  #notiz"}">${o.val || ""}</textarea>
+  <div class="cmp-ft"><span><kbd>⌘↵</kbd> senden</span><span><kbd>⌘⇧↵</kbd> an alle</span><span><kbd>Tab</kbd> Agent wechseln</span><span><kbd>⌘↑</kbd> letzter Prompt</span><span class="sp"></span><button class="send">${o.btn || "Senden ↵"}</button></div></div>`;
+const tree = () => Object.keys(PROJ).map((p) => { const ag = A.filter((a) => a.proj === p);
+  return `<div class="tr p" style="--c:${c(p)}" data-w="tp-${p}">▾ ${p}<span class="x">${ag.length || ""}</span></div>` + ag.map((a) => `<div class="tr a ${a.id === "a1" ? "on" : ""}" data-w="t-${a.id}">${st(a.st)}<span class="ell">${a.name}</span><span class="x">${a.t}</span></div>`).join(""); }).join("");
+const sl = (m, b, mid, y) => `<div class="sl"><span class="m">${m}</span><span class="b">${b}</span><span class="c">${mid}</span><span class="y">${y}</span><span class="z">3 laufen · 1 wartet</span></div>`;
+
+const V = [
+{ name:"Mission Control", note:"<b>Leitstand im Neovim-Look.</b> Links der Baum mit Projekten und ihren Agenten, Mitte eine Spur pro Agent mit dem, was er <i>gerade jetzt</i> tut (Werkzeug, Datei, Fortschritt), oben ein gelber Kasten, wenn einer auf dich wartet. Darunter der große Prompt-Bereich. Rechts der Live-Feed des gewählten Agenten. Linien zeigen, welcher Agent zu welchem Projekt gehört und wohin dein Prompt geht.",
+  html:() => `<div class="mc">
+    <div class="mc-tree"><div class="ph on"><span class="n">1</span><b>Projekte</b></div>${tree()}</div>
+    <div class="mc-mid">
+      <div class="mc-h"><b>Agenten jetzt</b> 3 arbeiten · 1 wartet · 1 Fehler<span class="sp"></span><kbd>j</kbd><kbd>k</kbd> wählen</div>
+      <div class="ask" data-w="ask">${st("wait")}<div class="q">${esc(A[2].ask)}<small>Soundeffekte · game-jam-2026 · wartet seit 4 min</small></div><button class="y">Ja</button><button>Nein</button><button>Antworten …</button></div>
+      ${A.filter((a) => a.st !== "wait").map((a) => `<div class="lane ${a.id === "a1" ? "on" : ""}" data-w="l-${a.id}">${st(a.st)}<div class="nm ell">${a.parent ? "↳ " : ""}${a.name}<small style="--c:${c(a.proj)}">${a.proj} · ${a.br}</small></div>${a.st === "run" ? nowEl(a) : `<span class="now dim">${a.st === "err" ? "Test fehlgeschlagen" : "abgeschlossen"}</span>`}${bar(a)}<span class="t">${a.t}</span></div>`).join("")}
+      <div data-w="cmp" style="display:flex;flex:1;min-height:0">${composer({ val:"Der Test für Tippfehler ist noch rot. Schau dir den Mock in tests/fixtures.ts an und " })}</div>
+    </div>
+    <div class="mc-feed"><div class="ph" data-w="feed"><span class="n">3</span><b>Live</b> · Suche-Refactor ${st("run")}</div><div class="feed" data-feed="a1"></div>
+      <div class="files"><div class="dim" style="margin-bottom:4px">Geändert in dieser Session</div><div><span class="m">M</span>src/search/index.ts</div><div><span class="m">M</span>tests/fixtures.ts</div><div><span class="a">A</span>tests/search.test.ts</div></div></div>
+  </div>${sl("NORMAL", "feat/suche", "rezept-app / Suche-Refactor", "Opus 5.5 · $5.88")}`,
+  wires:[["t-a1","l-a1","#8ec07c",1],["t-a1s","l-a1s","#8ec07c",1],["t-a3","l-a3","#8ec07c",1],["t-a5","l-a5","#fb4934"],["t-a4","l-a4","#83a598"],["t-a2","ask","#fabd2f",1],["l-a1","feed","#fabd2f",1],["cmp","l-a1","#fabd2f"]] },
+
+{ name:"Agent-Graph", note:"<b>Alles als lebender Graph.</b> Projekte links, dann Agenten, dann Sub-Agenten, ganz rechts die Dateien, die sie gerade anfassen. Auf den Linien laufen Punkte, solange ein Agent arbeitet; eine wartende Linie blinkt gelb. Der Prompt schwebt unten und geht an den markierten Knoten. Am meisten „KI-Zeitalter“, am wenigsten Text.",
+  html:() => { const P = [["rezept-app",10,20],["game-jam-2026",10,38],["dotfiles",10,54],["wetterstation",10,68]];
+    const N = [["a1",36,16],["a2",36,36],["a3",36,53],["a5",36,68],["a1s",62,28]];
+    const F = [["src/search/index.ts",86,12,1],["tests/fixtures.ts",86,20,0],["tests/search.test.ts",86,30,1],["Brewfile",86,48,1],["setup.sh",86,58,0]];
+    return `<div class="gr">
+      <span class="colh" style="left:4%">Projekte</span><span class="colh" style="left:30%">Agenten</span><span class="colh" style="left:56%">Sub-Agenten</span><span class="colh" style="left:80%">Dateien gerade</span>
+      <div class="legend"><span>${st("run")} arbeitet</span><span>${st("wait")} wartet</span><span>${st("err")} Fehler</span></div>
+      ${P.map(([p,x,y]) => `<div class="nd p" style="--c:${c(p)};left:${x}%;top:${y}%" data-w="g-${p}">▸ ${p}</div>`).join("")}
+      ${N.map(([id,x,y]) => { const a = A.find((q) => q.id === id); return `<div class="nd ag ${id === "a1" ? "on" : ""}" style="left:${x}%;top:${y}%" data-w="g-${id}"><div class="h">${st(a.st)}${a.name}<span class="sp"></span><span class="dim" style="font-size:10.5px">${a.t}</span></div>${a.st === "wait" ? `<div class="now" style="color:var(--ye)">„${esc(a.ask)}“</div>` : a.st === "err" ? `<div class="now" style="color:var(--re)">3 Tests fehlgeschlagen</div>` : nowEl(a)}${bar(a)}</div>`; }).join("")}
+      ${F.map(([f,x,y,h]) => `<div class="nd f ${h ? "hot" : ""}" style="left:${x}%;top:${y}%" data-w="g-${f}">${h ? "● " : ""}${f}</div>`).join("")}
+      <div class="gr-dock" data-w="g-cmp">${composer({ to:"Suche-Refactor + Tests schreiben", ph:"Frag den markierten Agenten oder starte einen neuen …" })}</div>
+    </div>${sl("GRAPH", "atlas", "6 Agenten · 4 Projekte", "Leertaste: zoomen")}`; },
+  wires:[["g-rezept-app","g-a1","#fabd2f",1],["g-game-jam-2026","g-a2","#fabd2f",2],["g-dotfiles","g-a3","#fe8019",1],["g-wetterstation","g-a5","#fb4934"],["g-a1","g-a1s","#8ec07c",1],
+    ["g-a1","g-src/search/index.ts","#fabd2f",1],["g-a1","g-tests/fixtures.ts","#504945"],["g-a1s","g-tests/search.test.ts","#8ec07c",1],["g-a3","g-Brewfile","#fe8019",1],["g-a3","g-setup.sh","#504945"]] },
+
+{ name:"Neovim + Prompt-Buffer", note:"<b>Dein heutiges Neovim mit den Linien, plus ein großer Prompt-Buffer.</b> Die vier Spalten bleiben (Projekte, Sessions, Schritte, Vorschau) und sind wie bisher verbunden. Die Bufferline oben zeigt bei jeder Session, ob der Agent arbeitet oder wartet. Unten rechts liegt ein echter Buffer <b>prompt.md</b> zum Schreiben im Insert-Modus, <b>:w</b> schickt ihn ab.",
+  html:() => `<div class="bl"><span class="on">${st("run")} Suche-Refactor</span><span>${st("wait")} Soundeffekte</span><span>${st("run")} Setup-Skript</span><span>${st("err")} MQTT Sensoren</span><span class="r">3 laufen · 1 wartet</span></div>
+    <div class="nv">
+      <div><div class="ph"><span class="n">1</span><b>neo-tree</b></div>${Object.keys(PROJ).map((p, i) => `<div class="rw ${i ? "" : "on"}" ${i ? "" : 'data-w="n1"'}><span style="color:${c(p)}">${i ? "▸" : "▾"} ${p}</span><span class="x">${A.filter((a) => a.proj === p).map((a) => st(a.st)).join("")}</span></div>`).join("")}</div>
+      <div><div class="ph"><span class="n">2</span><b>rezept-app/sessions</b></div>${[["Suche-Refactor","run","12m"],["↳ Tests schreiben","run","4m"],["Zutatenliste","done","17h"],["Bilder-Upload","done","2d"],["Dark Mode","done","4d"]].map(([n,s,t],i)=>`<div class="rw ${i ? "" : "on"}" ${i ? "" : 'data-w="n2"'}><span class="ln">${i + 1}</span>${st(s)}<span class="ell">${n}</span><span class="x">${t}</span></div>`).join("")}</div>
+      <div><div class="ph on"><span class="n">3</span><b>Schritte</b> 14/14</div>${["Warum schlägt der Test fehl?","Schreib einen Commit","Das sieht noch nicht gut aus","Zeig mir zwei Varianten","Bau die Tippfehler-Suche ein","⏺ arbeitet gerade …"].map((t,i)=>`<div class="rw ${i === 5 ? "on" : ""}" ${i === 5 ? 'data-w="n3"' : ""}><span class="ln">${9 + i}</span><span class="ell" ${i === 5 ? 'style="color:var(--run)"' : ""}>${t}</span></div>`).join("")}</div>
+      <div><div class="ph"><span class="n">4</span><b>live</b> · Schritt 14</div><div class="pv" data-w="n4"><h3># Bau die Tippfehler-Suche ein</h3>
+          <div class="h">## Gerade</div><div class="feed" data-feed="a1" style="padding:0;justify-content:flex-start;max-height:120px"></div></div>
+        <div class="buf" data-w="n5"><div class="ph"><span class="n">5</span><b>prompt.md</b> <span class="dim">[+]</span><span class="sp"></span>an ${st("run")} Suche-Refactor</div>
+          <div class="body"><div class="gut">${[1,2,3,4,5,6,7,8].map((n) => n + "<br>").join("")}</div><textarea spellcheck="false">## Nächster Schritt
+Der Tippfehler-Test ist rot.
+
+- schau in tests/fixtures.ts
+- Trigramme ab 3 Zeichen
+- danach committen</textarea></div>
+          <div class="ft"><span class="ins">-- INSERT --</span><span><kbd>:w</kbd> senden</span><span><kbd>:wa</kbd> an alle</span><span><kbd>Esc</kbd> normal</span></div></div></div>
+    </div>${sl("INSERT", "feat/suche", "prompt.md", "Opus 5.5 · $5.88")}`,
+  wires:[["n1","n2","#fabd2f"],["n2","n3","#fabd2f"],["n3","n4","#8ec07c",1],["n5","n4","#fabd2f",1]] },
+
+{ name:"Board (wie Orca)", note:"<b>Agenten als Karten auf einem Board.</b> Spalten nach Zustand: wartet auf dich, arbeitet, zur Prüfung, Fehler. Jede Karte zeigt Projekt, Branch/Worktree, das aktuelle Werkzeug und den Fortschritt; Sub-Agenten hängen per Linie an ihrem Eltern-Agenten. Rechts der große Prompt für die gewählte Karte. Gut, wenn viele Agenten parallel laufen.",
+  html:() => { const card = (a) => `<div class="card ${a.id === "a1" ? "on" : ""} ${a.parent ? "sub" : ""}" data-w="b-${a.id}"><div class="h">${st(a.st)}<span class="ell">${a.name}</span><span class="sp"></span><span class="dim" style="font-size:10.5px">${a.t}</span></div>
+      <div class="meta" style="--c:${c(a.proj)}"><span class="p">${a.proj}</span><span>⑂ ${a.br}</span><span>${a.steps} Schritte</span><span>${a.cost}</span></div>
+      ${a.st === "wait" ? `<div class="q">${esc(a.ask)}</div>` : a.st === "run" ? nowEl(a) : a.st === "err" ? `<div class="now" style="color:var(--re)">npm test: 3 fehlgeschlagen</div>` : `<div class="now">report.pdf erstellt · 2 Dateien</div>`}
+      <div class="mini">${Array.from({ length: Math.min(a.steps, 14) }, (_, i) => `<i class="${i < Math.round(Math.min(a.steps, 14) * a.prog / 100) - 1 ? "d" : i === Math.round(Math.min(a.steps, 14) * a.prog / 100) - 1 ? "c" : ""}"></i>`).join("")}</div></div>`;
+    const col = (t, s, list) => `<div class="bd-col"><h4>${st(s)} ${t}<span class="n">${list.length}</span></h4>${list.map(card).join("")}</div>`;
+    return `<div class="bd"><div class="bd-cols">
+      ${col("Wartet auf dich", "wait", A.filter((a) => a.st === "wait"))}${col("Arbeitet", "run", A.filter((a) => a.st === "run"))}${col("Prüfen", "done", A.filter((a) => a.st === "done"))}${col("Fehler", "err", A.filter((a) => a.st === "err"))}</div>
+      <div class="bd-side"><h3>${st("run")} Suche-Refactor <span class="dim" style="font-weight:500;font-size:11px">rezept-app · feat/suche</span></h3>
+        <div class="feed" data-feed="a1" style="flex:none;height:150px;padding:0;background:none"></div>
+        <div data-w="b-cmp" style="flex:1;display:flex;min-height:0">${composer({ btn:"Senden ↵" })}</div></div></div>${sl("BOARD", "atlas", "6 Agenten", "h l Spalte · j k Karte")}`; },
+  wires:[["b-a1","b-a1s","#8ec07c",1]] },
+
+{ name:"Aurora Dashboard", note:"<b>Das Dashboard, schöner und mit Agenten.</b> Oben eine große Eingabe „Was baust du heute?“ mit Vorschlägen (weitermachen, Agent beantworten, neue Session). Rechts ein Orbit: um dich kreisen die laufenden Agenten, je näher, desto aktiver. Darunter Kacheln mit Mini-Kurven und die letzten Sessions. Weicher Farbschimmer im Hintergrund, Neovim-Schrift bleibt.",
+  html:() => `<div class="au"><div class="au-in">
+    <div class="au-logo"><span class="mark">◆ session atlas</span><div class="t">Donnerstag, 13. November<b>3 Agenten arbeiten, einer wartet auf dich</b></div></div>
+    <div class="au-ask"><div style="display:flex;flex:1;min-height:0" data-w="au-cmp">${composer({ to:"Neue Session · rezept-app", ph:"Was baust du heute?  Beschreib es einfach, @ für Dateien, # für Notizen", btn:"Starten ↵" })}</div>
+      <div class="sugg"><button>▶ Weiter bei „Suche-Refactor“</button><button style="border-color:rgba(250,189,47,.5)">${st("wait")} Soundeffekte beantworten</button><button>⑂ MQTT-Fehler untersuchen</button><button># Anforderungen-Rezeptsuche.md an Claude</button></div></div>
+    <div class="orbit" data-w="au-orb">${[18,30,42].map((r) => `<div class="ring" style="inset:${r}%"></div>`).join("")}<div class="ring" style="inset:6%"></div>
+      <div class="core">Du<small>4 aktiv</small></div>
+      ${[["a1",30,"40s","0s"],["a1s",30,"40s","-20s"],["a3",18,"60s","-12s"],["a2",6,"90s","-50s"],["a5",6,"90s","-5s"]].map(([id,r,t,d]) => { const a = A.find((q) => q.id === id); return `<div class="orb" style="--t:${t};--d:${d}"><span style="--r:${r}%"><em>${st(a.st)}${a.name}</em></span></div>`; }).join("")}</div>
+    <div class="au-stats">${[["Heute Schritte","41","--ye"],["Agenten aktiv","4","--aq"],["Sessions","26","--bl"],["Kosten Woche","$12.40","--pu"]].map(([l,v,k],i) => `<div class="tile" style="--c:var(${k})"><b>${v}</b><small>${l}</small><div class="spark">${Array.from({length:16},(_,j)=>`<i style="height:${15 + Math.abs(Math.sin(i * 2 + j * .7)) * 85}%"></i>`).join("")}</div></div>`).join("")}</div>
+    <div class="au-rec"><h4>-- Zuletzt</h4>${[["Suche-Refactor","rezept-app","12m"],["Soundeffekte","game-jam-2026","3h"],["Setup-Skript","dotfiles","7h"],["Monatsbericht PDF","haushaltsbuch","10h"],["Neovim-Config aufräumen","dotfiles","14h"]].map(([n,p,t],i) => `<div class="rc"><span class="k">${i + 1}</span><span class="t ell">${n}</span><span style="color:${c(p)};font-size:11px">${p}</span><span class="a">${t}</span></div>`).join("")}</div>
+    <div class="au-act"><h4>-- Gerade passiert</h4><div class="feed" data-feed="a3" style="padding:0;height:140px"></div></div>
+  </div></div>${sl("NORMAL", "atlas", "dashboard", "26 Sessions")}`,
+  wires:[] },
+
+{ name:"Chat + Werkstatt", note:"<b>Links reden, rechts zusehen.</b> Links das Gespräch mit Claude, schön gesetzt statt rohem Terminal: deine Nachrichten als Blasen, Werkzeug-Aufrufe als kleine Zeilen, die Antwort tippt sich live. Großer Prompt unten. Rechts die Werkstatt: der Dateibaum leuchtet, wo der Agent gerade schreibt, darunter der Diff live. Linien verbinden Werkzeug-Aufruf und Datei.",
+  html:() => `<div class="ch"><div class="ch-l"><div class="ph" style="white-space:nowrap;overflow:hidden"><span class="n">1</span><b>Suche-Refactor</b> ${st("run")} · rezept-app<span class="sp"></span>${A.filter((a) => a.id !== "a1" && a.st !== "done").slice(0, 3).map((a) => `<span style="display:flex;gap:5px;align-items:center">${st(a.st)}${a.name}</span>`).join("")}</div>
+      <div class="ch-log">
+        <div class="msg-u">Der Tippfehler-Test ist noch rot, kannst du dir das anschauen?</div>
+        <div class="msg-c">Klar. Ich schaue mir zuerst den Test und die Fixtures an.</div>
+        <div class="tc" data-w="c-read"><span class="tool" style="--tc:${TC.Read}">Read</span>tests/search.test.ts<span class="r">· 42 Zeilen</span></div>
+        <div class="tc" data-w="c-edit"><span class="tool" style="--tc:${TC.Edit}">Edit</span>tests/fixtures.ts<span class="r">· +4 -1</span></div>
+        <div class="tc"><span class="tool" style="--tc:${TC.Bash}">Bash</span>bun test search<span class="r">· 24 bestanden</span></div>
+        <div class="msg-c typing">Der Mock hat ein leeres Array geliefert, deshalb fand die Suche nichts. Jetzt nutzt er die echten Fixtures und alle 24 Tests sind grün. Soll ich das committen</div>
+      </div>${composer({ ph:"Antworte Claude …  ⇧↵ neue Zeile" })}</div>
+    <div class="ch-r"><div class="ws-tree"><div class="ph"><span class="n">2</span><b>Werkstatt</b> · rezept-app</div>
+        ${[["▾ src/search",0],["  index.ts",0],["  trigram.ts",0],["▾ tests",0],["  fixtures.ts",1,"c-f1"],["  search.test.ts",0,"c-f2"],["README.md",0]].map(([f,h,w]) => `<div class="rw ${h ? "hot" : ""}" ${w ? `data-w="${w}"` : ""}><span>${f}</span></div>`).join("")}</div>
+      <div class="diff"><div class="hh">@@ tests/fixtures.ts:12 @@</div><div> export const recipes = [</div><div class="de">-  mockSearch: () =&gt; [],</div><div class="ad">+  mockSearch: (q) =&gt; RECIPES.filter((r) =&gt;</div><div class="ad">+    trigrams(r.title).some((t) =&gt; q.includes(t))),</div><div> ];</div><div class="hh" style="margin-top:8px">@@ src/search/index.ts:40 @@</div><div class="ad">+const MIN = 3;</div><div> export function search(q) {</div></div></div>
+  </div>${sl("INSERT", "feat/suche", "Suche-Refactor · Chat", "Opus 5.5 · $5.88")}`,
+  wires:[["c-read","c-f2","#83a598"],["c-edit","c-f1","#fabd2f",1]] },
+
+{ name:"Zeitachse", note:"<b>Wer hat wann was gemacht.</b> Eine Spur pro Agent über die letzte Stunde, jeder Strich ein Werkzeug-Aufruf (Farbe = Read, Edit, Bash …), gelb schraffiert = wartet auf dich. Linien zeigen, wann ein Agent einen Sub-Agenten gestartet hat. Rote Linie ist jetzt. Unten Prompt und Details. Gut, um zu verstehen, was in den letzten Minuten passiert ist.",
+  html:() => { const rnd = (s) => { let x = s; return () => (x = (x * 9301 + 49297) % 233280) / 233280; };
+    const lane = (a, from, to, seed, extra = "") => { const r = rnd(seed), ks = Object.keys(TC).filter((k) => k !== "Denkt" && k !== "Task");
+      let ticks = ""; for (let i = 0; i < 18; i++) { const x = from + r() * (to - from); ticks += `<i class="tk" style="left:${x}%;--tc:${TC[ks[Math.floor(r() * ks.length)]]}"></i>`; }
+      return `<div class="tln ${a.parent ? "sub" : ""}"><div class="nm" data-w="tl-${a.id}">${st(a.st)}<span class="ell">${a.parent ? "↳ " : ""}${a.name}</span><span class="dim" style="font-size:10px">${a.proj}</span></div><div class="trk"><i class="life" style="left:${from}%;width:${to - from}%"></i>${ticks}${extra}</div></div>`; };
+    return `<div class="tl"><div class="tl-top">
+      <div class="tl-ax"><span></span><div>${["-60m","-50m","-40m","-30m","-20m","-10m","jetzt"].map((t) => `<span>${t}</span>`).join("")}</div></div>
+      ${lane(A[0], 4, 92, 3, `<i class="tk" data-w="tl-spawn" style="left:58%;--tc:${TC.Task};width:8px"></i>`)}${lane(A[1], 60, 92, 7)}${lane(A[2], 0, 40, 11, `<i class="wt" style="left:40%;width:52%"></i>`)}${lane(A[3], 30, 92, 5)}${lane(A[4], 0, 22, 9)}${lane(A[5], 50, 70, 13)}
+      <i class="nowl" style="left:calc(200px + (100% - 232px) * .92 + 16px)"></i></div>
+      <div class="tkey">${Object.entries(TC).map(([k, v]) => `<span><i style="--tc:${v}"></i>${k}</span>`).join("")}<span><i style="background:rgba(250,189,47,.35)"></i>wartet auf dich</span></div>
+      <div class="tl-bot">${composer()}<div class="cmp" style="padding:10px 12px;gap:4px"><div style="color:var(--fg);font-weight:600;display:flex;gap:7px;align-items:center">${st("run")} Suche-Refactor</div><div class="feed" data-feed="a1" style="padding:0"></div></div></div></div>
+      ${sl("NORMAL", "atlas", "Zeitachse · letzte Stunde", "+/- zoomen")}`; },
+  wires:[["tl-spawn","tl-a1s","#8ec07c",1]] },
+
+{ name:"tmux-Wand", note:"<b>Alle Agenten gleichzeitig live.</b> Jeder Agent in einem eigenen kleinen Terminal-Fenster wie in tmux, der wichtigste groß. Der Prompt unten kann an einen, mehrere oder alle gehen: klick oben auf die Chips, die Linien zeigen sofort, wohin er geschickt wird. Gut zum Überwachen und für „alle bitte committen“.",
+  html:() => { const pane = (a, big) => `<div class="pane ${big ? "big" : ""} ${["a1", "a1s"].includes(a.id) ? "tg" : ""}" data-w="tm-${a.id}" data-pane="${a.id}"><div class="hd">${st(a.st)}<b>${a.name}</b><span>${a.proj}</span><span class="x">${a.t} · ${a.cost}</span></div>
+      ${a.st === "wait" ? `<div class="feed" style="justify-content:flex-start"><div style="color:#eed49f">? ${esc(a.ask)}</div><div class="o">  (j/n)</div></div>` : `<div class="feed" data-feed="${a.id}"></div>`}</div>`;
+    return `<div class="tm"><div class="tm-grid">${pane(A[0], 1)}${pane(A[1])}${pane(A[2])}</div>
+      <div data-w="tm-cmp" style="display:flex">${composer({ targets: A.filter((a) => a.st !== "done").map((a) => `<span class="chip ${["a1", "a1s"].includes(a.id) ? "to" : "off"}" data-tgt="${a.id}">${st(a.st)} ${a.name}</span>`).join("") + `<span class="chip" data-tgt="all">alle</span>`, ph:"Prompt an die markierten Agenten …", btn:"An 2 senden ↵" })}</div></div>
+      ${sl("NORMAL", "atlas", "tmux · 3 Fenster", "⌘1-9 Fenster · z zoomen")}`; },
+  wires:() => [...document.querySelectorAll(".chip.to[data-tgt]")].map((ch) => ["tm-cmp", "tm-" + ch.dataset.tgt, "#fabd2f", 1]).filter((w) => document.querySelector(`[data-w="${w[1]}"]`)),
+  after:() => document.querySelectorAll("[data-tgt]").forEach((ch) => ch.addEventListener("click", () => {
+    if (ch.dataset.tgt === "all") document.querySelectorAll("[data-tgt]:not([data-tgt=all])").forEach((x) => { x.classList.add("to"); x.classList.remove("off"); });
+    else { ch.classList.toggle("to"); ch.classList.toggle("off"); }
+    const on = [...document.querySelectorAll(".chip.to[data-tgt]")].map((x) => x.dataset.tgt);
+    document.querySelectorAll("[data-pane]").forEach((p) => p.classList.toggle("tg", on.includes(p.dataset.pane)));
+    document.querySelector(".tm .send").textContent = `An ${on.length} senden ↵`; drawWires(); })) },
+];
+
+/* ---------- wires ---------- */
+const win = document.getElementById("win"), svg = document.getElementById("wires"), v = document.getElementById("v");
+let cur = 0;
+function drawWires() {
+  const def = V[cur].wires, pairs = typeof def === "function" ? def() : def || [];
+  const W = win.getBoundingClientRect(); let out = "";
+  for (const [a, b, col, live] of pairs) {
+    const A_ = win.querySelector(`[data-w="${a}"]`), B_ = win.querySelector(`[data-w="${b}"]`); if (!A_ || !B_) continue;
+    const ra = A_.getBoundingClientRect(), rb = B_.getBoundingClientRect(); if (!ra.width || !rb.width) continue;
+    let x1, y1, x2, y2, d;
+    if (rb.left >= ra.right - 6 || rb.right <= ra.left + 6) {
+      const right = rb.left >= ra.right - 6;
+      x1 = (right ? ra.right : ra.left) - W.left; y1 = ra.top + ra.height / 2 - W.top; x2 = (right ? rb.left : rb.right) - W.left; y2 = rb.top + rb.height / 2 - W.top;
+      const k = Math.max(24, Math.abs(x2 - x1) / 2) * (right ? 1 : -1); d = `M${x1},${y1} C${x1 + k},${y1} ${x2 - k},${y2} ${x2},${y2}`;
+    } else {
+      const down = rb.top > ra.top; x1 = ra.left + Math.min(ra.width / 2, 60) - W.left; x2 = rb.left + Math.min(rb.width / 2, 60) - W.left;
+      y1 = (down ? ra.bottom : ra.top) - W.top; y2 = (down ? rb.top : rb.bottom) - W.top;
+      const k = Math.max(18, Math.abs(y2 - y1) / 2) * (down ? 1 : -1); d = `M${x1},${y1} C${x1},${y1 + k} ${x2},${y2 - k} ${x2},${y2}`;
+    }
+    out += `<path d="${d}" fill="none" stroke="${col}" stroke-opacity=".5" stroke-width="1.5"/>`;
+    if (live === 2) out += `<path d="${d}" fill="none" stroke="${col}" stroke-width="2"><animate attributeName="stroke-opacity" values=".9;.1;.9" dur="1s" repeatCount="indefinite"/></path>`;
+    else if (live) out += `<path d="${d}" fill="none" stroke="${col}" stroke-width="1.5" stroke-dasharray="3 9"><animate attributeName="stroke-dashoffset" from="24" to="0" dur=".9s" repeatCount="indefinite"/></path>
+      <circle r="3" fill="${col}"><animateMotion dur="2.2s" repeatCount="indefinite" path="${d}"/></circle>`;
+    out += `<circle cx="${x1}" cy="${y1}" r="3" fill="#1d2021" stroke="${col}" stroke-width="1.5"/><circle cx="${x2}" cy="${y2}" r="3" fill="#1d2021" stroke="${col}" stroke-width="1.5"/>`;
+  }
+  svg.innerHTML = out;
+}
+
+/* ---------- live ticker ---------- */
+const feedIdx = {};
+function feedLine(a) {
+  const i = (feedIdx[a.id] = (feedIdx[a.id] || 0) + 1), t = a.tools[i % a.tools.length];
+  return [`<div class="s"><span class="tool" style="--tc:${TC[t[0]]}">${t[0]}</span> ${esc(t[1])}</div>`, t[2] ? `<div class="o">⎿ ${esc(t[2])}</div>` : ""];
+}
+function seed() { document.querySelectorAll("[data-feed]").forEach((f) => { const a = A.find((q) => q.id === f.dataset.feed); for (let k = 0; k < 4; k++) f.insertAdjacentHTML("beforeend", feedLine(a).join("")); }); }
+let tick = 0;
+setInterval(() => {
+  tick++;
+  document.querySelectorAll("[data-tool]").forEach((el) => { const a = A.find((q) => q.id === el.dataset.tool); if (a.st === "run") el.innerHTML = tool(a, tick); });
+  document.querySelectorAll("[data-feed]").forEach((f) => { const a = A.find((q) => q.id === f.dataset.feed); if (a.st !== "run") return;
+    f.insertAdjacentHTML("beforeend", feedLine(a).join("")); while (f.children.length > 24) f.firstChild.remove(); });
+  document.querySelectorAll("[data-prog]").forEach((el) => { const a = A.find((q) => q.id === el.dataset.prog); if (a.st === "run") { a.prog = a.prog >= 96 ? 20 : a.prog + 2; el.style.width = a.prog + "%"; } });
+}, 1600);
+
+/* ---------- switcher ---------- */
+const sw = document.getElementById("sw"), note = document.getElementById("note");
+V.forEach((x, i) => sw.insertAdjacentHTML("beforeend", `<button data-i="${i}">${i + 1} · ${x.name}</button>`));
+function show(i) {
+  cur = i; sw.querySelectorAll("button").forEach((b) => b.classList.toggle("on", +b.dataset.i === i));
+  note.innerHTML = V[i].note; v.innerHTML = V[i].html(); seed(); V[i].after?.();
+  requestAnimationFrame(() => requestAnimationFrame(drawWires));
+  try { localStorage.setItem("agents.variant", i); } catch {}
+}
+sw.addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) show(+b.dataset.i); });
+addEventListener("keydown", (e) => { if (/INPUT|TEXTAREA/.test(e.target.tagName)) return; const n = +e.key; if (n >= 1 && n <= V.length) show(n - 1); });
+addEventListener("resize", drawWires);
+document.fonts?.ready.then(drawWires);
+let start = 0; try { start = +localStorage.getItem("agents.variant") || 0; } catch {}
+show(Math.min(start, V.length - 1));
+</script>
+</body>
+</html>
