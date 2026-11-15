@@ -18,7 +18,7 @@
   @keyframes mbob { 50% { transform:translateY(-2px); } }
   @keyframes mhop { 0%,100% { transform:translateY(0); } 40% { transform:translateY(-7px); } }
   #mascot .sig { position:absolute; left:50%; top:-16px; transform:translateX(-50%); font:800 12px var(--mono); pointer-events:none; }
-  #mascot.m-wait .sig { color:#fabd2f; animation:mbob .5s infinite; } #mascot.m-sweat .sig { color:#83a598; animation:mdrop 1.2s infinite; }
+  #mascot.m-wait .sig { color:#e07a4f; animation:mbob .5s infinite; } #mascot.m-sweat .sig { color:#83a598; animation:mdrop 1.2s infinite; }
   #mascot.m-sleep .sig { color:#83a598; animation:mz 2.4s infinite; } #mascot.m-sad .sig { color:#fb4934; }
   @keyframes mdrop { from { transform:translate(6px,0); opacity:1; } to { transform:translate(8px,10px); opacity:0; } }
   @keyframes mz { from { transform:translate(4px,4px) scale(.7); opacity:0; } 40% { opacity:1; } to { transform:translate(12px,-10px) scale(1.1); opacity:0; } }
