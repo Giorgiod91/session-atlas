@@ -14,9 +14,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #0a0c11; --ink: #ece9f5; --ink-2: #a9a5ba; --ink-3: #6f6b82;
+  --bg: #0f1011; --ink: #ece9f5; --ink-2: #a9a5ba; --ink-3: #6f6b82;
   --glass: rgba(255,255,255,.055); --glass-2: rgba(255,255,255,.1); --line: rgba(255,255,255,.12);
-  --violet: #8b6cff; --teal: #2dd4bf; --amber: #fabd2f; --rose: #fb7185; --green: #4ade80; --cyan: #22d3ee;
+  --violet: #8b6cff; --teal: #2dd4bf; --amber: #e07a4f; --rose: #fb7185; --green: #4ade80; --cyan: #22d3ee;
   --sans: "Figtree", -apple-system, sans-serif; --mono: "JetBrains Mono", ui-monospace, monospace; --display: "Orbitron", var(--sans);
   /* Spring easings in the spirit of Framer Motion */
   --spring: linear(0, 0.009, 0.035 2.1%, 0.141, 0.281 6.7%, 0.723 12.9%, 0.938 16.7%, 1.017, 1.077, 1.121, 1.149 24.3%, 1.159, 1.163, 1.161, 1.154 29.9%, 1.129 32.8%, 1.051 39.6%, 1.017 43.1%, 0.991, 0.977 51%, 0.974 53.8%, 0.975 57.1%, 0.997 69.8%, 1.003 76.9%, 1);
@@ -51,11 +51,11 @@ svg.i { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-widt
 #stage { position: fixed; inset: 0; }
 
 /* ---------- Shared drawer: a Neovim floating window (gruvbox, title in the border) ---------- */
-#drawer { --g-bg:#1d2021; --g-bg1:#3c3836; --g-bg2:#504945; --g-bg3:#665c54; --g-fg:#ebdbb2; --g-fg2:#d5c4a1; --g-fg3:#bdae93; --g-fg4:#a89984; --g-gr:#928374;
-  --g-ye:#fabd2f; --g-or:#fe8019; --g-aq:#8ec07c; --g-bl:#83a598; --g-pu:#d3869b; --g-gn:#b8bb26; --g-rd:#fb4934;
+#drawer { --g-bg:#141617; --g-bg1:#3c3836; --g-bg2:#504945; --g-bg3:#665c54; --g-fg:#ebdbb2; --g-fg2:#d5c4a1; --g-fg3:#bdae93; --g-fg4:#a89984; --g-gr:#928374;
+  --g-ye:#e07a4f; --g-or:#fe8019; --g-aq:#8ec07c; --g-bl:#83a598; --g-pu:#d3869b; --g-gn:#b8bb26; --g-rd:#fb4934;
   position: fixed; z-index: 60; top: 22px; right: 14px; bottom: 14px; width: min(500px, calc(100vw - 28px)); display: flex; flex-direction: column;
   font: 500 12.5px/1.45 var(--mono); color: var(--g-fg2);
-  background: rgba(29,32,33,.94); border: 1px solid rgba(235,219,178,.28); border-radius: 10px; backdrop-filter: blur(18px) saturate(150%); -webkit-backdrop-filter: blur(18px) saturate(150%);
+  background: rgba(20,22,23,.95); border: 1px solid rgba(235,219,178,.28); border-radius: 10px; backdrop-filter: blur(18px) saturate(150%); -webkit-backdrop-filter: blur(18px) saturate(150%);
   box-shadow: 0 1px 0 rgba(255,255,255,.04) inset, 0 30px 80px rgba(0,0,0,.6); transform: translateX(calc(100% + 30px)); transition: transform .55s var(--spring); }
 #drawer.open { transform: none; }
 #drawer .dw-title { position: absolute; top: -9px; left: 16px; right: 56px; display: flex; gap: 6px; align-items: center; pointer-events: none; z-index: 2; }
@@ -75,7 +75,7 @@ svg.i { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-widt
 .dw-lbl span:last-child { color: var(--g-gr); font-weight: 500; font-style: italic; }
 .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
 .kpis div { padding: 4px 10px 5px; border-left: 2px solid var(--c, var(--g-bl)); background: linear-gradient(90deg, color-mix(in srgb, var(--c, #83a598) 10%, transparent), transparent); border-radius: 0 5px 5px 0; }
-.kpis div:nth-child(1) { --c: #83a598; } .kpis div:nth-child(2) { --c: #d3869b; } .kpis div:nth-child(3) { --c: #8ec07c; } .kpis div:nth-child(4) { --c: #fabd2f; }
+.kpis div:nth-child(1) { --c: #83a598; } .kpis div:nth-child(2) { --c: #d3869b; } .kpis div:nth-child(3) { --c: #8ec07c; } .kpis div:nth-child(4) { --c: #e07a4f; }
 .kpis .cap { color: var(--g-fg4); font-size: 10px; letter-spacing: .06em; text-transform: uppercase; }
 .kpis b { display: block; font: 800 17px var(--mono); color: var(--c); }
 .dw-graph { position: relative; height: 210px; border-radius: 6px; background: #191b1c; border: 1px solid #32302f; overflow: hidden; }
@@ -83,8 +83,8 @@ svg.i { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-widt
 .gnode { position: absolute; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; gap: 3px; width: 96px; text-align: center; }
 .gnode .orb { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; background: #282828; border: 2px solid var(--g-pu); color: var(--g-pu); transition: transform .4s var(--spring), border-color .2s; }
 .gnode .orb svg.i { width: 18px; height: 18px; }
-.gnode:hover .orb, .gnode.on .orb { transform: scale(1.12); border-color: var(--g-ye); color: var(--g-ye); box-shadow: 0 0 18px rgba(250,189,47,.35); }
-.gnode.main .orb { width: 48px; height: 48px; background: radial-gradient(circle at 30% 30%, #fabd2f, #fe8019); border-color: #fabd2f; color: #1d2021; box-shadow: 0 0 24px rgba(250,189,47,.3); }
+.gnode:hover .orb, .gnode.on .orb { transform: scale(1.12); border-color: var(--g-ye); color: var(--g-ye); box-shadow: 0 0 18px rgba(224,122,79,.35); }
+.gnode.main .orb { width: 48px; height: 48px; background: radial-gradient(circle at 30% 30%, #f0a070, #e07a4f); border-color: #e07a4f; color: #1d2021; box-shadow: 0 0 24px rgba(224,122,79,.3); }
 .gnode b { font-size: 11px; white-space: nowrap; color: var(--g-fg); } .gnode small { font-size: 10px; color: var(--g-gr); line-height: 1.2; max-width: 96px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
 .agentbox { background: #191b1c; border: 1px solid var(--g-pu); border-radius: 6px; padding: 10px 12px; font-size: 12px; display: grid; gap: 6px; }
 .agentbox > .row b { color: var(--g-pu); }
@@ -95,7 +95,7 @@ svg.i { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-widt
 #drawer .cap { color: var(--g-gr); }
 /* Step path: connected points you can open and continue from */
 .path { position: relative; display: flex; flex-direction: column; }
-.path::before { content: ""; position: absolute; left: 13px; top: 14px; bottom: 14px; width: 2px; background: linear-gradient(#fabd2f, #8ec07c); opacity: .45; transform-origin: top; animation: grow 1s var(--spring-soft) both; }
+.path::before { content: ""; position: absolute; left: 13px; top: 14px; bottom: 14px; width: 2px; background: linear-gradient(#e07a4f, #8ec07c); opacity: .45; transform-origin: top; animation: grow 1s var(--spring-soft) both; }
 @keyframes grow { from { transform: scaleY(0); } }
 .step { position: relative; display: grid; grid-template-columns: 28px 1fr; gap: 10px; padding: 6px 0; text-align: left; width: 100%; border-radius: 5px; }
 .step:hover { background: rgba(235,219,178,.03); }
@@ -103,7 +103,7 @@ svg.i { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-widt
 .step .pt svg.i { width: 13px; height: 13px; color: var(--g-pu); }
 .step:hover .pt { transform: scale(1.1); border-color: var(--g-ye); }
 .step.now .pt { background: var(--g-aq); color: #1d2021; border-color: #b8e08e; box-shadow: 0 0 12px rgba(142,192,124,.5); }
-.step.open .pt { background: var(--g-ye); color: #1d2021; border-color: #ffd977; }
+.step.open .pt { background: var(--g-ye); color: #1d2021; border-color: #f3a27c; }
 .step .tx { font-size: 12.5px; padding-top: 5px; color: var(--g-fg2); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .step.open .tx { -webkit-line-clamp: unset; display: block; color: var(--g-fg); }
 .step .cap.mono { font-size: 10.5px; }
@@ -113,7 +113,7 @@ svg.i { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-widt
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 8px 12px; border-radius: 6px; font: 800 12.5px var(--mono); transition: transform .3s var(--spring), filter .2s; }
 .btn svg.i { width: 14px; height: 14px; }
 .btn:active { transform: scale(.96); }
-.btn.pri { background: linear-gradient(135deg, #fabd2f, #f5a623); color: #1d2021; box-shadow: 0 6px 24px rgba(250,189,47,.18); }
+.btn.pri { background: linear-gradient(135deg, #e07a4f, #f0a070); color: #1d2021; box-shadow: 0 6px 24px rgba(224,122,79,.18); }
 .btn.pri svg.i { fill: #1d2021; }
 .btn.pri:hover { filter: brightness(1.08); }
 .btn.sec { background: #32302f; color: var(--g-fg2); border: 1px solid #504945; }
@@ -123,7 +123,7 @@ svg.i { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-widt
 #drawer .mp { font-size: 10px; padding: 1px 7px; }
 
 /* ---------- toast (fallback when the look has no notify) ---------- */
-.toast { position: fixed; z-index: 120; right: 16px; top: 44px; transform: translateX(30px); opacity: 0; transition: .45s var(--spring); background: rgba(29,32,33,.94); color: #d5c4a1;
+.toast { position: fixed; z-index: 120; right: 16px; top: 44px; transform: translateX(30px); opacity: 0; transition: .45s var(--spring); background: rgba(20,22,23,.95); color: #d5c4a1;
   padding: 9px 14px; border-radius: 6px 9px 9px 6px; border: 1px solid rgba(235,219,178,.2); border-left: 3px solid #8ec07c; font: 600 12px var(--mono); box-shadow: 0 20px 50px rgba(0,0,0,.5); max-width: 360px; }
 .toast.show { transform: none; opacity: 1; }
 .toast code { display: block; font: 11px var(--mono); color: #a89984; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -271,9 +271,9 @@ function renderDrawer() {
     <div class="dw-b scroll">
       <div class="kpis"><div><span class="cap">Schritte</span><b>${s.nodes.length}</b></div><div><span class="cap">Agents</span><b>${1 + n}</b></div><div><span class="cap">Kosten</span><b>${usd(s.cost?.usd)}</b></div><div><span class="cap">Dateien</span><b>${s.files.length}</b></div></div>
       <div><div class="dw-lbl"><span>Wer hat gearbeitet</span><span>${n ? "Agent anklicken" : "nur Claude"}</span></div>
-        <div class="dw-graph" style="height:${H}px"><svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><defs><linearGradient id="gd" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#fabd2f"/><stop offset="1" stop-color="#d3869b"/></linearGradient></defs>
+        <div class="dw-graph" style="height:${H}px"><svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><defs><linearGradient id="gd" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#e07a4f"/><stop offset="1" stop-color="#d3869b"/></linearGradient></defs>
           ${pos.map((p, i) => `<path class="draw" style="--i:${i};--len:400" id="dth${i}" d="M${cx},${cy} C${cx},${cy + 60} ${p.x},${p.y - 70} ${p.x},${p.y - 20}" fill="none" stroke="url(#gd)" stroke-width="2"/>
-            <circle r="3" fill="#fff1c4"><animateMotion dur="${2 + i * .25}s" repeatCount="indefinite" begin="${1 + i * .15}s"><mpath href="#dth${i}"/></animateMotion></circle>`).join("")}</svg>
+            <circle r="3" fill="#ffd6c2"><animateMotion dur="${2 + i * .25}s" repeatCount="indefinite" begin="${1 + i * .15}s"><mpath href="#dth${i}"/></animateMotion></circle>`).join("")}</svg>
           <div class="gnode main in" style="left:50%;top:${cy / H * 100}%"><span class="orb">${ic("bot")}</span><b>${esc(s.agentName || "Claude")}</b></div>
           ${s.agents.map((x, i) => `<button class="gnode in ${x.id === dw.agent ? "on" : ""}" style="--i:${i + 3};left:${pos[i].x / W * 100}%;top:${pos[i].y / H * 100}%" data-dagent="${x.id}"><span class="orb">${ic("bot")}</span><b>${esc(aName(x.type))}</b><small>${esc(x.description || "")}</small></button>`).join("")}
           ${n ? "" : `<div class="cap" style="position:absolute;left:0;right:0;bottom:30px;text-align:center">Claude hat hier allein gearbeitet.</div>`}
