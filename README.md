@@ -34,7 +34,7 @@ bun run demo       # mit erfundenen Demo-Daten (für Screenshots)
 
 **Dashboard:** Prompt-Feld „Was soll Claude tun?“ (`i` schreiben, `Tab` wechselt das Ziel zwischen laufenden Agenten und neuen Sessions, `Cmd Enter` schickt ab), „Braucht dich“ mit Agenten, die auf eine Antwort warten (Ja/Nein direkt beantworten), ein kleiner Live-Graph und die Statistik. Über `⚙ Widgets` schaltest du einzelne Bausteine an und aus oder wählst `kompakt`, `standard` oder `voll`.
 
-**Agenten-Graph** (`g` auf dem Dashboard, `Space g`, `:Graph`): Projekte, Agenten, ihre Helfer und die Dateien, an denen sie gerade arbeiten, mit Linien verbunden. Grün arbeitet, gelb wartet auf dich, rot hatte einen Fehler. `j`/`k` wählt einen Agenten, rechts steht, was er zuletzt getan hat; `Enter` öffnet ihn im Editor, `o` im Terminal, `i` schreibt ihm einen Prompt. Den Zustand liest die App aus den Session-Dateien: zuletzt ein Werkzeug-Aufruf und vor weniger als 90 Sekunden geschrieben heißt „arbeitet“, eine fertige Antwort in den letzten 30 Minuten heißt „wartet auf dich“.
+**Agenten-Graph** (`g` auf dem Dashboard, `Space g`, `:Graph`): Projekte, Agenten, ihre Helfer und die Dateien, an denen sie gerade arbeiten, mit Linien verbunden. Grün arbeitet, orange wartet auf dich, rot hatte einen Fehler. `j`/`k` wählt einen Agenten, rechts steht, was er zuletzt getan hat; `Enter` öffnet ihn im Editor, `o` im Terminal, `i` schreibt ihm einen Prompt. Den Zustand liest die App aus den Session-Dateien: zuletzt ein Werkzeug-Aufruf und vor weniger als 90 Sekunden geschrieben heißt „arbeitet“, eine fertige Antwort in den letzten 30 Minuten heißt „wartet auf dich“.
 
 ![Agenten-Graph](docs/screenshots/graph.png)
 
