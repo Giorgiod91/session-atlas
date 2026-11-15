@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Orca ablösen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg0:#1d2021; --bg:#282828; --bg1:#32302f; --bg2:#3c3836; --bg3:#504945; --bg4:#665c54;
+  --fg:#ebdbb2; --fg2:#d5c4a1; --fg3:#bdae93; --fg4:#a89984; --gr:#928374;
+  --re:#fb4934; --gn:#b8bb26; --ye:#fabd2f; --bl:#83a598; --pu:#d3869b; --aq:#8ec07c; --or:#fe8019;
+  --mono:"JetBrains Mono", Menlo, monospace;
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:#111213; color:var(--fg2); font:500 12.5px/1.5 var(--mono); padding:22px 16px 40px; }
+button { font:inherit; color:inherit; background:none; border:0; cursor:pointer; }
+kbd { font:700 10px var(--mono); color:var(--fg4); background:rgba(235,219,178,.06); border:1px solid rgba(235,219,178,.16); border-bottom-width:2px; border-radius:4px; padding:0 4px; }
+.wrap { max-width:1320px; margin:0 auto; }
+h1 { color:var(--fg); font-size:17px; }
+.lead { color:var(--gr); margin:4px 0 16px; max-width:820px; }
+.filters { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:18px; }
+.filters button { padding:4px 11px; border-radius:20px; border:1px solid #2a2c2d; color:var(--fg4); }
+.filters button.on { background:var(--ye); color:var(--bg0); border-color:var(--ye); font-weight:700; }
+.grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(380px, 1fr)); gap:14px; }
+.card { background:var(--bg0); border:1px solid #2a2c2d; border-radius:12px; overflow:hidden; display:flex; flex-direction:column; }
+.card.pick { border-color:var(--ye); box-shadow:0 0 0 3px rgba(250,189,47,.12); }
+.mock { height:190px; background:#191b1c; border-bottom:1px solid #2a2c2d; position:relative; overflow:hidden; padding:14px; font-size:11.5px; }
+.body { padding:12px 14px 14px; display:flex; flex-direction:column; gap:6px; flex:1; }
+.body h3 { color:var(--fg); font-size:13.5px; display:flex; align-items:center; gap:8px; }
+.body h3 .n { color:var(--bg0); background:var(--ye); border-radius:4px; padding:0 6px; font-size:11px; }
+.body p { color:var(--fg3); }
+.tags { display:flex; gap:6px; flex-wrap:wrap; margin-top:auto; padding-top:6px; }
+.tag { font-size:10.5px; padding:1px 8px; border-radius:20px; background:#26282a; color:var(--fg4); }
+.tag.e1 { color:var(--aq); } .tag.e2 { color:var(--ye); } .tag.e3 { color:var(--or); }
+.tag.d { color:var(--bl); }
+.want { margin-left:auto; border:1px solid var(--bg3); border-radius:6px; padding:2px 10px; font-size:11px; color:var(--fg3); }
+.card.pick .want { background:var(--ye); color:var(--bg0); border-color:var(--ye); font-weight:700; }
+.summary { position:sticky; bottom:12px; margin:22px auto 0; max-width:1320px; background:#252728; border:1px solid var(--bg3); border-radius:10px; padding:10px 14px; display:flex; gap:10px; align-items:center; flex-wrap:wrap; box-shadow:0 18px 50px rgba(0,0,0,.5); }
+.summary[hidden] { display:none; }
+.summary b { color:var(--fg); } .summary .list { color:var(--fg3); flex:1; min-width:200px; }
+.summary button { background:var(--ye); color:var(--bg0); font-weight:800; border-radius:7px; padding:5px 12px; }
+
+/* shared mock bits */
+.dot { width:8px; height:8px; border-radius:50%; display:inline-block; flex:none; background:var(--c, var(--gr)); }
+.run { --c:var(--aq); } .wait { --c:var(--ye); } .err { --c:var(--re); }
+.row { display:flex; align-items:center; gap:8px; height:22px; }
+.dim { color:var(--gr); } .ell { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; }
+.tg { font-weight:700; padding:0 5px; border-radius:3px; font-size:10px; color:var(--bg0); background:var(--tc); }
+.btn { border:1px solid var(--bg3); border-radius:5px; padding:1px 8px; font-size:10.5px; color:var(--fg2); }
+.btn.y { background:var(--ye); color:var(--bg0); border-color:var(--ye); font-weight:700; }
+.bar { height:6px; border-radius:3px; background:var(--bg2); overflow:hidden; } .bar i { display:block; height:100%; background:var(--c); }
+.win { background:var(--bg0); border:1px solid var(--bg2); border-radius:8px; padding:8px 10px; }
+.mh { color:var(--gr); font-style:italic; margin-bottom:6px; } .mh b { color:var(--fg3); font-style:normal; }
+
+/* 1 notification */
+.notif { position:absolute; right:14px; top:14px; width:250px; background:rgba(50,48,47,.96); border-radius:12px; padding:10px 12px; box-shadow:0 12px 30px rgba(0,0,0,.5); font-family:-apple-system, system-ui, sans-serif; font-size:12px; color:#eee; animation:drop 3s ease-in-out infinite; }
+
+/* keyboard focus + hints */
+.card.kf { outline:2px solid var(--aq); outline-offset:2px; }
+.hint { position:absolute; z-index:5; background:var(--ye); color:var(--bg0); font-weight:800; font-size:11px; padding:0 5px; border-radius:3px; box-shadow:0 2px 8px rgba(0,0,0,.5); }
+.keys { display:flex; gap:14px; flex-wrap:wrap; color:var(--gr); margin:-6px 0 16px; }
+.help { position:fixed; inset:0; background:rgba(0,0,0,.6); display:flex; align-items:center; justify-content:center; z-index:20; }
+.help[hidden] { display:none; }
+.help .box { background:var(--bg0); border:1px solid var(--bg3); border-radius:12px; padding:16px 18px; display:grid; grid-template-columns:auto 1fr; gap:6px 14px; }
+.help .box h4 { grid-column:1/-1; color:var(--fg); }
+
+/* 1 worktrees */
+.wt { display:grid; grid-template-columns:14px 140px 1fr auto; gap:8px; align-items:center; height:25px; }
+/* 2 kanban */
+.kb { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; height:100%; }
+.kb > div { background:#1f2122; border-radius:6px; padding:5px; display:flex; flex-direction:column; gap:4px; }
+.kb h5 { font-size:10px; color:var(--gr); font-weight:700; }
+.kb .k { background:var(--bg1); border-radius:4px; padding:3px 5px; font-size:10px; color:var(--fg2); border-left:0; display:flex; gap:5px; align-items:center; }
+.kb .k.sel { outline:1px solid var(--ye); }
+/* 4 split terminals */
+.tiles { display:grid; grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr; gap:5px; height:142px; }
+.tiles > div { background:#101112; border:1px solid var(--bg2); border-radius:5px; padding:4px 6px; font-size:10px; overflow:hidden; color:var(--fg4); }
+.tiles > div.on { border-color:var(--ye); }
+.tiles b { color:var(--fg3); font-size:10px; display:flex; gap:5px; align-items:center; }
+.cur { display:inline-block; width:6px; height:11px; background:var(--fg); vertical-align:-2px; animation:blink 1s steps(1) infinite; }
+@keyframes blink { 50% { opacity:0; } }
+/* 6 chain */
+.chain { display:flex; align-items:center; gap:0; margin-top:26px; }
+.chain .st { flex:1; text-align:center; border:1px solid var(--bg3); border-radius:8px; padding:8px 4px; background:var(--bg0); }
+.chain .st small { display:block; white-space:nowrap; color:var(--gr); font-size:10px; }
+.chain .st.act { border-color:var(--aq); animation:pulse 1.6s ease-in-out infinite; }
+.chain .ar { width:26px; height:2px; background:var(--bg3); position:relative; }
+.chain .ar.done { background:var(--aq); }
+@keyframes pulse { 50% { box-shadow:0 0 0 4px rgba(142,192,124,.15); } }
+/* 7 mission */
+.mc { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; }
+.mc > div { background:#101112; border:1px solid var(--bg2); border-radius:6px; padding:5px 7px; height:76px; font-size:10px; display:flex; flex-direction:column; gap:2px; overflow:hidden; }
+.mc .t { color:var(--fg); font-weight:700; display:flex; gap:5px; align-items:center; }
+.mc .ln2 { color:var(--fg4); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+/* 8 gantt */
+.gt { display:grid; grid-template-columns:110px 1fr; gap:5px 8px; align-items:center; position:relative; }
+.gt .tr { position:relative; height:12px; background:#1f2122; border-radius:3px; }
+.gt .tr i { position:absolute; top:0; bottom:0; border-radius:3px; background:var(--c); opacity:.85; }
+.now { position:absolute; top:-4px; bottom:-4px; width:2px; background:var(--ye); }
+/* 9 statusline */
+.sl { position:absolute; left:0; right:0; bottom:0; height:24px; background:var(--bg1); display:flex; align-items:center; font-size:10.5px; }
+.sl > span { white-space:nowrap; padding:0 6px; height:100%; display:flex; align-items:center; gap:5px; }
+.sl .m { background:var(--aq); color:var(--bg0); font-weight:800; }
+.term { color:var(--fg4); font-size:10.5px; line-height:1.55; }
+/* 10 spotlight */
+.desk { position:absolute; inset:0; background:linear-gradient(135deg,#2b3a4a,#3b2b3f); }
+.desk .app { position:absolute; left:20px; top:18px; right:60px; bottom:30px; background:#f3f3f3; border-radius:8px; opacity:.35; }
+.spot { position:absolute; left:50%; top:46px; transform:translateX(-50%); width:82%; background:rgba(40,40,40,.97); border-radius:12px; padding:9px 12px; box-shadow:0 20px 50px rgba(0,0,0,.55); }
+.spot .q { color:var(--fg); font-size:12.5px; } .spot .q b { color:var(--ye); }
+.spot .to { color:var(--gr); font-size:10.5px; margin-top:5px; display:flex; gap:8px; align-items:center; }
+/* 11 hints */
+.hui { position:relative; display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.hui .el { background:var(--bg1); border-radius:5px; padding:6px 8px; position:relative; color:var(--fg3); font-size:10.5px; }
+.hui .el .h { position:absolute; left:-4px; top:-7px; background:var(--ye); color:var(--bg0); font-weight:800; font-size:10px; padding:0 4px; border-radius:3px; }
+.hui .el.hit { outline:1px solid var(--ye); }
+/* 12 tabs numbers */
+.tabs { display:flex; gap:3px; }
+.tabs > span { white-space:nowrap; background:var(--bg1); border-radius:5px 5px 0 0; padding:3px 8px; font-size:10.5px; display:flex; gap:5px; align-items:center; color:var(--fg4); }
+.tabs > span.on { background:var(--bg2); color:var(--fg); }
+.tabs kbd { font-size:9px; }
+/* 14 cheatsheet */
+.kbd-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:4px 10px; font-size:10.5px; }
+.kbd-grid div { display:flex; gap:6px; align-items:center; white-space:nowrap; overflow:hidden; }
+.kbd-grid h6 { grid-column:span 1; color:var(--ye); font-size:10.5px; }
+/* 15 keymap */
+.cfg div { white-space:pre; font-size:11px; color:var(--fg3); } .cfg .c { color:var(--gr); } .cfg .s { color:var(--gn); } .cfg .k2 { color:var(--bl); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Orca ablösen: Übersicht und alles per Tastatur</h1>
+  <p class="lead">Neue Ideen, damit Session Atlas Orca ersetzen kann: viele Agenten parallel, jeder in eigenem Worktree, eine Übersicht wie eine Leitstelle und eine Bedienung komplett ohne Maus. <b>Diese Seite selbst geht schon nur mit Tastatur</b>, probier es aus:</p>
+  <div class="keys"><span><kbd>h</kbd><kbd>j</kbd><kbd>k</kbd><kbd>l</kbd> bewegen</span><span><kbd>Space</kbd> will ich</span><span><kbd>f</kbd> Sprung-Buchstaben</span><span><kbd>1</kbd>-<kbd>4</kbd> Filter</span><span><kbd>y</kbd> Liste kopieren</span><span><kbd>?</kbd> alle Tasten</span></div>
+  <div class="filters" id="filters"></div>
+  <div class="grid" id="grid"></div>
+</div>
+<div class="summary" id="summary" hidden><b id="cnt"></b><span class="list" id="list"></span><button id="copy">Liste kopieren <kbd>y</kbd></button></div>
+<div class="help" id="help" hidden><div class="box"><h4>Tasten auf dieser Seite</h4>
+  <kbd>h j k l</kbd><span>zwischen den Karten bewegen</span><kbd>Space</kbd><span>„will ich“ an/aus</span><kbd>f</kbd><span>Buchstaben auf jeder Karte, tippen springt hin</span>
+  <kbd>1 2 3 4</kbd><span>Filter: Alle, Orca ablösen, Übersicht, Ohne Maus</span><kbd>y</kbd><span>Auswahl kopieren</span><kbd>Esc</kbd><span>schließen</span></div></div>
+
+<script>
+const R = (n, t, s = "run") => `<span class="dot ${s}"></span>`;
+const IDEAS = [
+{ cat:"Orca ablösen", t:"Eigener Worktree pro Agent", p:"Jeder neue Agent bekommt automatisch einen eigenen Git-Worktree und Branch. Mehrere Agenten im selben Projekt kommen sich so nie in die Quere. Die Liste zeigt pro Worktree Status, Änderungen und ob er schon gemerged ist.", e:2, d:"neu (git worktree)",
+  mock:`<div class="mh">-- <b>Worktrees</b> · rezept-app</div>
+  ${[["run","wt/csv-export","Agent A · Edit src/export.ts","+84 -3"],["run","wt/tippfehler","Agent B · bun test","+61 -2"],["wait","wt/dark-mode","wartet auf dich","+22 -9"],["","main","sauber","↑0"]].map(([s,b,x,d])=>`<div class="wt"><span class="dot ${s}"></span><span style="color:var(--ye)">⑂ ${b}</span><span class="ell dim">${x}</span><span class="dim">${d}</span></div>`).join("")}
+  <div class="dim" style="margin-top:8px"><kbd>c</kbd> neuer Agent + Worktree · <kbd>dd</kbd> Worktree entfernen</div>` },
+{ cat:"Orca ablösen", t:"Aufgaben-Board", p:"Aufgaben als Karten in Spalten: Geplant, Läuft, Review, Fertig. Schiebst du eine Karte nach „Läuft“, startet ein Agent damit. Ist er fertig, wandert die Karte von selbst in „Review“.", e:2, d:"neu speichern",
+  mock:`<div class="kb">${[["Geplant",[["","CSV-Export"],["","Bilder-Upload"],["","Frost-Alarm"]]],["Läuft",[["run","Tippfehler-Suche"],["run","Setup-Skript"]]],["Review",[["wait","Dark Mode",1]]],["Fertig",[["","README"],["","Lighthouse"]]]].map(([h,ks])=>`<div><h5>${h} ${ks.length}</h5>${ks.map(([s,t,sel])=>`<div class="k ${sel?"sel":""}">${s?`<span class="dot ${s}"></span>`:""}<span class="ell">${t}</span></div>`).join("")}</div>`).join("")}</div>` },
+{ cat:"Orca ablösen", t:"Review und Merge", p:"Ist ein Agent fertig, siehst du den Diff seines Worktrees, das Testergebnis und eine kurze Zusammenfassung. Dann mit einer Taste mergen, verwerfen oder mit einem Satz zurückschicken („mach die Fehlermeldung freundlicher“).", e:2, d:"Daten da + git",
+  mock:`<div class="mh">-- <b>wt/dark-mode</b> · 3 Dateien · Tests grün</div><div class="code"><div> :root {</div><div class="de">-  --bg: #fff;</div><div class="ad">+  --bg: light-dark(#fff, #1d2021);</div><div class="ad">+  color-scheme: light dark;</div><div> }</div></div>
+  <div class="row" style="margin-top:10px"><button class="btn y"><kbd>m</kbd> mergen</button><button class="btn"><kbd>r</kbd> zurückschicken</button><button class="btn"><kbd>x</kbd> verwerfen</button></div>` },
+{ cat:"Orca ablösen", t:"Kachel-Terminals", p:"Zwei bis vier Agenten-Terminals gleichzeitig nebeneinander, wie tmux. Mit Ctrl-w und h j k l wechselst du zwischen den Kacheln, mit Ctrl-w z holst du eine auf Vollbild.", e:2, d:"Terminal da",
+  mock:`<div class="tiles">${[["run","Tippfehler-Suche","● Edit tests/search.test.ts<br>● Bash bun test search",1],["run","Setup-Skript","● Bash brew bundle<br>  Ghostty installiert",0],["wait","Dark Mode","Soll ich auch die Bilder<br>abdunkeln? (j/n)",0],["","neue Session","&gt; ",0]].map(([s,t,x,on])=>`<div class="${on?"on":""}"><b>${s?`<span class="dot ${s}"></span>`:""}${t}</b>${x}${on||t==="neue Session"?'<span class="cur"></span>':""}</div>`).join("")}</div>
+  <div class="dim" style="margin-top:6px"><kbd>Ctrl-w</kbd> <kbd>l</kbd> nächste Kachel · <kbd>Ctrl-w</kbd> <kbd>z</kbd> Vollbild</div>` },
+{ cat:"Orca ablösen", t:"Warteschlange", p:"Aufträge vormerken, auch zehn auf einmal. Es laufen höchstens so viele Agenten gleichzeitig, wie du einstellst; wird einer fertig, startet automatisch der nächste. Gut für abends: Liste füllen, morgens Review.", e:2, d:"neu bauen",
+  mock:`<div class="row"><span class="dim">läuft</span><b style="color:var(--aq)">3 / 3</b><div class="bar" style="--c:var(--aq);flex:1"><i style="width:100%"></i></div></div>
+  <div class="mh" style="margin-top:8px">-- <b>Als Nächstes</b></div>
+  ${["Bilder-Upload mit Vorschau","Frost-Alarm per Push","Monatsbericht als PDF","Strava-Export"].map((t,i)=>`<div class="row"><span style="color:var(--ye);width:14px">${i+1}</span><span class="ell">${t}</span><span class="dim" style="margin-left:auto">${["rezept-app","wetterstation","haushaltsbuch","fahrrad-tracker"][i]}</span></div>`).join("")}` },
+{ cat:"Orca ablösen", t:"Agenten-Kette", p:"Mehrere Agenten hintereinander schalten: einer plant, einer baut, einer prüft. Das Ergebnis des einen ist der Auftrag des nächsten. Du greifst nur ein, wenn der Prüfer etwas findet.", e:3, d:"neu bauen",
+  mock:`<div class="win"><span class="dim">Auftrag:</span> Kontaktformular gegen Spam absichern</div>
+  <div class="chain"><div class="st">Planen<small>Opus · fertig</small></div><div class="ar done"></div><div class="st act">Bauen<small>Sonnet · läuft</small></div><div class="ar"></div><div class="st">Prüfen<small>Opus · wartet</small></div><div class="ar"></div><div class="st">Du<small>mergen</small></div></div>` },
+{ cat:"Übersicht", t:"Leitstelle", p:"Ein Vollbild mit allen laufenden Agenten als Kacheln. Jede zeigt live die letzte Aktion, den Kontext-Füllstand und die Kosten. Wer wartet, rückt nach vorn. Ideal auf einem zweiten Bildschirm.", e:2, d:"Daten da",
+  mock:`<div class="mc">${[["wait","Dark Mode","Frage: Bilder abdunkeln?","72%"],["run","Tippfehler","Bash bun test search","38%"],["run","Setup-Skript","Edit Brewfile +2","64%"],["run","CSV-Export","Read src/recipes.ts","21%"],["err","MQTT","npm test · 3 rot","55%"],["","frei","c startet neuen Agent",""]].map(([s,t,l,c])=>`<div style="${s==="wait"?"border-color:var(--ye)":""}"><span class="t">${s?`<span class="dot ${s}"></span>`:""}${t}</span><span class="ln2">${l}</span>${c?`<div class="bar" style="--c:${parseInt(c)>70?"var(--ye)":"var(--aq)"};margin-top:auto"><i style="width:${c}"></i></div><span class="dim">${c} Kontext</span>`:""}</div>`).join("")}</div>` },
+{ cat:"Übersicht", t:"Live-Zeitachse", p:"Alle Agenten des Tages als Balken auf einer Zeitachse, mit gelber Jetzt-Linie. Man sieht sofort, was parallel lief, wer lange gebraucht hat und wo du Pausen hattest.", e:1, d:"Daten da",
+  mock:`<div class="mh">-- <b>Heute</b> · 08:00 bis jetzt</div><div class="gt">
+  ${[["Tippfehler-Suche",[[5,30],[62,30]],"var(--aq)"],["Setup-Skript",[[40,52]],"var(--aq)"],["Dark Mode",[[20,25],[70,18]],"var(--ye)"],["MQTT",[[10,20]],"var(--re)"],["CSV-Export",[[78,14]],"var(--aq)"]].map(([n,bs,c])=>`<span class="ell">${n}</span><div class="tr" style="--c:${c}">${bs.map(([l,w])=>`<i style="left:${l}%;width:${w}%"></i>`).join("")}<span class="now" style="left:92%"></span></div>`).join("")}
+  </div><div class="dim" style="margin-top:10px;text-align:right">gelb = jetzt</div>` },
+{ cat:"Übersicht", t:"Statuszeile überall", p:"Eine Zeile ganz unten, auch im Vollbild-Terminal: alle Agenten mit Nummer und Farbe. Du siehst immer, wer arbeitet und wer wartet, ohne die Ansicht zu wechseln.", e:1, d:"Daten da",
+  mock:`<div class="term">~/code/rezept-app on feat/suche<br>&gt; claude --resume<br>● Edit src/search.ts (+12 -3)<br>● Bash bun test search<br>  23 passed, 1 failed<span class="cur"></span></div>
+  <div class="sl"><span class="m">TERMINAL</span><span><b>1</b><span class="dot run"></span>Tippfehler</span><span><b>2</b><span class="dot wait"></span>Dark Mode</span><span><b>3</b><span class="dot run"></span>Setup</span><span><b>4</b><span class="dot err"></span>MQTT</span><span style="margin-left:auto;color:var(--gr)">$6.12</span></div>` },
+{ cat:"Ohne Maus", t:"Schnell-Prompt von überall", p:"Eine systemweite Taste (z. B. ⌥ Space) öffnet ein kleines Prompt-Fenster über jeder App, wie Spotlight. Tippen, mit Tab das Ziel wählen, Enter schickt ab. Atlas muss dafür nicht vorne sein.", e:2, d:"Electron kann das",
+  mock:`<div class="desk"><div class="app"></div></div><div class="spot"><div class="q"><b>›</b> schreib Tests für den CSV-Export<span class="cur"></span></div><div class="to">an <span class="tg" style="--tc:var(--aq)">CSV-Export</span> <kbd>Tab</kbd> anderes Ziel <span style="margin-left:auto"><kbd>⌥</kbd> <kbd>Space</kbd></span></div></div>` },
+{ cat:"Ohne Maus", t:"Sprung-Buchstaben", p:"Drück f, und auf allem, was man anklicken kann, erscheint ein Buchstabe, wie bei Vimium im Browser. Buchstaben tippen ist dasselbe wie klicken. Damit ist jede Schaltfläche ohne Maus erreichbar. Auf dieser Seite schon eingebaut.", e:1, d:"neu bauen",
+  mock:`<div class="hui">${[["a","Weitermachen"],["s","Ab hier weitermachen",1],["d","Im Terminal öffnen"],["f","Notiz an Claude"],["g","Agent: Dark Mode"],["h","Widgets"]].map(([k,t,hit])=>`<div class="el ${hit?"hit":""}"><span class="h">${k}</span>${t}</div>`).join("")}</div><div class="dim" style="margin-top:10px">getippt: <b style="color:var(--ye)">s</b> → „Ab hier weitermachen“</div>` },
+{ cat:"Ohne Maus", t:"Agenten-Nummern und Sprünge", p:"Jeder laufende Agent hat eine feste Nummer. ⌘1 bis ⌘9 springt direkt hin, egal wo du bist. ]w springt zum nächsten Agenten, der auf dich wartet, ]e zum nächsten mit Fehler.", e:1, d:"Daten da",
+  mock:`<div class="tabs">${[["1","run","Tippfehler",1],["2","wait","Dark Mode"],["3","run","Setup"],["4","err","MQTT"]].map(([n,s,t,on])=>`<span class="${on?"on":""}"><kbd>⌘${n}</kbd><span class="dot ${s}"></span>${t}</span>`).join("")}</div>
+  <div class="win" style="border-radius:0 6px 6px 6px">${[["⌘1 … ⌘9","direkt zum Agenten"],["]w  [w","nächster / voriger wartender"],["]e  [e","nächster / voriger mit Fehler"],["Ctrl-^","zurück zum letzten Agenten"]].map(([k,t])=>`<div class="row"><b style="color:var(--ye);width:90px">${k}</b><span class="dim">${t}</span></div>`).join("")}</div>` },
+{ cat:"Ohne Maus", t:"Marken für Lieblings-Sessions", p:"Wie Harpoon in Neovim: ma setzt eine Marke a auf die Session unter dem Cursor, 'a springt von überall dorthin. Vier, fünf Marken reichen für alles, woran du diese Woche arbeitest.", e:1, d:"neu speichern",
+  mock:`<div class="mh">-- <b>Marken</b></div>${[["a","Tippfehler-Suche","rezept-app"],["s","Setup-Skript","dotfiles"],["d","Dark Mode","rezept-app"],["f","MQTT Sensoren","wetterstation"]].map(([k,t,p],i)=>`<div class="row" style="${i===2?"background:var(--bg1);border-radius:4px":""}"><b style="color:var(--ye);width:28px">'${k}</b><span class="ell">${t}</span><span class="dim" style="margin-left:auto">${p}</span></div>`).join("")}
+  <div class="dim" style="margin-top:8px"><kbd>m</kbd><kbd>a</kbd> setzen · <kbd>'</kbd><kbd>a</kbd> springen</div>` },
+{ cat:"Ohne Maus", t:"Tastatur-Karte", p:"? zeigt in jeder Ansicht genau die Tasten, die dort gehen, gruppiert nach Bewegen, Agenten und Aktionen. So lernst du die Tasten nebenbei. Space zeigt wie jetzt schon die Leader-Befehle.", e:1, d:"teils da",
+  mock:`<div class="kbd-grid"><h6>Bewegen</h6><h6>Agenten</h6><h6>Aktionen</h6>
+  ${[["j k","hoch/runter"],["i","Prompt"],["m","mergen"],["g g","nach oben"],["o","Terminal"],["r","zurückschicken"],["/","suchen"],["]w","wartet"],["c","neuer Agent"],["f","springen"],["⌘1","Agent 1"],["y","kopieren"]].map(([k,t])=>`<div><kbd>${k}</kbd><span class="dim">${t}</span></div>`).join("")}</div>` },
+{ cat:"Ohne Maus", t:"Eigene Tastenbelegung", p:"Alle Tasten in einer Datei, die du selbst ändern kannst, wie eine Neovim-Config. Die App liest sie beim Start und zeigt Konflikte an.", e:1, d:"neu bauen",
+  mock:`<div class="cfg"><div class="c">-- ~/.session-atlas/keys.lua</div><div><span class="k2">map</span>(<span class="s">"&lt;leader&gt;g"</span>, <span class="s">"graph"</span>)</div><div><span class="k2">map</span>(<span class="s">"]w"</span>, <span class="s">"next_waiting"</span>)</div><div><span class="k2">map</span>(<span class="s">"&lt;M-Space&gt;"</span>, <span class="s">"quick_prompt"</span>, { global = true })</div><div><span class="k2">map</span>(<span class="s">"m"</span>, <span class="s">"merge"</span>, { view = <span class="s">"review"</span> })</div><div class="c">-- Konflikte: keine</div></div>` },
+];
+const EFF = { 1:["klein","e1"], 2:["mittel","e2"], 3:["groß","e3"] };
+const KEY = "orca.picks";
+let cat = "Alle", picks = new Set(), kf = 0, hinting = false;
+try { picks = new Set(JSON.parse(localStorage.getItem(KEY) || "[]")); } catch {}
+const cats = ["Alle", ...new Set(IDEAS.map((i) => i.cat))];
+const cards = () => [...document.querySelectorAll(".card")];
+function render() {
+  document.getElementById("filters").innerHTML = cats.map((c, n) => `<button class="${c === cat ? "on" : ""}" data-c="${c}"><kbd>${n + 1}</kbd> ${c}${c === "Alle" ? "" : " · " + IDEAS.filter((i) => i.cat === c).length}</button>`).join("");
+  document.getElementById("grid").innerHTML = IDEAS.map((x, i) => ({ x, i })).filter(({ x }) => cat === "Alle" || x.cat === cat).map(({ x, i }) => `
+    <div class="card ${picks.has(i) ? "pick" : ""}" data-i="${i}"><div class="mock">${x.mock}</div><div class="body"><h3><span class="n">${i + 1}</span>${x.t}</h3><p>${x.p}</p>
+      <div class="tags"><span class="tag">${x.cat}</span><span class="tag ${EFF[x.e][1]}">Aufwand: ${EFF[x.e][0]}</span><span class="tag d">${x.d}</span><button class="want" data-i="${i}">${picks.has(i) ? "✓ will ich" : "will ich"}</button></div></div></div>`).join("");
+  const s = document.getElementById("summary"); s.hidden = !picks.size;
+  document.getElementById("cnt").textContent = `${picks.size} gewählt:`;
+  document.getElementById("list").textContent = [...picks].sort((a, b) => a - b).map((i) => `${i + 1}. ${IDEAS[i].t}`).join(" · ");
+  try { localStorage.setItem(KEY, JSON.stringify([...picks])); } catch {}
+  focusCard(Math.min(kf, cards().length - 1), false);
+}
+function focusCard(n, scroll = true) {
+  const cs = cards(); if (!cs.length) return; kf = Math.max(0, n);
+  cs.forEach((c, k) => c.classList.toggle("kf", k === kf));
+  if (scroll) cs[kf].scrollIntoView({ block: "nearest", behavior: "smooth" });
+}
+function move(dx, dy) {
+  const cs = cards(), a = cs[kf].getBoundingClientRect(), ax = a.left + a.width / 2, ay = a.top + a.height / 2;
+  let best = -1, bd = Infinity;
+  cs.forEach((c, k) => {
+    if (k === kf) return; const r = c.getBoundingClientRect(), x = r.left + r.width / 2 - ax, y = r.top + r.height / 2 - ay;
+    if (dx && Math.sign(x) !== dx) return; if (dy && Math.sign(y) !== dy) return;
+    if (dx && Math.abs(y) > 20) return;
+    const d = dx ? Math.abs(x) : Math.abs(y) * 10 + Math.abs(x);
+    if (d < bd) { bd = d; best = k; }
+  });
+  if (best >= 0) focusCard(best);
+}
+function toggle(i) { picks.has(i) ? picks.delete(i) : picks.add(i); render(); }
+function copy() { navigator.clipboard?.writeText(document.getElementById("list").textContent); }
+const LET = "asdfghjklqwertzuiopyxcvbnm";
+function showHints() {
+  hinting = true;
+  cards().forEach((c, k) => { const h = document.createElement("span"); h.className = "hint"; h.textContent = LET[k]; const r = c.getBoundingClientRect();
+    h.style.left = r.left + window.scrollX + 8 + "px"; h.style.top = r.top + window.scrollY + 8 + "px"; h.style.position = "absolute"; document.body.appendChild(h); });
+}
+function clearHints() { hinting = false; document.querySelectorAll(".hint").forEach((h) => h.remove()); }
+document.addEventListener("keydown", (e) => {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  const help = document.getElementById("help");
+  if (e.key === "Escape") { help.hidden = true; clearHints(); return; }
+  if (hinting) { const k = LET.indexOf(e.key); clearHints(); if (k >= 0 && k < cards().length) focusCard(k); e.preventDefault(); return; }
+  const m = { h: [-1, 0], l: [1, 0], j: [0, 1], k: [0, -1], ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowDown: [0, 1], ArrowUp: [0, -1] }[e.key];
+  if (m) { e.preventDefault(); move(...m); return; }
+  if (e.key === " ") { e.preventDefault(); const c = cards()[kf]; if (c) toggle(+c.dataset.i); return; }
+  if (e.key === "f") { showHints(); return; }
+  if (e.key === "y") { copy(); return; }
+  if (e.key === "?") { help.hidden = !help.hidden; return; }
+  if (/^[1-4]$/.test(e.key) && cats[+e.key - 1]) { cat = cats[+e.key - 1]; kf = 0; render(); }
+});
+document.addEventListener("click", (e) => {
+  clearHints();
+  const f = e.target.closest("[data-c]"); if (f) { cat = f.dataset.c; kf = 0; render(); return; }
+  const w = e.target.closest(".want"); if (w) { toggle(+w.dataset.i); return; }
+  const c = e.target.closest(".card"); if (c) focusCard(cards().indexOf(c), false);
+});
+document.getElementById("copy").onclick = copy;
+render();
+</script>
+</body>
+</html>
