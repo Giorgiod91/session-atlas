@@ -335,7 +335,7 @@
 .lk-nvim .ag-r .mp { font-size:10px; padding:1px 7px; }
 .lk-nvim .ag-r .du { color:var(--ye); }
 .lk-nvim .ag-c { color:var(--gr); font-style:italic; padding:0 12px 0 22px; }
-.lk-nvim .ag-pt { position:absolute; left:0; top:0; width:6px; height:6px; border-radius:50%; background:#fff1c4; pointer-events:none; z-index:2;
+.lk-nvim .ag-pt { position:absolute; left:0; top:0; width:6px; height:6px; border-radius:50%; background:#ffd6c2; pointer-events:none; z-index:2;
   box-shadow:0 0 6px 2px var(--pc, #d3869b), 0 0 14px 4px color-mix(in srgb, var(--pc, #d3869b) 50%, transparent); offset-rotate:0deg; offset-anchor:50% 50%;
   animation:nvRide var(--d, 2.6s) linear infinite; animation-delay:var(--dl, 0s); }
 @keyframes nvRide { 0% { offset-distance:0%; opacity:0; } 8% { opacity:1; } 88% { opacity:1; } 100% { offset-distance:100%; opacity:0; } }
