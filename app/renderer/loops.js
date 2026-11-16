@@ -17,16 +17,16 @@
   #loops .lb .sp { flex:1; -webkit-app-region:drag; }
   #loops .lb .hk { display:flex; align-items:center; gap:10px; padding:0 14px; color:#928374; font-size:11px; }
   #loops .lm { flex:1; min-height:0; display:grid; grid-template-columns:330px minmax(0,1fr); }
-  #loops .side { border-right:1px solid #1d2021; overflow:auto; padding:8px 0; }
+  #loops .side { border-right:1px solid #141617; overflow:auto; padding:8px 0; }
   #loops .side h4 { color:#928374; font-weight:600; font-style:italic; padding:6px 14px; font-size:11.5px; }
   #loops .it { display:grid; grid-template-columns:12px minmax(0,1fr) auto; gap:4px 9px; align-items:center; padding:7px 14px; cursor:pointer; border-left:2px solid transparent; }
   #loops .it:hover { background:#16181a; }
-  #loops .it.on { background:#1d2021; border-left-color:#e07a4f; }
+  #loops .it.on { background:#141617; border-left-color:#e07a4f; }
   #loops .it .t { color:#ebdbb2; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   #loops .it .m { grid-column:2 / 4; color:#928374; font-size:11px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   #loops .it .c { color:#928374; font-size:11px; }
   #loops .empty { color:#928374; padding:14px; }
-  #loops .dot { width:8px; height:8px; border-radius:50%; background:var(--c,#665c54); display:inline-block; flex:none; }
+  #loops .dot { width:8px; height:8px; border-radius:50%; background:var(--c,#4f5458); display:inline-block; flex:none; }
   #loops .dot.live { animation:lpulse 1.2s ease-in-out infinite; }
   @keyframes lpulse { 50% { box-shadow:0 0 0 4px color-mix(in srgb, var(--c) 25%, transparent); } }
   #loops .main { overflow:auto; padding:18px 22px 40px; }
@@ -36,42 +36,42 @@
   #loops .meta { display:flex; gap:16px; flex-wrap:wrap; color:#928374; margin-bottom:16px; font-size:11.5px; }
   #loops .meta b { color:#d5c4a1; font-weight:600; }
   #loops .pipe { display:flex; align-items:center; flex-wrap:wrap; gap:6px; margin-bottom:18px; }
-  #loops .stp { border:1px solid #3c3836; background:#16181a; border-radius:10px; padding:7px 11px; min-width:120px; }
+  #loops .stp { border:1px solid #2a2d2f; background:#16181a; border-radius:10px; padding:7px 11px; min-width:120px; }
   #loops .stp b { color:#ebdbb2; display:block; } #loops .stp small { color:#928374; }
   #loops .stp.now { border-color:#e07a4f; box-shadow:0 0 0 3px rgba(224,122,79,.12); }
   #loops .stp.ok { border-color:rgba(142,192,124,.6); } #loops .stp.bad { border-color:rgba(251,73,52,.6); }
-  #loops .arr { color:#665c54; }
+  #loops .arr { color:#4f5458; }
   #loops .sec { color:#928374; font-style:italic; margin:16px 0 8px; } #loops .sec b { color:#bdae93; font-style:normal; }
   #loops .pips { display:flex; gap:5px; flex-wrap:wrap; }
-  #loops .pips i { width:22px; height:22px; border-radius:6px; display:grid; place-items:center; font-style:normal; font-size:10.5px; font-weight:800; color:#141617; background:var(--c,#3c3836); }
+  #loops .pips i { width:22px; height:22px; border-radius:6px; display:grid; place-items:center; font-style:normal; font-size:10.5px; font-weight:800; color:#141617; background:var(--c,#2a2d2f); }
   #loops .pips i.run { background:transparent; border:1.5px dashed #e07a4f; color:#e07a4f; }
-  #loops .chk { border:1px solid #282828; border-radius:8px; margin-bottom:6px; overflow:hidden; }
+  #loops .chk { border:1px solid #1b1d1e; border-radius:8px; margin-bottom:6px; overflow:hidden; }
   #loops .chk .ch { display:flex; gap:8px; align-items:center; padding:5px 10px; background:#16181a; }
   #loops .chk .ch b { color:#ebdbb2; font-weight:600; } #loops .chk .ch span:last-child { margin-left:auto; color:#928374; font-size:11px; }
   #loops .chk pre { margin:0; padding:8px 10px; max-height:180px; overflow:auto; font:11px/1.45 var(--mono); color:#bdae93; white-space:pre-wrap; background:#0b0c0c; }
-  #loops .log { background:#0b0c0c; border:1px solid #1d2021; border-radius:10px; padding:8px 10px; font-size:11.5px; max-height:300px; overflow:auto; }
-  #loops .log div { display:flex; gap:8px; padding:1px 0; } #loops .log .ts { color:#665c54; flex:none; }
+  #loops .log { background:#0b0c0c; border:1px solid #141617; border-radius:10px; padding:8px 10px; font-size:11.5px; max-height:300px; overflow:auto; }
+  #loops .log div { display:flex; gap:8px; padding:1px 0; } #loops .log .ts { color:#4f5458; flex:none; }
   #loops .log .tool { color:#83a598; } #loops .log .ok { color:#8ec07c; } #loops .log .bad, #loops .log .err { color:#f08a7c; } #loops .log .say { color:#d5c4a1; } #loops .log .start, #loops .log .done { color:#e07a4f; } #loops .log .check { color:#928374; }
   #loops .acts { display:flex; gap:8px; flex-wrap:wrap; margin-top:16px; }
-  #loops button.b { border:1px solid #3c3836; border-radius:7px; padding:4px 11px; color:#d5c4a1; background:#16181a; font:inherit; cursor:pointer; }
-  #loops button.b:hover { border-color:#665c54; }
+  #loops button.b { border:1px solid #2a2d2f; border-radius:7px; padding:4px 11px; color:#d5c4a1; background:#16181a; font:inherit; cursor:pointer; }
+  #loops button.b:hover { border-color:#4f5458; }
   #loops button.b.p { background:#e07a4f; color:#1a0f0a; border-color:#e07a4f; font-weight:800; }
   #loops .frm { display:grid; grid-template-columns:130px minmax(0,1fr); gap:10px 14px; align-items:start; max-width:860px; }
   #loops .frm label { color:#bdae93; padding-top:5px; } #loops .frm label small { display:block; color:#928374; font-size:10.5px; }
-  #loops .frm input, #loops .frm select, #loops .frm textarea { font:inherit; color:#ebdbb2; background:#16181a; border:1px solid #3c3836; border-radius:7px; padding:5px 8px; width:100%; outline:none; }
+  #loops .frm input, #loops .frm select, #loops .frm textarea { font:inherit; color:#ebdbb2; background:#16181a; border:1px solid #2a2d2f; border-radius:7px; padding:5px 8px; width:100%; outline:none; }
   #loops .frm textarea { resize:vertical; min-height:70px; }
   #loops .frm :focus { border-color:#e07a4f; box-shadow:0 0 0 3px rgba(224,122,79,.15); }
   #loops .frm .row2 { display:flex; gap:10px; } #loops .frm .row2 > * { flex:1; }
   #loops .frm .hint { color:#928374; font-size:11px; margin-top:4px; }
   #loops .frm .sugg { display:flex; gap:6px; flex-wrap:wrap; margin-top:6px; }
-  #loops .frm .sugg button { font:inherit; font-size:11px; border:1px solid #3c3836; border-radius:20px; padding:0 9px; color:#bdae93; background:none; cursor:pointer; }
+  #loops .frm .sugg button { font:inherit; font-size:11px; border:1px solid #2a2d2f; border-radius:20px; padding:0 9px; color:#bdae93; background:none; cursor:pointer; }
   #loops .err-msg { color:#f08a7c; margin-top:8px; }
   #loops .rec-steps { display:flex; flex-direction:column; gap:6px; }
   `;
   const style = document.createElement("style"); style.textContent = css; document.head.appendChild(style);
   const el = document.createElement("div"); el.id = "loops"; document.body.appendChild(el);
 
-  const COL = { "läuft": "#e07a4f", "grün": "#8ec07c", "rot": "#fb4934", "kreist": "#fabd2f", "budget": "#fabd2f", "gestoppt": "#928374", "fehler": "#fb4934", "wartet": "#504945", "fertig": "#8ec07c" };
+  const COL = { "läuft": "#e07a4f", "grün": "#8ec07c", "rot": "#fb4934", "kreist": "#e07a4f", "budget": "#e07a4f", "gestoppt": "#928374", "fehler": "#fb4934", "wartet": "#3a3e41", "fertig": "#8ec07c" };
   const TYPE = { prompt: ["Prompt", "ein Auftrag"], loop: ["Loop", "bauen bis grün"], verify: ["Prüfen", "bei Rot reparieren"] };
   const st = { open: false, tab: "runs", runs: [], recipes: [], sel: null, form: null, rsel: 0, err: "" };
   const ago = (t) => { const s = Math.round((Date.now() - t) / 1000); return s < 60 ? `${s} s` : s < 3600 ? `${Math.round(s / 60)} min` : `${Math.round(s / 3600)} h`; };
@@ -106,7 +106,7 @@
   function sideRuns() {
     if (!st.runs.length) return `<h4>-- Läufe</h4><div class="empty">Noch keine Loops. <kbd>n</kbd> startet einen.</div>`;
     return `<h4>-- Läufe</h4>` + st.runs.map((r) => { const s = r.steps[r.stepIdx] || {}; return `<div class="it ${r.id === st.sel ? "on" : ""}" data-run="${r.id}">
-      <span class="dot ${r.status === "läuft" ? "live" : ""}" style="--c:${COL[r.status] || "#665c54"}"></span><span class="t">${esc(r.task.replace(/\s+/g, " "))}</span><span class="c">$${r.cost.toFixed(2)}</span>
+      <span class="dot ${r.status === "läuft" ? "live" : ""}" style="--c:${COL[r.status] || "#4f5458"}"></span><span class="t">${esc(r.task.replace(/\s+/g, " "))}</span><span class="c">$${r.cost.toFixed(2)}</span>
       <span class="m">${esc(proj(r.cwd))} · ${esc(r.recipe.name)} · ${r.status === "läuft" ? `Schritt ${r.stepIdx + 1}/${r.steps.length}${s.iter ? `, Lauf ${s.iter}` : ""}` : esc(r.status)} · vor ${ago(r.started)}</span></div>`; }).join("");
   }
   function detailRun() {
@@ -119,7 +119,7 @@
     return `<div class="hd"><h2>${esc(r.task)}</h2><span class="badge" style="--c:${COL[r.status]}">${esc(r.status)}</span></div>
       <div class="meta"><span>Projekt <b>${esc(proj(r.cwd))}</b></span><span>Rezept <b>${esc(r.recipe.name)}</b></span><span>Kosten <b>$${r.cost.toFixed(2)}</b> von $${r.maxUsd}</span><span>max <b>${r.maxIter}</b> Läufe pro Schritt</span><span>Rechte <b>${r.perm === "bypassPermissions" ? "alles erlaubt" : "Dateien ändern"}</b></span><span>${r.ended ? `Dauer <b>${Math.max(1, Math.round((r.ended - r.started) / 60e3))} min</b>` : `läuft seit <b>${ago(r.started)}</b>`}</span></div>
       <div class="pipe">${r.steps.map((s, i) => `${i ? '<span class="arr">→</span>' : ""}<div class="stp ${i === r.stepIdx && r.status === "läuft" ? "now" : ""} ${s.status === "grün" || s.status === "fertig" ? "ok" : ["rot", "fehler", "kreist", "budget"].includes(s.status) ? "bad" : ""}"><b>${i + 1}. ${TYPE[s.type][0]}${s.model ? ` · ${s.model}` : ""}</b><small>${esc(s.status)}${s.iters.length && s.type !== "prompt" ? ` · ${s.iters.length} ${s.iters.length === 1 ? "Lauf" : "Läufe"}` : ""}</small></div>`).join("")}</div>
-      ${loopStep ? `<div class="sec">-- <b>Läufe</b> · ${TYPE[loopStep.type][0]}</div><div class="pips">${loopStep.iters.map((it) => `<i class="${it.ok == null && r.status === "läuft" ? "run" : ""}" style="--c:${it.ok ? "#8ec07c" : it.ok === false ? "#fb4934" : "#3c3836"}">${it.n}</i>`).join("")}</div>` : ""}
+      ${loopStep ? `<div class="sec">-- <b>Läufe</b> · ${TYPE[loopStep.type][0]}</div><div class="pips">${loopStep.iters.map((it) => `<i class="${it.ok == null && r.status === "läuft" ? "run" : ""}" style="--c:${it.ok ? "#8ec07c" : it.ok === false ? "#fb4934" : "#2a2d2f"}">${it.n}</i>`).join("")}</div>` : ""}
       ${lastIt ? `<div class="sec">-- <b>Prüfung</b> · Lauf ${lastIt.n}</div>${lastIt.checks.map((c) => `<div class="chk"><div class="ch"><span class="dot" style="--c:${c.ok ? "#8ec07c" : "#fb4934"}"></span><b>${esc(c.cmd)}</b><span>${c.ok ? "grün" : `Exit ${c.code}`} · ${(c.ms / 1000).toFixed(1)} s</span></div>${c.ok ? "" : `<pre>${esc(c.tail)}</pre>`}</div>`).join("")}` : ""}
       <div class="sec">-- <b>Protokoll</b></div><div class="log">${r.log.map((l) => `<div><span class="ts">${hm(l.ts)}</span><span class="${l.kind}">${l.kind === "tool" ? "● " : ""}${esc(l.text)}</span></div>`).join("")}</div>
       <div class="acts">${r.status === "läuft" ? `<button class="b" data-act="stop">Stoppen <kbd>s</kbd></button>` : `<button class="b p" data-act="again">Nochmal mit Änderungen <kbd>a</kbd></button>`}${r.sessionId ? `<button class="b" data-act="open">Session im Terminal <kbd>o</kbd></button>` : ""}<button class="b" data-act="new">Neuer Loop <kbd>n</kbd></button>${r.status !== "läuft" ? `<button class="b" data-act="del">Entfernen <kbd>x</kbd></button>` : ""}</div>`;

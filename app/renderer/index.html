@@ -51,79 +51,83 @@ svg.i { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-widt
 #stage { position: fixed; inset: 0; }
 
 /* ---------- Shared drawer: a Neovim floating window (gruvbox, title in the border) ---------- */
-#drawer { --g-bg:#141617; --g-bg1:#3c3836; --g-bg2:#504945; --g-bg3:#665c54; --g-fg:#ebdbb2; --g-fg2:#d5c4a1; --g-fg3:#bdae93; --g-fg4:#a89984; --g-gr:#928374;
-  --g-ye:#e07a4f; --g-or:#fe8019; --g-aq:#8ec07c; --g-bl:#83a598; --g-pu:#d3869b; --g-gn:#b8bb26; --g-rd:#fb4934;
+#drawer { --g-bg:#141617; --g-bg1:#2a2d2f; --g-bg2:#3a3e41; --g-bg3:#4f5458; --g-fg:#ebdbb2; --g-fg2:#d5c4a1; --g-fg3:#bdae93; --g-fg4:#a89984; --g-gr:#928374;
+  --g-ye:#e07a4f; --g-or:#f0a070; --g-aq:#8ec07c; --g-bl:#83a598; --g-pu:#d3869b; --g-gn:#b8bb26; --g-rd:#fb4934;
   position: fixed; z-index: 60; top: 22px; right: 14px; bottom: 14px; width: min(500px, calc(100vw - 28px)); display: flex; flex-direction: column;
   font: 500 12.5px/1.45 var(--mono); color: var(--g-fg2);
-  background: rgba(20,22,23,.95); border: 1px solid rgba(235,219,178,.28); border-radius: 10px; backdrop-filter: blur(18px) saturate(150%); -webkit-backdrop-filter: blur(18px) saturate(150%);
+  background: rgba(15,16,17,.96); border: 1px solid rgba(235,219,178,.28); border-radius: 10px; backdrop-filter: blur(18px) saturate(150%); -webkit-backdrop-filter: blur(18px) saturate(150%);
   box-shadow: 0 1px 0 rgba(255,255,255,.04) inset, 0 30px 80px rgba(0,0,0,.6); transform: translateX(calc(100% + 30px)); transition: transform .55s var(--spring); }
 #drawer.open { transform: none; }
 #drawer .dw-title { position: absolute; top: -9px; left: 16px; right: 56px; display: flex; gap: 6px; align-items: center; pointer-events: none; z-index: 2; }
-#drawer .dw-title b { background: var(--g-ye); color: #1d2021; font-weight: 800; font-size: 11px; padding: 0 7px; border-radius: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+#drawer .dw-title b { background: var(--g-ye); color: #141617; font-weight: 800; font-size: 11px; padding: 0 7px; border-radius: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
 #drawer .dw-title i { font-style: normal; background: var(--g-bg); color: var(--g-gr); font-size: 11px; padding: 0 6px; border-radius: 3px; white-space: nowrap; }
-.dw-h { padding: 18px 18px 12px; display: flex; gap: 12px; align-items: flex-start; border-bottom: 1px solid #32302f; }
+.dw-h { padding: 18px 18px 12px; display: flex; gap: 12px; align-items: flex-start; border-bottom: 1px solid #1f2223; }
 .dw-h .cap.mono { color: var(--g-gr); display: flex; gap: 6px; align-items: center; font-size: 11.5px; }
 .dw-h .cap svg.i { width: 13px; height: 13px; color: var(--g-ye); }
 .dw-h h2 { margin: 4px 0 0; font: 800 15px/1.35 var(--mono); color: var(--g-or); letter-spacing: 0; }
-.dw-h h2::before { content: "# "; color: #5f5752; font-weight: 600; }
-.dw-h .x { margin-left: auto; width: 26px; height: 26px; border-radius: 5px; display: grid; place-items: center; color: var(--g-gr); flex: none; border: 1px solid #3c3836; }
+.dw-h h2::before { content: "# "; color: #4a4f52; font-weight: 600; }
+.dw-h .x { margin-left: auto; width: 26px; height: 26px; border-radius: 5px; display: grid; place-items: center; color: var(--g-gr); flex: none; border: 1px solid #2a2d2f; }
 .dw-h .x:hover { color: var(--g-rd); border-color: var(--g-rd); }
 .dw-h .x svg.i { width: 14px; height: 14px; }
 .dw-b { flex: 1; padding: 14px 18px 18px; display: flex; flex-direction: column; gap: 16px; }
 .dw-lbl { font: 600 11.5px var(--mono); color: var(--g-ye); margin-bottom: 8px; display: flex; justify-content: space-between; }
-.dw-lbl span:first-child::before { content: "## "; color: #5f5752; }
+.dw-lbl span:first-child::before { content: "## "; color: #4a4f52; }
 .dw-lbl span:last-child { color: var(--g-gr); font-weight: 500; font-style: italic; }
-.kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-.kpis div { padding: 4px 10px 5px; border-left: 2px solid var(--c, var(--g-bl)); background: linear-gradient(90deg, color-mix(in srgb, var(--c, #83a598) 10%, transparent), transparent); border-radius: 0 5px 5px 0; }
-.kpis div:nth-child(1) { --c: #83a598; } .kpis div:nth-child(2) { --c: #d3869b; } .kpis div:nth-child(3) { --c: #8ec07c; } .kpis div:nth-child(4) { --c: #e07a4f; }
-.kpis .cap { color: var(--g-fg4); font-size: 10px; letter-spacing: .06em; text-transform: uppercase; }
-.kpis b { display: block; font: 800 17px var(--mono); color: var(--c); }
-.dw-graph { position: relative; height: 210px; border-radius: 6px; background: #191b1c; border: 1px solid #32302f; overflow: hidden; }
-.dw-graph svg { position: absolute; inset: 0; width: 100%; height: 100%; }
-.gnode { position: absolute; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; gap: 3px; width: 96px; text-align: center; }
-.gnode .orb { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; background: #282828; border: 2px solid var(--g-pu); color: var(--g-pu); transition: transform .4s var(--spring), border-color .2s; }
-.gnode .orb svg.i { width: 18px; height: 18px; }
-.gnode:hover .orb, .gnode.on .orb { transform: scale(1.12); border-color: var(--g-ye); color: var(--g-ye); box-shadow: 0 0 18px rgba(224,122,79,.35); }
-.gnode.main .orb { width: 48px; height: 48px; background: radial-gradient(circle at 30% 30%, #f0a070, #e07a4f); border-color: #e07a4f; color: #1d2021; box-shadow: 0 0 24px rgba(224,122,79,.3); }
-.gnode b { font-size: 11px; white-space: nowrap; color: var(--g-fg); } .gnode small { font-size: 10px; color: var(--g-gr); line-height: 1.2; max-width: 96px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
-.agentbox { background: #191b1c; border: 1px solid var(--g-pu); border-radius: 6px; padding: 10px 12px; font-size: 12px; display: grid; gap: 6px; }
-.agentbox > .row b { color: var(--g-pu); }
-.agentbox .cap { color: var(--g-ye); font-size: 11.5px; }
-.agentbox .txt { color: var(--g-fg3); white-space: pre-wrap; max-height: 150px; overflow: auto; border-left: 2px solid #3c3836; padding-left: 10px; }
 .row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
-.tag { font: 600 10.5px var(--mono); padding: 1px 7px; border-radius: 3px; background: #32302f; color: var(--g-fg4); }
+.tag { font: 600 10.5px var(--mono); padding: 1px 7px; border-radius: 3px; background: #1f2223; color: var(--g-fg4); }
 #drawer .cap { color: var(--g-gr); }
 /* Step path: connected points you can open and continue from */
-.path { position: relative; display: flex; flex-direction: column; }
-.path::before { content: ""; position: absolute; left: 13px; top: 14px; bottom: 14px; width: 2px; background: linear-gradient(#e07a4f, #8ec07c); opacity: .45; transform-origin: top; animation: grow 1s var(--spring-soft) both; }
 @keyframes grow { from { transform: scaleY(0); } }
-.step { position: relative; display: grid; grid-template-columns: 28px 1fr; gap: 10px; padding: 6px 0; text-align: left; width: 100%; border-radius: 5px; }
-.step:hover { background: rgba(235,219,178,.03); }
-.step .pt { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font: 800 10.5px var(--mono); background: #1d2021; border: 2px solid #665c54; color: var(--g-fg4); z-index: 1; transition: transform .35s var(--spring), background .2s; }
-.step .pt svg.i { width: 13px; height: 13px; color: var(--g-pu); }
-.step:hover .pt { transform: scale(1.1); border-color: var(--g-ye); }
-.step.now .pt { background: var(--g-aq); color: #1d2021; border-color: #b8e08e; box-shadow: 0 0 12px rgba(142,192,124,.5); }
-.step.open .pt { background: var(--g-ye); color: #1d2021; border-color: #f3a27c; }
-.step .tx { font-size: 12.5px; padding-top: 5px; color: var(--g-fg2); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-.step.open .tx { -webkit-line-clamp: unset; display: block; color: var(--g-fg); }
-.step .cap.mono { font-size: 10.5px; }
-.stepx { margin: 2px 0 8px 38px; display: grid; gap: 8px; animation: in .5s var(--spring) both; }
-.stepx > .cap { color: var(--g-aq) !important; font-size: 11.5px; }
-.bubble { border-left: 2px solid var(--g-aq); padding: 2px 0 2px 11px; font-size: 12px; color: var(--g-fg3); white-space: pre-wrap; max-height: 220px; overflow: auto; }
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 8px 12px; border-radius: 6px; font: 800 12.5px var(--mono); transition: transform .3s var(--spring), filter .2s; }
 .btn svg.i { width: 14px; height: 14px; }
 .btn:active { transform: scale(.96); }
-.btn.pri { background: linear-gradient(135deg, #e07a4f, #f0a070); color: #1d2021; box-shadow: 0 6px 24px rgba(224,122,79,.18); }
-.btn.pri svg.i { fill: #1d2021; }
+.btn.pri { background: #e07a4f; color: #141617; box-shadow: 0 4px 14px rgba(0,0,0,.35); }
+.btn.pri svg.i { fill: #141617; }
 .btn.pri:hover { filter: brightness(1.08); }
-.btn.sec { background: #32302f; color: var(--g-fg2); border: 1px solid #504945; }
-.dw-f { padding: 10px 14px; border-top: 1px solid #32302f; display: flex; gap: 8px; }
+.btn.sec { background: #1f2223; color: var(--g-fg2); border: 1px solid #3a3e41; }
+.dw-f { padding: 10px 14px; border-top: 1px solid #1f2223; display: flex; gap: 8px; }
 .dw-f .btn { flex: 1; }
-#drawer .scroll { scrollbar-color: #504945 transparent; }
+#drawer .scroll { scrollbar-color: #3a3e41 transparent; }
+/* Session panel: open sessions as tabs (gt / gT), the session as a compact graph like git log --graph */
+#drawer { width: min(470px, calc(100vw - 28px)); }
+.dw-tabs { display: flex; gap: 2px; padding: 8px 8px 0; border-bottom: 1px solid #2a2d2f; background: #0f1011; border-radius: 10px 10px 0 0; overflow: hidden; }
+.dw-tabs button { display: flex; align-items: center; gap: 6px; padding: 5px 9px; border-radius: 6px 6px 0 0; color: var(--g-gr); font: 600 11px var(--mono); white-space: nowrap; min-width: 0; max-width: 150px; }
+.dw-tabs button span:last-child { overflow: hidden; text-overflow: ellipsis; }
+.dw-tabs button b { color: var(--g-fg4); font-size: 10px; }
+.dw-tabs button.on { background: var(--g-bg); color: var(--g-fg); box-shadow: inset 0 2px 0 #e07a4f; }
+.dw-tabs button.on b { color: #e07a4f; }
+.dw-tabs .sp { flex: 1; }
+.dw-tabs .x { color: var(--g-gr); padding: 4px 8px; }
+.dw-tabs .x:hover { color: var(--g-rd); }
+.sdot { width: 7px; height: 7px; border-radius: 50%; flex: none; background: var(--c, #4f5458); }
+.sdot.run { --c: #a9b665; } .sdot.wait { --c: #e0a84f; } .sdot.err { --c: #ea6962; }
+.dw-h2 { padding: 11px 16px 9px; border-bottom: 1px solid #2a2d2f; }
+.dw-h2 .t { color: #e07a4f; font: 800 13.5px/1.35 var(--mono); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dw-h2 .m { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; color: var(--g-gr); font-size: 11px; margin-top: 3px; }
+.dw-h2 .m b { color: var(--g-fg2); }
+.dw-log { flex: 1; overflow: auto; padding: 6px 0; scrollbar-width: thin; scrollbar-color: #3a3e41 transparent; }
+.lg-r { display: grid; grid-template-columns: 50px minmax(0, 1fr) 42px; align-items: center; min-height: 26px; padding-right: 14px; color: var(--g-fg4); text-align: left; width: 100%; font: 500 12px var(--mono); }
+.lg-r svg { width: 50px; height: 26px; display: block; }
+.lg-r .x { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--g-fg3); }
+.lg-r .x i { font-style: normal; color: var(--g-gr); font-weight: 700; margin-right: 8px; }
+.lg-r .tm { color: var(--g-gr); font-size: 10.5px; text-align: right; }
+.lg-r.ag .x { color: var(--g-pu); font-size: 11.5px; }
+.lg-r.br .x { color: var(--g-bl); }
+.lg-r:hover { background: rgba(235,219,178,.03); }
+.lg-r.on { background: #1f2223; }
+.lg-r.on .x { color: var(--g-fg); }
+.lg-r.ag.on .x { color: var(--g-pu); }
+.dw-pv { border-top: 1px solid #2a2d2f; padding: 10px 16px 4px; display: flex; flex-direction: column; gap: 6px; max-height: 34%; overflow: auto; }
+.dw-pv .q { color: var(--g-fg); font-weight: 700; font-size: 12px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
+.dw-pv .a { color: var(--g-fg4); font-size: 11.5px; white-space: pre-wrap; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; }
+.dw-pv .row { gap: 5px; }
+.dw-keys { display: flex; gap: 10px; flex-wrap: wrap; color: var(--g-gr); font-size: 10.5px; padding: 0 14px 10px; }
+.dw-keys kbd { font: 700 10px var(--mono); color: var(--g-fg3); background: rgba(235,219,178,.07); border: 1px solid rgba(235,219,178,.16); border-bottom-width: 2px; border-radius: 4px; padding: 0 4px; }
+.btn.fork { background: #7daea3; color: #141617; }
 #drawer .mp { font-size: 10px; padding: 1px 7px; }
 
 /* ---------- toast (fallback when the look has no notify) ---------- */
-.toast { position: fixed; z-index: 120; right: 16px; top: 44px; transform: translateX(30px); opacity: 0; transition: .45s var(--spring); background: rgba(20,22,23,.95); color: #d5c4a1;
+.toast { position: fixed; z-index: 120; right: 16px; top: 44px; transform: translateX(30px); opacity: 0; transition: .45s var(--spring); background: rgba(20,22,23,.94); color: #d5c4a1;
   padding: 9px 14px; border-radius: 6px 9px 9px 6px; border: 1px solid rgba(235,219,178,.2); border-left: 3px solid #8ec07c; font: 600 12px var(--mono); box-shadow: 0 20px 50px rgba(0,0,0,.5); max-width: 360px; }
 .toast.show { transform: none; opacity: 1; }
 .toast code { display: block; font: 11px var(--mono); color: #a89984; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -243,48 +247,95 @@ function toast(msg, sub) { if (window.Atlas?.notifier) return window.Atlas.notif
 const cmdFor = (s, fork) => `cd '${short(s.cwd || s.project)}' && claude --resume ${s.id}${fork ? " --fork-session" : ""}`;
 async function resume(s, fork) { if (window.AtlasTerminal) return window.AtlasTerminal.open(s, fork); const c = cmdFor(s, fork); try { await navigator.clipboard.writeText(c); toast(fork ? "Neuer Weg ab hier: Befehl kopiert" : "Weitermachen: Befehl kopiert", c); } catch { toast("Befehl:", c); } }
 
-// ================= Shared drawer: session -> agents -> steps =================
-const dw = { s: null, step: null, agent: null };
-function openSession(id, stepId) { dw.s = sessions.find((s) => s.id === id); dw.step = stepId || null; dw.agent = null; renderDrawer(); document.getElementById("drawer").classList.add("open"); LOOK?.onSelect?.(id); }
+// ================= Session panel: open sessions as tabs, each one as a compact graph =================
+// tabs: sessions opened in the panel (gt / gT), sel: selected row of the active one
+const dw = { s: null, tabs: [], sel: 0, g: false };
+function dwRows(s) {
+  const rows = [], agentsAt = new Map();
+  for (const a of s.agents) { if (!agentsAt.has(a.node)) agentsAt.set(a.node, []); agentsAt.get(a.node).push(a); }
+  for (const n of s.nodes) {
+    const no = s.path.findIndex((x) => x.id === n.id);
+    rows.push({ k: no >= 0 ? "s" : "b", n, no: no + 1, last: n.id === s.last.id });
+    for (const a of agentsAt.get(n.id) || []) rows.push({ k: "a", n, a });
+  }
+  return rows;
+}
+const dwLastRow = (rows) => Math.max(0, rows.findIndex((r) => r.last));
+function openSession(id, stepId) {
+  const s = sessions.find((x) => x.id === id); if (!s) return;
+  if (!dw.tabs.includes(id)) { dw.tabs.push(id); if (dw.tabs.length > 6) dw.tabs.shift(); }
+  dw.s = s; const rows = dwRows(s);
+  const at = stepId ? rows.findIndex((r) => r.k !== "a" && r.n.id === stepId) : -1;
+  dw.sel = at >= 0 ? at : dwLastRow(rows);
+  renderDrawer(); document.getElementById("drawer").classList.add("open"); LOOK?.onSelect?.(id);
+}
 function closeDrawer() { document.getElementById("drawer").classList.remove("open"); dw.s = null; LOOK?.onSelect?.(null); }
+function dwSwitch(d) {
+  if (!dw.s || dw.tabs.length < 2) return;
+  const i = dw.tabs.indexOf(dw.s.id), id = dw.tabs[(i + d + dw.tabs.length) % dw.tabs.length];
+  dw.s = sessions.find((x) => x.id === id) || dw.s; dw.sel = dwLastRow(dwRows(dw.s)); renderDrawer(); LOOK?.onSelect?.(dw.s.id);
+}
+function dwCloseTab() {
+  if (!dw.s) return; const i = dw.tabs.indexOf(dw.s.id); dw.tabs.splice(i, 1);
+  if (!dw.tabs.length) return closeDrawer();
+  dw.s = sessions.find((x) => x.id === dw.tabs[Math.min(i, dw.tabs.length - 1)]); dw.sel = dwLastRow(dwRows(dw.s)); renderDrawer(); LOOK?.onSelect?.(dw.s.id);
+}
+// One line of the graph: main line on the left, branches (blue) and helpers (pink) as side branches
+function dwGutter(r, on, isLast) {
+  const line = `<line x1="14" y1="0" x2="14" y2="${isLast ? 13 : 26}" stroke="#3a3e41" stroke-width="2"/>`;
+  if (r.k === "s") return `<svg viewBox="0 0 50 26">${line}<circle cx="14" cy="13" r="${on ? 6 : 4.5}" fill="${on ? "#e07a4f" : r.last ? "#141617" : "#5a5f63"}" stroke="${r.last ? "#e07a4f" : "none"}" stroke-width="2"/></svg>`;
+  const col = r.k === "a" ? "#d3869b" : "#7daea3";
+  return `<svg viewBox="0 0 50 26">${line}<path d="M14,2 C14,11 31,8 31,13" stroke="${col}" stroke-width="1.5" fill="none"${r.k === "a" ? ` stroke-dasharray="3 3"` : ""}/><circle cx="31" cy="13" r="4" fill="${on ? col : "#141617"}" stroke="${col}" stroke-width="1.5"/></svg>`;
+}
+const dwAction = (r) => !r || r.k === "a" ? null : r.last ? { fork: false, label: "Am letzten Stand weitermachen" } : { fork: true, label: r.k === "s" ? `Ab Schritt ${r.no} abzweigen` : "Ab diesem Zweig weitermachen" };
 function renderDrawer() {
   const s = dw.s; if (!s) return;
-  const n = s.agents.length, W = 460, H = n > 3 ? 260 : 210, cx = W / 2, cy = 46;
-  // More than 3 agents: stagger on two heights so labels do not collide
-  const pos = s.agents.map((_, i) => { const t = n === 1 ? .5 : i / (n - 1); return { x: 50 + t * (W - 100), y: n > 3 ? (i % 2 ? 222 : 150) : 160 }; });
-  const a = s.agents.find((x) => x.id === dw.agent);
-  const stepNo = (id) => { const i = s.path.findIndex((n) => n.id === id); return i >= 0 ? i + 1 : null; };
-  const steps = s.nodes.map((nd) => {
-    const no = stepNo(nd.id), open = dw.step === nd.id, isNow = nd.id === s.last.id, ags = s.agents.filter((x) => x.node === nd.id);
-    return `<button class="step ${isNow ? "now" : ""} ${open ? "open" : ""}" data-dstep="${nd.id}" id="st-${nd.id}"><span class="pt">${no ?? ic("branch")}</span>
-      <span><span class="tx">${esc(nd.text)}</span><span class="row" style="margin-top:4px"><span class="cap mono">${day(nd.ts)} ${hhmm(nd.ts)}</span>${ags.length ? `<span class="tag">${ags.length} Agents</span>` : ""}${nd.edits.length ? `<span class="tag">${nd.edits.length} Dateien</span>` : ""}</span></span></button>
-      ${open ? `<div class="stepx"><div class="cap">Claude hat geantwortet${(nd.models || []).length ? " mit " + nd.models.map((m) => modelInfo(m).name).join(", ") : ""}:</div>
-        <div class="bubble">${esc(nd.reply || "Keine Textantwort in diesem Schritt.")}</div>
-        ${nd.edits.length ? `<div class="row">${nd.edits.slice(0, 8).map((f) => `<span class="tag">${esc(f.split("/").pop())}</span>`).join("")}</div>` : ""}
-        <div class="row"><button class="btn pri" data-resume="${isNow ? "" : "fork"}">${ic("play")} ${isNow ? "Hier weitermachen" : "Ab hier weitermachen"}</button></div></div>` : ""}`;
-  }).join("");
+  const rows = dwRows(s); dw.sel = Math.max(0, Math.min(rows.length - 1, dw.sel));
+  const r = rows[dw.sel], act = dwAction(r), n = s.agents.length;
+  const tabs = dw.tabs.map((id, i) => sessions.find((x) => x.id === id)).filter(Boolean);
+  const pv = !r ? "" : r.k === "a"
+    ? `<div class="q">${esc(aName(r.a.type))}${r.a.description ? ": " + esc(r.a.description) : ""}</div>
+       <div class="row">${Object.keys(r.a.models || {}).map(mp).join("")}<span class="tag">${fmtDur(Date.parse(r.a.end) - Date.parse(r.a.start))}</span><span class="tag">${fmtTok(r.a.tokens || 0)} Tokens</span></div>
+       ${r.a.task ? `<div class="a">Auftrag: ${esc(r.a.task)}</div>` : ""}${r.a.result ? `<div class="a">Ergebnis: ${esc(r.a.result)}</div>` : ""}`
+    : `<div class="q">${r.k === "s" ? `${r.no}. ` : "Zweig: "}${esc(r.n.text)}</div><div class="a">${esc(r.n.reply || "Keine Textantwort in diesem Schritt.")}</div>
+       <div class="row"><span class="tag">${day(r.n.ts)} ${hhmm(r.n.ts)}</span>${(r.n.models || []).map(mp).join("")}${r.n.edits.slice(0, 5).map((f) => `<span class="tag">${esc(f.split("/").pop())}</span>`).join("")}</div>`;
   document.getElementById("drawer").innerHTML = `
-    <div class="dw-title"><b>${esc(s.projName)}/session.md</b><i>Esc schliesst</i></div>
-    <div class="dw-h"><div style="min-width:0"><div class="cap mono">${ic("folder", "")} ${esc(s.projName)}${s.branch ? " / " + esc(s.branch) : ""}</div><h2>${esc(s.label)}</h2>
-      <div class="row" style="margin-top:6px">${s.live ? `<span class="tag" style="color:#b8bb26">● läuft gerade</span>` : `<span class="tag">${rel(s.end)}</span>`}${s.modelList.map(mp).join("")}</div></div>
-      <button class="x" data-close aria-label="Schliessen">${ic("x")}</button></div>
-    <div class="dw-b scroll">
-      <div class="kpis"><div><span class="cap">Schritte</span><b>${s.nodes.length}</b></div><div><span class="cap">Agents</span><b>${1 + n}</b></div><div><span class="cap">Kosten</span><b>${usd(s.cost?.usd)}</b></div><div><span class="cap">Dateien</span><b>${s.files.length}</b></div></div>
-      <div><div class="dw-lbl"><span>Wer hat gearbeitet</span><span>${n ? "Agent anklicken" : "nur Claude"}</span></div>
-        <div class="dw-graph" style="height:${H}px"><svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><defs><linearGradient id="gd" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#e07a4f"/><stop offset="1" stop-color="#d3869b"/></linearGradient></defs>
-          ${pos.map((p, i) => `<path class="draw" style="--i:${i};--len:400" id="dth${i}" d="M${cx},${cy} C${cx},${cy + 60} ${p.x},${p.y - 70} ${p.x},${p.y - 20}" fill="none" stroke="url(#gd)" stroke-width="2"/>
-            <circle r="3" fill="#ffd6c2"><animateMotion dur="${2 + i * .25}s" repeatCount="indefinite" begin="${1 + i * .15}s"><mpath href="#dth${i}"/></animateMotion></circle>`).join("")}</svg>
-          <div class="gnode main in" style="left:50%;top:${cy / H * 100}%"><span class="orb">${ic("bot")}</span><b>${esc(s.agentName || "Claude")}</b></div>
-          ${s.agents.map((x, i) => `<button class="gnode in ${x.id === dw.agent ? "on" : ""}" style="--i:${i + 3};left:${pos[i].x / W * 100}%;top:${pos[i].y / H * 100}%" data-dagent="${x.id}"><span class="orb">${ic("bot")}</span><b>${esc(aName(x.type))}</b><small>${esc(x.description || "")}</small></button>`).join("")}
-          ${n ? "" : `<div class="cap" style="position:absolute;left:0;right:0;bottom:30px;text-align:center">Claude hat hier allein gearbeitet.</div>`}
-        </div></div>
-      ${a ? `<div class="agentbox"><div class="row"><b>${esc(aName(a.type))}</b>${Object.keys(a.models).map(mp).join("")}<span class="tag">${fmtDur(Date.parse(a.end) - Date.parse(a.start))}</span><span class="tag">${fmtTok(a.tokens)} Tokens</span>${stepNo(a.node) ? `<button class="tag" data-dstep="${a.node}">bei Schritt ${stepNo(a.node)}</button>` : ""}</div>
-        ${a.task ? `<div class="cap">Auftrag</div><div class="txt">${esc(a.task)}</div>` : ""}${a.result ? `<div class="cap">Ergebnis</div><div class="txt">${esc(a.result)}</div>` : ""}</div>` : ""}
-      <div><div class="dw-lbl"><span>Verlauf</span><span>Punkt anklicken</span></div><div class="path">${steps}</div></div>
-    </div>
-    <div class="dw-f"><button class="btn pri" data-resume>${ic("play")} Am letzten Stand weitermachen</button></div>`;
-  if (dw.step) document.getElementById("st-" + dw.step)?.scrollIntoView({ block: "center", behavior: "smooth" });
+    <div class="dw-tabs">${tabs.map((t, i) => `<button data-dtab="${t.id}" class="${t.id === s.id ? "on" : ""}"><b>${i + 1}</b><span class="sdot ${agentState(t).st}"></span><span>${esc(t.label)}</span></button>`).join("")}<span class="sp"></span><button class="x" data-close aria-label="Schliessen">${ic("x")}</button></div>
+    <div class="dw-h2"><div class="t">${esc(s.label)}</div>
+      <div class="m"><span class="sdot ${agentState(s).st}"></span>${esc(s.projName)}${s.branch ? " / " + esc(s.branch) : ""} ${s.modelList.map(mp).join("")}</div>
+      <div class="m"><b>${s.path.length}</b> Schritte${s.nodes.length > s.path.length ? ` · <b>${s.nodes.length - s.path.length}</b> im Zweig` : ""} · <b>${n}</b> Helfer · <b>${usd(s.cost?.usd)}</b> · <b>${s.files.length}</b> Dateien · ${s.live ? `<span style="color:#a9b665">läuft gerade</span>` : rel(s.end)}</div></div>
+    <div class="dw-log" id="dwLog">${rows.map((x, i) => `<button class="lg-r ${x.k === "a" ? "ag" : x.k === "b" ? "br" : ""} ${i === dw.sel ? "on" : ""}" data-dsel="${i}">${dwGutter(x, i === dw.sel, i === rows.length - 1)}<span class="x">${x.k === "a" ? `Helfer: ${esc(aName(x.a.type))}${x.a.description ? ", " + esc(x.a.description) : ""}` : `<i>${x.k === "s" ? x.no : "⑂"}</i>${esc(x.n.text)}`}</span><span class="tm">${x.k === "a" ? "" : hhmm(x.n.ts)}</span></button>`).join("")}</div>
+    <div class="dw-pv">${pv}</div>
+    <div class="dw-f">${act ? `<button class="btn ${act.fork ? "fork" : "pri"}" data-resume="${act.fork ? "fork" : ""}">${ic("play")} ${act.label}</button>` : `<button class="btn sec" data-dsel="${rows.findIndex((x) => x.n === r.n)}">Zum Schritt dieses Helfers</button>`}</div>
+    <div class="dw-keys"><span><kbd>j</kbd><kbd>k</kbd> Zeile</span><span><kbd>J</kbd><kbd>K</kbd> nur Schritte</span><span><kbd>gt</kbd><kbd>gT</kbd> Session</span><span><kbd>Enter</kbd> los</span><span><kbd>x</kbd> Reiter zu</span><span><kbd>Esc</kbd> zu</span></div>`;
+  document.querySelector("#dwLog .lg-r.on")?.scrollIntoView({ block: "nearest" });
 }
+function dwEnter() {
+  const s = dw.s; if (!s) return; const rows = dwRows(s), r = rows[dw.sel], act = dwAction(r);
+  if (act) return resume(s, act.fork);
+  dw.sel = rows.findIndex((x) => x.n === r.n); renderDrawer();
+}
+// Keys while the panel is open: nothing reaches the editor underneath (Cmd shortcuts stay global)
+window.addEventListener("keydown", (e) => {
+  if (!dw.s || !document.getElementById("drawer").classList.contains("open")) return;
+  if (document.body.classList.contains("term-open") || e.metaKey || e.ctrlKey || e.altKey) return;
+  if (e.target.matches?.("input,textarea,[contenteditable]")) return;
+  const k = e.key, rows = dwRows(dw.s), step = (d) => { let i = dw.sel + d; while (i >= 0 && i < rows.length && rows[i].k === "a") i += d; if (i >= 0 && i < rows.length) dw.sel = i; };
+  let used = true;
+  if (dw.g) { dw.g = false; if (k === "t") dwSwitch(1); else if (k === "T") dwSwitch(-1); else if (k === "g") { dw.sel = 0; renderDrawer(); } else used = false; }
+  else if (k === "g") dw.g = true;
+  else if (k === "j" || k === "ArrowDown") { dw.sel = Math.min(rows.length - 1, dw.sel + 1); renderDrawer(); }
+  else if (k === "k" || k === "ArrowUp") { dw.sel = Math.max(0, dw.sel - 1); renderDrawer(); }
+  else if (k === "J") { step(1); renderDrawer(); } else if (k === "K") { step(-1); renderDrawer(); }
+  else if (k === "G") { dw.sel = dwLastRow(rows); renderDrawer(); }
+  else if (/^[1-6]$/.test(k) && dw.tabs[+k - 1]) { dw.s = sessions.find((x) => x.id === dw.tabs[+k - 1]) || dw.s; dw.sel = dwLastRow(dwRows(dw.s)); renderDrawer(); }
+  else if (k === "x") dwCloseTab();
+  else if (k === "Enter") dwEnter();
+  else if (k === "Escape") closeDrawer();
+  else if (k === "Shift") return;
+  else used = false;
+  if (used) { e.preventDefault(); e.stopPropagation(); }
+}, true);
 
 // ================= Look registry =================
 const LOOKS = []; let LOOK = null, cleanup = [];
@@ -313,12 +364,12 @@ function mount(key) {
   try { LOOK.render(st, window.Atlas); } catch (e) { st.innerHTML = `<pre style="padding:40px;color:var(--rose)">${esc(e.stack)}</pre>`; console.error(e); }
 }
 document.addEventListener("click", (e) => {
-  const el = e.target.closest("[data-close],[data-dstep],[data-dagent],[data-resume],[data-open]");
+  const el = e.target.closest("[data-close],[data-dsel],[data-dtab],[data-resume],[data-open]");
   if (!el) return;
   const d = el.dataset;
   if (d.close !== undefined) return closeDrawer();
-  if (d.dstep) { dw.step = dw.step === d.dstep ? null : d.dstep; return renderDrawer(); }
-  if (d.dagent) { dw.agent = dw.agent === d.dagent ? null : d.dagent; return renderDrawer(); }
+  if (d.dsel !== undefined) { const i = +d.dsel; if (i === dw.sel) return dwEnter(); dw.sel = i; return renderDrawer(); }
+  if (d.dtab) { dw.s = sessions.find((x) => x.id === d.dtab) || dw.s; dw.sel = dwLastRow(dwRows(dw.s)); renderDrawer(); return LOOK?.onSelect?.(dw.s.id); }
   if (d.resume !== undefined && dw.s) return resume(dw.s, d.resume === "fork");
   if (d.open) return openSession(d.open, d.openStep);
 });

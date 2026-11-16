@@ -29,19 +29,19 @@
   #mascot .bub.show { opacity:1; transform:scale(1); }
   #mascot .bub b { color:#b4532a; }
   #mascot .bub .bar { height:5px; border-radius:3px; background:rgba(0,0,0,.12); margin-top:5px; overflow:hidden; } #mascot .bub .bar i { display:block; height:100%; background:var(--c); }
-  #mpanel { position:fixed; z-index:37; bottom:96px; left:20px; width:310px; background:rgba(29,32,33,.98); border:1px solid #504945; border-radius:14px; padding:14px; color:#d5c4a1; font:500 12px/1.45 var(--mono);
+  #mpanel { position:fixed; z-index:37; bottom:96px; left:20px; width:310px; background:rgba(20,22,23,.98); border:1px solid #3a3e41; border-radius:14px; padding:14px; color:#d5c4a1; font:500 12px/1.45 var(--mono);
     box-shadow:0 24px 60px rgba(0,0,0,.55); }
   #mpanel[hidden] { display:none; }
   #mpanel h4 { color:#ebdbb2; display:flex; align-items:center; gap:8px; margin:0 0 10px; font-size:13px; }
   #mpanel .r { margin-bottom:10px; } #mpanel .r > div:first-child { display:flex; justify-content:space-between; } #mpanel .r b { color:#ebdbb2; }
-  #mpanel .bar { height:6px; border-radius:3px; background:#3c3836; overflow:hidden; margin:4px 0 2px; } #mpanel .bar i { display:block; height:100%; background:var(--c); border-radius:3px; }
+  #mpanel .bar { height:6px; border-radius:3px; background:#2a2d2f; overflow:hidden; margin:4px 0 2px; } #mpanel .bar i { display:block; height:100%; background:var(--c); border-radius:3px; }
   #mpanel small, #mpanel .dim { color:#928374; }
   #mpanel .row { display:flex; gap:8px; align-items:center; min-height:22px; }
-  #mpanel .w { cursor:pointer; border-radius:5px; padding:0 4px; margin:0 -4px; } #mpanel .w:hover { background:#3c3836; }
+  #mpanel .w { cursor:pointer; border-radius:5px; padding:0 4px; margin:0 -4px; } #mpanel .w:hover { background:#2a2d2f; }
   #mpanel .ell { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; }
   #mpanel .dot { width:7px; height:7px; border-radius:50%; background:var(--c); flex:none; }
   #mpanel .acts { display:flex; gap:6px; flex-wrap:wrap; margin-top:10px; }
-  #mpanel button { font:inherit; font-size:11px; border:1px solid #504945; border-radius:6px; padding:2px 8px; color:#d5c4a1; background:#282828; cursor:pointer; }
+  #mpanel button { font:inherit; font-size:11px; border:1px solid #3a3e41; border-radius:6px; padding:2px 8px; color:#d5c4a1; background:#1b1d1e; cursor:pointer; }
   #mpanel button:hover { border-color:#7c6f64; }
   #mpanel kbd { font:700 10px var(--mono); color:#a89984; border:1px solid rgba(235,219,178,.16); border-bottom-width:2px; border-radius:4px; padding:0 4px; }
   @media (prefers-reduced-motion: reduce) { #mascot, #mascot * { animation:none !important; transition:opacity .2s !important; } }
@@ -70,7 +70,7 @@
       if (c === ".") return;
       out.push(`<rect x="${x}" y="${y + 1}" width="1.03" height="1.03" fill="${c === "e" ? "#1d1611" : c === "-" ? "#7a3a20" : y === 0 ? "#f3a27c" : "#e07a4f"}"/>`);
     }));
-    out.push(`<rect x="6.5" y="0" width="1" height="1" fill="#fabd2f"/>`);
+    out.push(`<rect x="6.5" y="0" width="1" height="1" fill="#e07a4f"/>`);
     svg.innerHTML = out.join("");
   }
 
@@ -79,7 +79,7 @@
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const fmtIn = (t) => { const m = Math.max(0, Math.round((t - Date.now()) / 60e3)); return m < 60 ? `${m} min` : m < 48 * 60 ? `${Math.floor(m / 60)} h ${m % 60} min` : `${Math.round(m / 1440)} Tagen`; };
   const clock = (t) => new Date(t).toLocaleString("de-DE", Date.now() + 864e5 < t ? { weekday: "short", hour: "2-digit", minute: "2-digit" } : { hour: "2-digit", minute: "2-digit" });
-  const colorFor = (p) => (p >= 90 ? "#fb4934" : p >= 70 ? "#fabd2f" : "#8ec07c");
+  const colorFor = (p) => (p >= 90 ? "#fb4934" : p >= 70 ? "#e07a4f" : "#8ec07c");
   function agents() {
     const now = Date.now(), run = [], wait = [];
     for (const s of A.DATA.sessions.slice(0, 80)) { const a = A.agentState(s, now); if (a.st === "run") run.push(s); else if (a.st === "wait" && a.why !== "im Terminal offen") wait.push(s); }
@@ -166,7 +166,7 @@
         : `<div class="dim" style="margin-bottom:10px">Noch keine Werte. Claude meldet die Limits nur mit Abo (Pro, Max). „Aktualisieren“ fragt kurz nach.</div>`}
       <div class="row"><span class="dim">Heute in Sessions</span><b style="margin-left:auto;color:#ebdbb2">${A.usd ? A.usd(todayCost()) : "$" + todayCost().toFixed(2)}</b></div>
       <div class="row"><span class="dim">Arbeiten gerade</span><b style="margin-left:auto;color:#ebdbb2">${run.length} Agenten${loopsRunning ? ` · ${loopsRunning} Loops` : ""}</b></div>
-      ${wait.length ? `<div class="dim" style="margin-top:6px">Warten auf dich:</div>${wait.slice(0, 4).map((s) => `<div class="row w" data-sid="${s.id}"><span class="dot" style="--c:#fabd2f"></span><span class="ell">${esc(s.label)}</span><span class="dim" style="margin-left:auto">${esc(s.projName)}</span></div>`).join("")}` : ""}
+      ${wait.length ? `<div class="dim" style="margin-top:6px">Warten auf dich:</div>${wait.slice(0, 4).map((s) => `<div class="row w" data-sid="${s.id}"><span class="dot" style="--c:#e07a4f"></span><span class="ell">${esc(s.label)}</span><span class="dim" style="margin-left:auto">${esc(s.projName)}</span></div>`).join("")}` : ""}
       <div class="acts"><button data-m="refresh">Aktualisieren</button><button data-m="loops">Loops öffnen</button><button data-m="off">Ausblenden</button></div>
       <div class="dim" style="margin-top:8px">Wieder einblenden mit <b>:Begleiter</b> · <kbd>Esc</kbd> schliesst</div>`;
     draw(P.querySelector(".mini"));
